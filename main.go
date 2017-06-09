@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/julienschmit/httprouter"
+	"github.com/julienschmidt/httprouter"
 )
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
