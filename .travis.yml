@@ -6,6 +6,7 @@ script:
 after_script:
   - cp appspec.yml "./build-artifacts/"
   - tar -czf "corkboard-${TRAVIS_TAG}.tar.gz" "./build-artifacts"
+  - mkdir compressed
   - mv corkboard-${TRAVIS_TAG}.tar.gz ./compressed
 deploy:
   - provider: s3
