@@ -1,14 +1,30 @@
 language: go
 go:
   - 1.8.x
+#script:
+#  - go build -o corkboard
+#  after_script:
+#    - tar -czf "corkboard-${}"
 deploy:
   - provider: s3
     access_key_id: AKIAI6J3DLDG65WB423Q
     secret_access_key:
       secure: fF4JB1ZeuWWLSmOT/HaLLSinsaN0wsiIJLhiRHjs4XZbGZ1+9brz9JVOwwxH2HY0UYdmw9QUAoHUuCldAieBxag0yOLBXQ8BraVZiWGpCdIwe5HKEPCr8VVLMEFprJdaR/KfysdN3e/ESpteju6ssSi9nJLu67bgKgbySlBXc0qm8YDPqw80qw+klGvJ1wXx2S75vcZ2Cjv92ZaDKKVgEznKtZpZL3uxm4Cw1QwMH15+WYTbi0nDJubzNWRe/rxU11SjjOevoCdkBXhjUgAqkW6upwEha/E8SRUPHj34amW1lrxWxiOAbaKGBuUF8B3E4YBeh39anU15glszu3JbNT2ozyV5IZMzNMZ/Oy3wAmsJA+PAYbXIeqrmM0gihxymhV3B6qLStpQiJ3wD5N0eksFtYG4E0l3Yft3FgzNmNJUzF20T87ee8lDoRq7ystIDnGfdvJ+3i68DGe86hQrzrFPeiPe4PBEH+R3TuCWpylqBDyERbemFb5PYbP9CLKm2V9VOM2wdfOvnvHVAcjAWOnDh/3bH0xcW++jtaA4sfTotFjzpXt61dDs4uIJ8pkV5Ysxwd+dc4DkiRSeCZlJOaMz/k0iUeN5cBrY4DkIUa0l7n9Ue3kSvv6MKAnKxR6WPbquOfkuWiDfxUyjfCDH7kfv35PGaIDYkV+cYN2HojqE=
     bucket: acst-play-testing-corkboard-media
-    upload-dir: builds
+     upload-dir: builds
     skip_cleanup: true
     on:
       repo: acstech/corkboard
-      tags: true
+      #tags: true ## uncomment before merging to master
+#  - provider: codedeploy
+#    access_key_id: AKIAI6J3DLDG65WB423Q
+#    secret_access_key:
+#      secure: fF4JB1ZeuWWLSmOT/HaLLSinsaN0wsiIJLhiRHjs4XZbGZ1+9brz9JVOwwxH2HY0UYdmw9QUAoHUuCldAieBxag0yOLBXQ8BraVZiWGpCdIwe5HKEPCr8VVLMEFprJdaR/KfysdN3e/ESpteju6ssSi9nJLu67bgKgbySlBXc0qm8YDPqw80qw+klGvJ1wXx2S75vcZ2Cjv92ZaDKKVgEznKtZpZL3uxm4Cw1QwMH15+WYTbi0nDJubzNWRe/rxU11SjjOevoCdkBXhjUgAqkW6upwEha/E8SRUPHj34amW1lrxWxiOAbaKGBuUF8B3E4YBeh39anU15glszu3JbNT2ozyV5IZMzNMZ/Oy3wAmsJA+PAYbXIeqrmM0gihxymhV3B6qLStpQiJ3wD5N0eksFtYG4E0l3Yft3FgzNmNJUzF20T87ee8lDoRq7ystIDnGfdvJ+3i68DGe86hQrzrFPeiPe4PBEH+R3TuCWpylqBDyERbemFb5PYbP9CLKm2V9VOM2wdfOvnvHVAcjAWOnDh/3bH0xcW++jtaA4sfTotFjzpXt61dDs4uIJ8pkV5Ysxwd+dc4DkiRSeCZlJOaMz/k0iUeN5cBrY4DkIUa0l7n9Ue3kSvv6MKAnKxR6WPbquOfkuWiDfxUyjfCDH7kfv35PGaIDYkV+cYN2HojqE=
+#    bucket: acst-play-testing-corkboard-media
+#    application: corkboard
+#    deployment_group: testing
+#    on:
+#      branch: master
+      #tags: true ## uncomment before merge to master
+
+#TRAVIS_TAG = git tag
