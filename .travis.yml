@@ -6,6 +6,7 @@ script:
 after_script:
   - cp appspec.yml "./build-artifacts/"
   - tar -czf "corkboard-${TRAVIS_TAG}.tar.gz" "./build-artifacts"
+  - mv corkboard-${TRAVIS_TAG}.tar.gz ./compressed
 deploy:
   - provider: s3
     access_key_id: AKIAI6J3DLDG65WB423Q
@@ -14,6 +15,7 @@ deploy:
     bucket: acst-play-testing-corkboard-media
     upload-dir: builds
     skip_cleanup: true
+    local_dir: compressed
     on:
       repo: acstech/corkboard
       all_branches: true
