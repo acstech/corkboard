@@ -19,8 +19,8 @@ deploy:
     local_dir: ${TRAVIS_BUILD_DIR}/compressed
     on:
       repo: acstech/corkboard
-      all_branches: true
-      #tags: true ## uncomment before merging to master
+      branch: master
+      tags: true
   - provider: codedeploy
     access_key_id: AKIAI6J3DLDG65WB423Q
     secret_access_key:
@@ -31,5 +31,6 @@ deploy:
     bundle_type: tgz
     deployment_group: testing
     on:
-      all_branches: true
-      #tags: true ## uncomment before merge to master
+      repo: acstech/corkboard
+      branch: master
+      tags: true
