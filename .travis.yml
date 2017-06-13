@@ -5,6 +5,7 @@ before_deploy:
   - go build -o "./build-artifacts/corkboard-${TRAVIS_TAG}"
   - cp appspec.yml "./build-artifacts/"
   - tar -czf "corkboard-${TRAVIS_TAG}.tar.gz" "./build-artifacts"
+  - if [ -d compressed ]; then rm -r compressed; fi
   - mkdir compressed
   - mv corkboard-${TRAVIS_TAG}.tar.gz ./compressed
 deploy:
