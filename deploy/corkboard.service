@@ -1,0 +1,12 @@
+[Unit]
+Description=Corkboard Service
+Documentation=https://github.com/acstech/corkboard
+After=network.target
+
+[Service]
+ExecStart=/opt/corkboard/corkboard
+Restart=on-failure
+User=ubuntu
+
+[Install]
+WantedBy=multi-user.target
