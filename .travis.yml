@@ -3,7 +3,6 @@ go:
   - 1.8.x
 script:
   - go build -o "./build-artifacts/corkboard-${TRAVIS_TAG}"
-after_script:
   - cp appspec.yml "./build-artifacts/"
   - tar -czf "corkboard-${TRAVIS_TAG}.tar.gz" "./build-artifacts"
   - mkdir compressed
