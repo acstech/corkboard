@@ -8,6 +8,8 @@ after_script:
   - tar -czf "corkboard-${TRAVIS_TAG}.tar.gz" "./build-artifacts"
   - mkdir compressed
   - mv corkboard-${TRAVIS_TAG}.tar.gz ./compressed
+  - pwd
+  - ls
 deploy:
   - provider: s3
     access_key_id: AKIAI6J3DLDG65WB423Q
