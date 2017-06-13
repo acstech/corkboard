@@ -16,7 +16,7 @@ deploy:
     bucket: acst-play-testing-corkboard-media
     upload-dir: builds
     skip_cleanup: true
-    local_dir: ./compressed
+    local_dir: ${TRAVIS_BUILD_DIR}/compressed
     on:
       repo: acstech/corkboard
       all_branches: true
