@@ -4,7 +4,7 @@ files:
   - source: /corkboard.service
     destination: /lib/systemd/system/
   - source: /
-  destination: /opt/corkboard
+    destination: /opt/corkboard
 permissions:
   - object: /opt/corkboard
     owner: ubuntu
