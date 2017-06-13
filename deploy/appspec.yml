@@ -1,0 +1,27 @@
+version: 0.0
+os: linux
+files:
+  - source: /corkboard.service
+    destination: /lib/systemd/system/
+  - source: /
+  destination: /opt/corkboard
+permissions:
+  - object: /opt/corkboard
+    owner: ubuntu
+    group: ubuntu
+  - object: /lib/systemd/system/corkboard.service
+    owner: root
+    group: root
+hooks:
+  AfterInstall:
+    - location: events.sh
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: events.sh
+      timeout: 300
+      runas: root
+  ApplicationStop:
+    - location: events.sh
+      timeout: 300
+      runas: root
