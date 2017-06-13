@@ -2,12 +2,11 @@ language: go
 go:
   - 1.8.x
 before_deploy:
-  - go build -o "./build-artifacts/corkboard-${TRAVIS_TAG}"
-  - cp appspec.yml "./build-artifacts/"
-  - tar -czf "corkboard-${TRAVIS_TAG}.tar.gz" "./build-artifacts"
-  - if [ -d compressed ]; then rm -r compressed; fi
-  - mkdir compressed
-  - mv corkboard-${TRAVIS_TAG}.tar.gz ./compressed
+  - go build -o "./deploy/corkboard-${TRAVIS_TAG}"        #build app and output binary to deploy/corkboard-(tagname)
+  - tar -czf "corkboard-${TRAVIS_TAG}.tar.gz" "./deploy"  #build tarball containing deploy directory
+  - if [ -d compressed ]; then rm -r compressed; fi       #delete compressed directory if exists
+  - mkdir compressed                                      #create compressed directory for push to s3
+  - mv corkboard-${TRAVIS_TAG}.tar.gz ./compressed        #move tarball to compressed directory
 deploy:
   - provider: s3
     access_key_id: AKIAI6J3DLDG65WB423Q
