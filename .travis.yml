@@ -28,7 +28,7 @@ deploy:
     bucket: acst-play-testing-corkboard-media
     application: corkboard
     key: corkboard-${TRAVIS_TAG}.tar.gz
-    bundle_type: gzip
+    bundle_type: tgz
     deployment_group: testing
     on:
       all_branches: true
