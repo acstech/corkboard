@@ -1,4 +1,8 @@
 #!/bin/bash -e
+#########################################################################
+# this script handles LIFECYCLE_EVENTs from aws code deploy
+# (see appspec.yml hooks)
+#########################################################################
 event=${LIFECYCLE_EVENT:-""} #injected by code deploy
 case $event in
   "AfterInstall") systemctl enable corkboard ;;
