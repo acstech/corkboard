@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/couchbase/gocb"
 )
@@ -29,8 +30,13 @@ in the bucket*/
 //findUserByEmail queries couchbase and finds users by their email address
 func (corkboard *Corkboard) findUsers() []User {
 	var users []User
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT * FROM `%s` WHERE _type = 'User' AND SiteId =SiteId", corkboard.bucket.Name()))
-	rows, _ := corkboard.bucket.ExecuteN1qlQuery(query, nil)
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT * FROM `%s` WHERE _type = 'User'", corkboard.bucket.Name()))
+	log.Println(corkboard.bucket.Name())
+	rows, err := corkboard.bucket.ExecuteN1qlQuery(query, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//TODO: THink the error is occuring here
 	var row User2
 	for rows.Next(&row) {
 		users = append(users, row.User)

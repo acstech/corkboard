@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/couchbase/gocb"
 	"github.com/julienschmidt/httprouter"
 )
@@ -19,28 +21,26 @@ type CBConfig struct {
 	BucketPass string
 }
 
-//TODO: Figure out why CBConfig.Connection and other CBConfig elements are not
-//accessible and giving back "undefined" or "CBConfig does not have method Connection"
-
 //NewCorkboard creates a Corkboard and connects to the  CBConfig passed to it
 func NewCorkboard(config *CBConfig) (*Corkboard, error) {
-	cluster, err := gocb.Connect("CBConfig.Connection")
+	cluster, err := gocb.Connect(config.Connection)
 	if err != nil {
 		return nil, err
 	}
-	newbucket, err := cluster.OpenBucket("CBConfig.BucketName", "CBConfig.BucketPass")
+	bucket, err := cluster.OpenBucket(config.BucketName, config.BucketPass)
 	if err != nil {
 		return nil, err
 	}
+	log.Println("successfully opened bucket")
 	return &Corkboard{
-		bucket: newbucket}, nil //no error if we get this far
+		bucket: bucket}, nil //no error if we get this far
 }
 
 //Router returns all the router containing the Corkboard endpoints
 func (corkboard *Corkboard) Router() *httprouter.Router {
 	router := httprouter.New()
 
-	router.GET("/users", corkboard.GetUsers())
+	router.GET("/api/users", corkboard.GetUsers())
 
 	return router
 
