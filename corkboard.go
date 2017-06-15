@@ -9,7 +9,7 @@ import (
 
 //Corkboard is an instance of the Corkboard server
 type Corkboard struct {
-	bucket *gocb.Bucket
+	Bucket *gocb.Bucket
 	//SiteID? Or is this auto-generated?
 
 }
@@ -27,20 +27,22 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Println("Able to connect!")
+	//Connection opens successfull
 	bucket, err := cluster.OpenBucket(config.BucketName, config.BucketPass)
 	if err != nil {
 		return nil, err
 	}
-	log.Println("successfully opened bucket")
+	log.Println("successfully opened bucket: ", config.BucketName)
 	return &Corkboard{
-		bucket: bucket}, nil //no error if we get this far
+		Bucket: bucket}, nil //no error if we get this far
 }
 
 //Router returns all the router containing the Corkboard endpoints
-func (corkboard *Corkboard) Router() *httprouter.Router {
+func (cb *Corkboard) Router() *httprouter.Router {
 	router := httprouter.New()
 
-	router.GET("/api/users", corkboard.GetUsers())
+	router.GET("/api/users", cb.GetUsers)
 
 	return router
 

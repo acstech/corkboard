@@ -13,16 +13,24 @@ type UsersRes struct {
 	Users []User `json:"users"`
 }
 
-//GetUsers is an HTTP Router Handle to get a full list of users
-func (corkboard *Corkboard) GetUsers() httprouter.Handle {
-	//TODO: Figure out the issue
-	users := corkboard.findUsers()
+//GetUsers handles handles "/users"
+func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	//TODO: Figure out the issue here
+	//users is an aray of User structs
+	users := cb.findUsers()
 	if users == nil {
 		log.Println("Not finding Users")
 	}
-	log.Println(users)
-	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-		json.NewEncoder(w).Encode(users)
+
+	//json.NewEncoder(w).Encode(users)
+	//I have an array of users (struct format) and I want to marshal
+	//them to JSON and write the response
+	log.Println("Made it!")
+	usersJSON, err := json.Marshal(users)
+	if err != nil {
+		log.Println(err)
 	}
+	log.Println("UsersJSON: ", usersJSON)
+	w.Write(usersJSON)
 
 }
