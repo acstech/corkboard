@@ -43,7 +43,6 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router := httprouter.New()
 
 	router.GET("/api/users", cb.GetUsers)
-
+	router.GET("/api/users/:id", cb.GetUser)
 	return router
-
 }

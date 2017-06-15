@@ -2,18 +2,19 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/couchbase/gocb"
 )
 
 //User contains all necessary information about users
 type User struct {
-	ID        string `json:"id,omitempty"`
-	Firstname string `json:"firstname,omitempty"`
-	Lastname  string `json:"lastname,omitempty"`
+	ID        string `json:"id"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
 	//Profilepic
-	Email string `json:"email,omitempty"`
-	Phone string `json:"phone,omitempty"`
+	Email string `json:"email"`
+	Phone string `json:"phone"`
 	//Itemlist
 }
 
@@ -26,24 +27,45 @@ type User2 struct {
 search key and return typeare using passed input. Currently, the query
 is hardcoded and the return type is a slice containing all the users currently
 in the bucket*/
-//findUserByEmail queries couchbase and finds users by their email address
-func (cb *Corkboard) findUsers() []User {
-	var users []User
 
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT * FROM `%s` WHERE _type = 'User'", cb.Bucket.Name()))
+//TODO: Change back to array of users
 
-	rows, err := cb.Bucket.ExecuteN1qlQuery(query, nil)
+func (cb *Corkboard) findUsers() ([]*User, error) {
+	var users []*User
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone FROM `%s` WHERE _type = 'User'", cb.Bucket.Name()))
+
+	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
-	var row User2
-	for rows.Next(&row) {
-		users = append(users, row.User)
+	defer res.Close()
+
+	user := new(User)
+	for res.Next(user) {
+		users = append(users, user)
+		//the user
+		log.Println(user)
+
 	}
-	return users
+	log.Println("Slice: ", users)
+	return users, nil
 }
 
-// func (corkboard *Corkboard) findUserByID(id uuid.UUID) (*User, error) {
-//   query :=
-//
-//}
+//TODO: Change id param to uuid to match corkboard-auth format
+
+//findUserByID ...
+func (cb *Corkboard) findUserByID(id string) (*User, error) {
+
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone FROM `%s` WHERE _type = 'User' AND id = '%s'", cb.Bucket.Name(), id))
+	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{id})
+	if err != nil {
+		return nil, err
+	}
+	defer res.Close()
+
+	user := new(User)
+	for res.Next(user) {
+		return user, nil
+	}
+	return nil, err
+}
