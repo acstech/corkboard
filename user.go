@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/couchbase/gocb"
 )
@@ -30,24 +29,23 @@ in the bucket*/
 
 //TODO: Change back to array of users
 
-func (cb *Corkboard) findUsers() ([]*User, error) {
-	var users []*User
+func (cb *Corkboard) findUsers() ([]User, error) {
 	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone FROM `%s` WHERE _type = 'User'", cb.Bucket.Name()))
-
 	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
 		return nil, err
 	}
 	defer res.Close()
 
-	user := new(User)
+	var user = new(User)
+	var users []User
 	for res.Next(user) {
-		users = append(users, user)
-		//the user
-		log.Println(user)
+		users = append(users, *user)
 
+		//log.Println(user)
+		//log.Println("Break")
 	}
-	log.Println("Slice: ", users)
+
 	return users, nil
 }
 
