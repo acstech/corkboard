@@ -12,9 +12,9 @@ import (
 // type GetUsersRes struct {
 // 	Users []User `json:"users"`
 // }
-type GetUserRes struct {
-	User User `json:"user"`
-}
+// type GetUserRes struct {
+// 	User User `json:"user"`
+// }
 
 //GetUsers handles handles "/users"
 func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -56,4 +56,9 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 		log.Println(err)
 	}
 	w.Write(userJSON)
+}
+
+func (cb *Corkboard) NewUser(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	var user User
+	var reqBody = json.NewDecoder(r.Body).Decode(&user)
 }

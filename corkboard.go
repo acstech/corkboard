@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/couchbase/gocb"
+	"github.com/jasonmoore30/madhatter"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -41,8 +42,8 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 //Router returns all the router containing the Corkboard endpoints
 func (cb *Corkboard) Router() *httprouter.Router {
 	router := httprouter.New()
-
-	router.GET("/api/users", cb.GetUsers)
+	stdChain := madhatter.New(testMiddleware2)
+	router.GET("/api/users", (stdChain.Then(cb.GetUsers)))
 	router.GET("/api/users/:id", cb.GetUser)
 	return router
 }
