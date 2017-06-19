@@ -15,7 +15,7 @@ type Corkboard struct {
 
 }
 
-//CBConfig is all the neccessary input values to configure a new CB Connection
+//CBConfig is all the necessary input values to configure a new CB Connection
 type CBConfig struct {
 	Connection string
 	BucketName string
@@ -29,7 +29,7 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 		return nil, err
 	}
 	log.Println("Able to connect!")
-	//Connection opens successfull
+	//Connection opens successful
 	bucket, err := cluster.OpenBucket(config.BucketName, config.BucketPass)
 	if err != nil {
 		return nil, err

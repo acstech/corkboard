@@ -1,6 +1,11 @@
 language: go
 go:
   - 1.8.x
+before_install:
+  - go get -u github.com/alecthomas/gometalinter          #Install gometalinter
+  - gometalinter --install                                #Install linters used by gometalinter
+  - gometalinter --vendor --tests --disable=gotype ./...                   #Run the linters to make sure the code is clean
+install:
 before_deploy:
   - go build -o "./deploy/corkboard-${TRAVIS_TAG}"        #build app and output binary to deploy/corkboard-(tagname)
   - tar -czf "corkboard-${TRAVIS_TAG}.tar.gz" "./deploy"  #build tarball containing deploy directory
