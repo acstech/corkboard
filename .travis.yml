@@ -2,10 +2,7 @@ language: go
 go:
   - 1.8.x
 before_install:
-  - go get -u sourcegraph.com/sqs/goreturns               #Install goreturns
   - go get -u github.com/alecthomas/gometalinter          #Install gometalinter
-  - goreturns -d -e -l .                                  #Print the output to terminal of goreturns         
-  - if [[ $(goreturns -d -e -l .) ]]; then exit 1; fi     #Run goreturns to make sure files are formatted
   - gometalinter --install                                #Install linters used by gometalinter
   - gometalinter --vendor --tests ./...                   #Run the linters to make sure the code is clean
 install:
