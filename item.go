@@ -7,27 +7,30 @@ import (
 	"github.com/couchbase/gocb"
 )
 
+//Item struct contains properties for a standard item, not all properties are required
 type Item struct {
-	ItemID   string `json:"itemid"`
-	ItemName string `json:"itemname"`
-	ItemDesc string `json:"itemdesc"`
+	ItemID   string `json:"itemid,omitempty"`
+	ItemName string `json:"itemname,omitempty"`
+	ItemDesc string `json:"itemdesc,omitempty"`
 	Category string `json:"itemcat" `
 	//itempic
-	Price      string `json:"price"`
-	DatePosted string `json:"date"`
-	SaleStatus string `json:"status"`
-	SellerId   string `json:"sellerid"`
+	Price      string `json:"price,omitempty"`
+	DatePosted string `json:"date,omitempty"`
+	SaleStatus string `json:"status,omitempty"`
+	SellerID   string `json:"sellerid,omitempty"`
 }
 
+//Item2 struct
 type Item2 struct {
 	Item Item `json:"itemname"`
 }
 
+//NewItemReq struct for creating new items
 type NewItemReq struct {
-	itemname string `json:"itemname"`
-	itemcat  string `json:itemcat`
-	itemdesc string `json:itemdesc`
-	price    string `json:itemprice`
+	Itemname string `json:"itemname"`
+	Itemcat  string `json:"itemcat"`
+	Itemdesc string `json:"itemdesc"`
+	Price    string `json:"itemprice"`
 	//item picture coming up
 }
 
@@ -55,10 +58,10 @@ func (corkboard *Corkboard) findItems() ([]Item, error) {
 }
 
 //findItemById queries for a specific item by id key
-func (corkboard *Corkboard) findItemById(itemId string) (*Item, error) {
+func (corkboard *Corkboard) findItemByID(itemID string) (*Item, error) {
 
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT * FROM `%s` WHERE itemid = '%s'", corkboard.Bucket.Name(), itemId))
-	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{itemId})
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT * FROM `%s` WHERE itemid = '%s'", corkboard.Bucket.Name(), itemID))
+	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{itemID})
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -74,14 +77,16 @@ func (corkboard *Corkboard) findItemById(itemId string) (*Item, error) {
 }
 
 //createNewItem . . .
-/*
-func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
-	var name string = newitem.itemname
-	var desc string = newitem.itemdesc
-	var cat string = newitem.itemcat
-	var price string = newitem.price
 
-	bucket := corkboard.Bucket.Name()
-	bucket.Upsert("Item:" + strconv.Itoa())
+func (corkboard *Corkboard) createNewItem(newitem NewItemReq) {
+	var name = newitem.Itemname
+	var desc = newitem.Itemdesc
+	var cat = newitem.Itemcat
+	var price = newitem.Price
 
-}*/
+	_, err := corkboard.Bucket.Upsert("Item:test", Item{ItemID: "9", ItemName: name, ItemDesc: desc, Category: cat, Price: price}, 0)
+	if err != nil {
+		log.Println("issues")
+	}
+
+}

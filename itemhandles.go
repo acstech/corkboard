@@ -8,7 +8,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-//ItemRes...
+//ItemsRes does all this
 type ItemsRes struct {
 	Items []Item `json:"items"`
 }
@@ -32,7 +32,7 @@ func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ h
 func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	theid := p.ByName("id")
-	item, _ := corkboard.findItemById(theid)
+	item, _ := corkboard.findItemByID(theid)
 	if item == nil {
 		log.Println("Item could not be found")
 	}
@@ -45,11 +45,15 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 
 }
 
-//NewItem...
-/*func (corkboard *Corkboard) NewItem(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+//NewItem . . .
+func (corkboard *Corkboard) NewItem(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
-	var item
-	var req = json.NewDecoder(r.Body).Decode(&item)
-	corkboard.createNewItem(req)
+	var item NewItemReq
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&item)
+	if err != nil {
+		log.Println("issues")
+	}
+	corkboard.createNewItem(item)
 
-}*/
+}
