@@ -41,10 +41,13 @@ func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprout
 	if err != nil {
 		log.Println(err)
 	}
-	w.Write(usersJSON)
+	_, error := w.Write(usersJSON)
+	if error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
-//GetUser ..
+//GetUser handles GET requests to
 func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var id string = ps.ByName("id")
 	log.Println(id)
@@ -62,10 +65,14 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 	if err != nil {
 		log.Println(err)
 	}
-	w.Write(userJSON)
+	_, error := w.Write(userJSON)
+	if error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 	// w.WriteHeader(http.StatusOK)
 }
 
+//RegisterUser is a HandlerFunc to deal with NewUserRequests
 func (cb *Corkboard) RegisterUser() http.HandlerFunc {
 	//TODO: PrivateRSAFile needs to be added to .env
 	cba, err := corkboardauth.New(&corkboardauth.Config{
