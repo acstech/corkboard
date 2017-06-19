@@ -20,10 +20,10 @@ type User struct {
 }
 
 type NewUserReq struct {
-	firstname string `json:"firstname"`
-	lastname  string `json:"lastname"`
-	email     string `json:"email"`
-	phone     string `json:"phone,omitempty"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Email     string `json:"email"`
+	Phone     string `json:"phone,omitempty"`
 }
 
 //User2 is uses for querying and adding fields
