@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"regexp"
+	"log"
 
 	"github.com/couchbase/gocb"
 )
@@ -64,28 +64,21 @@ func (cb *Corkboard) findUsers() ([]User, error) {
 func (cb *Corkboard) findUserByID(id string) (*User, error) {
 	//Neither of the injected elements come from user input,
 	//should be relatively safe
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone FROM `%s` WHERE _type = 'User' AND id = '%s'", cb.Bucket.Name(), id)) //nolint: gas
-	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{id})
+
+	// query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone FROM `%s` WHERE _type = 'User' AND id = '%s'", cb.Bucket.Name(), id)) //nolint: gas
+	// res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{id})
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// defer res.Close() //nolint: errcheck
+	//TODO: Make sure there is a user found by that id or throw error
+	key := "user:" + id
+	user := new(User)
+	_, err := cb.Bucket.Get(key, user)
 	if err != nil {
+		log.Println("Unable to get user.")
 		return nil, err
 	}
-	defer res.Close() //nolint: errcheck
-	//TODO: Make sure there is a user found by that id or throw error
-	user := new(User)
-	for res.Next(user) {
-		return user, nil
-	}
-	return nil, err
-}
+	return user, nil
 
-func (cb *Corkboard) createNewUser(newUser NewUserReq) {
-	var fname string = newUser.firstname
-	var lname string = newUser.lastname
-	var email string = newUser.email
-
-	if !(regexp.MatchString("[A-Za-z]*", fname) || (regexp.MatchString("[A-Z][a-z]*", lname))) {
-
-	}
-
-	//query := gocb.NewN1qlQuery(fmt.Sprintf(""))
 }

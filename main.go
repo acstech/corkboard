@@ -22,6 +22,7 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
 	log.Println("Listening on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", cork.Router()))
 

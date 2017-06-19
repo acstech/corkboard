@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/acstech/corkboard-auth"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -56,9 +58,24 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 		log.Println(err)
 	}
 	w.Write(userJSON)
+	// w.WriteHeader(http.StatusOK)
 }
 
-func (cb *Corkboard) NewUser(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	var user User
-	var reqBody = json.NewDecoder(r.Body).Decode(&user)
+func (cb *Corkboard) RegisterUser() http.HandlerFunc {
+	//TODO: PrivateRSAFile needs to be added to .env
+	cba, err := corkboardauth.New(&corkboardauth.Config{
+		CBConnection:   os.Getenv("CB_CONNECTION"),
+		CBBucket:       os.Getenv("CB_BUCKET"),
+		CBBucketPass:   os.Getenv("CB_BUCKET_PASS"),
+		PrivateRSAFile: os.Getenv("CB_PRIVATE_RSA"),
+	})
+	if err != nil {
+		log.Println(err)
+	}
+
+	hf := cba.RegisterUser()
+
+	//log.Println("Called the register method")
+
+	return hf
 }

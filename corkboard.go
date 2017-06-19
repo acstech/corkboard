@@ -43,7 +43,9 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 func (cb *Corkboard) Router() *httprouter.Router {
 	router := httprouter.New()
 	stdChain := madhatter.New(testMiddleware2)
+
 	router.GET("/api/users", (stdChain.Then(cb.GetUsers)))
 	router.GET("/api/users/:id", cb.GetUser)
+	router.HandlerFunc("POST", "/api/users/register", cb.RegisterUser())
 	return router
 }
