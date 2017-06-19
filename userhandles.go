@@ -11,11 +11,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-//UsersRes ...
-type UsersRes struct {
-	Users []User `json:"users"`
-}
-
 // type GetUsersRes struct {
 // 	Users []User `json:"users"`
 // }

@@ -20,11 +20,6 @@ type Item struct {
 	UserID     string `json:"userid,omitempty"`
 }
 
-//Item2 struct
-type Item2 struct {
-	Item Item `json:"itemname"`
-}
-
 //NewItemReq struct for creating new items
 type NewItemReq struct {
 	Itemname string `json:"itemname"`
@@ -39,7 +34,7 @@ func (corkboard *Corkboard) findItems() ([]Item, error) {
 
 	//META(default).id = Items1
 	//TODO: verify object is of type item
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT name FROM `%s` WHERE itemname = 'bike'", corkboard.Bucket.Name()))
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT name FROM `%s` WHERE itemname = 'bike'", corkboard.Bucket.Name())) //nolint: gas
 	log.Println(corkboard.Bucket.Name())
 	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
@@ -61,13 +56,13 @@ func (corkboard *Corkboard) findItems() ([]Item, error) {
 //findItemById queries for a specific item by id key
 func (corkboard *Corkboard) findItemByID(itemID string) (*Item, error) {
 
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT * FROM `%s` WHERE itemid = '%s'", corkboard.Bucket.Name(), itemID))
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT * FROM `%s` WHERE itemid = '%s'", corkboard.Bucket.Name(), itemID)) //nolint: gas
 	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{itemID})
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	defer rows.Close()
+	defer rows.Close() //nolint: errcheck
 
 	item := new(Item)
 	for rows.Next(item) {
@@ -91,4 +86,3 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) {
 	}
 
 }
-
