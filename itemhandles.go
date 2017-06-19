@@ -8,11 +8,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-//ItemsRes does all this
-type ItemsRes struct {
-	Items []Item `json:"items"`
-}
-
 //GetItems is an http handler for finding an array of items and storing them in the items array
 func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	items, _ := corkboard.findItems()
@@ -25,7 +20,10 @@ func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ h
 	if err != nil {
 		log.Println("could not marshal items")
 	}
-	w.Write(JSONobject)
+	_, err2 := w.Write(JSONobject)
+	if err != nil {
+		log.Println(err2)
+	}
 }
 
 //GetItemByID is a function for finding a specific Item obect by ID
@@ -41,8 +39,10 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 	if err != nil {
 		log.Println(err)
 	}
-	w.Write(JSONuser)
-
+	_, err3 := w.Write(JSONuser)
+	if err3 != nil {
+		log.Println(err3)
+	}
 }
 
 //NewItem . . .

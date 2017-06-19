@@ -17,7 +17,7 @@ type Item struct {
 	Price      string `json:"price,omitempty"`
 	DatePosted string `json:"date,omitempty"`
 	SaleStatus string `json:"status,omitempty"`
-	SellerID   string `json:"sellerid,omitempty"`
+	UserID     string `json:"userid,omitempty"`
 }
 
 //Item2 struct
@@ -43,17 +43,18 @@ func (corkboard *Corkboard) findItems() ([]Item, error) {
 	log.Println(corkboard.Bucket.Name())
 	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("caught error: ", err)
+		return nil, err
 	}
 
-	defer rows.Close()
+	defer rows.Close() //nolint: errcheck
 
 	var item = new(Item)
 	var items []Item
 	for rows.Next(item) {
 		items = append(items, *item)
 	}
-	return items, err
+	return items, nil
 
 }
 
@@ -86,7 +87,7 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) {
 
 	_, err := corkboard.Bucket.Upsert("Item:test", Item{ItemID: "9", ItemName: name, ItemDesc: desc, Category: cat, Price: price}, 0)
 	if err != nil {
-		log.Println("issues")
+		log.Println("error:", err)
 	}
 
 }
