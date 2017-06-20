@@ -86,10 +86,7 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 	newID := uuid.NewV4()
 	uID := newID.String()
 	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, ItemName: name, ItemDesc: desc, Category: cat, Price: price, Status: status}, 0)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 //updateItem upserts updated item object to couchbase document
@@ -98,10 +95,7 @@ func (corkboard *Corkboard) updateItem(item *Item) error {
 	var theID = "item:" + item.ItemID
 
 	_, err := corkboard.Bucket.Upsert(theID, item, 0)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 
 }
 
@@ -110,9 +104,5 @@ func (corkboard *Corkboard) removeItemByID(id string) error {
 
 	var docID = "item:" + id
 	_, err := corkboard.Bucket.Remove(docID, 0)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
