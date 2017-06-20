@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/couchbase/gocb"
+	uuid "github.com/satori/go.uuid"
 )
 
 //Item struct contains properties for a standard item, not all properties are required
@@ -33,8 +34,6 @@ type NewItemReq struct {
 //findItems takes a corkboard object and queries couchbase
 func (corkboard *Corkboard) findItems() ([]Item, error) {
 
-	//META(default).id = Items1
-	//TODO: verify object is of type item
 	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemcat FROM `%s` WHERE type = 'item'", corkboard.Bucket.Name())) //nolint: gas
 	log.Println(corkboard.Bucket.Name())
 	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{})
@@ -57,31 +56,33 @@ func (corkboard *Corkboard) findItems() ([]Item, error) {
 //findItemById queries for a specific item by id key
 func (corkboard *Corkboard) findItemByID(itemID string) (*Item, error) {
 
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemcat FROM `%s` WHERE itemid = '%s'", corkboard.Bucket.Name(), itemID)) //nolint: gas
-	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{itemID})
+	item := new(Item)
+	itemkey := "item:" + itemID
+	fmt.Println(itemkey)
+	_, err := corkboard.Bucket.Get(itemkey, item)
 	if err != nil {
 		fmt.Println(err)
+		return nil, err
 	}
-
-	defer rows.Close() //nolint: errcheck
-
-	item := new(Item)
-	for rows.Next(item) {
-		return item, nil
-	}
-	return nil, err
+	return item, nil
 
 }
 
-//createNewItem . . .
+//getUserKey . . .
+func getItemKey(id uuid.UUID) string {
+	return fmt.Sprintf("item:%s", id.String())
+}
 
+//createNewItem . . .
 func (corkboard *Corkboard) createNewItem(newitem NewItemReq) {
 	var name = newitem.Itemname
 	var desc = newitem.Itemdesc
 	var cat = newitem.Itemcat
 	var price = newitem.Price
 
-	_, err := corkboard.Bucket.Upsert("Item:test", Item{ItemID: "9", ItemName: name, ItemDesc: desc, Category: cat, Price: price}, 0)
+	newID := uuid.NewV4()
+	uID := newID.String()
+	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, ItemName: name, ItemDesc: desc, Category: cat, Price: price}, 0)
 	if err != nil {
 		log.Println("error:", err)
 	}
