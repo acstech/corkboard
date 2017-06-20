@@ -43,9 +43,11 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router := httprouter.New()
 	//stdChain := madhatter.New(testMiddleware2)
 
-	//router.GET("/api/items", cb.GetItems)
+	router.GET("/api/items", cb.GetItems)
 	router.GET("/api/items/:id", cb.GetItemByID)
-	//router.POST("/api/items/new", cb.NewItem)
+	router.POST("/api/items/new", cb.NewItem)
+	router.PUT("/api/items/edit/:id", cb.EditItem)
+	router.DELETE("/api/items/delete/:id", cb.DeleteItem)
 	//router.GET("/api/users", (stdChain.Then(cb.GetUsers)))
 	//router.GET("/api/users/:id", cb.GetUser)
 	//router.HandlerFunc("POST", "/api/users/register", cb.RegisterUser())

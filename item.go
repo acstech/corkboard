@@ -14,7 +14,7 @@ type Item struct {
 	ItemID   string `json:"itemid,omitempty"`
 	ItemName string `json:"itemname,omitempty"`
 	ItemDesc string `json:"itemdesc,omitempty"`
-	Category string `json:"itemcat" `
+	Category string `json:"itemcat,omitempty" `
 	//itempic
 	Price      string `json:"price,omitempty"`
 	DatePosted string `json:"date,omitempty"`
@@ -24,11 +24,16 @@ type Item struct {
 
 //NewItemReq struct for creating new items
 type NewItemReq struct {
-	Itemname string `json:"itemname"`
-	Itemcat  string `json:"itemcat"`
-	Itemdesc string `json:"itemdesc"`
-	Price    string `json:"itemprice"`
+	Itemname string `json:"itemname,omitempty"`
+	Itemcat  string `json:"itemcat,omitempty"`
+	Itemdesc string `json:"itemdesc,omitempty"`
+	Price    string `json:"itemprice,omitempty"`
 	//item picture coming up
+}
+
+//getUserKey concatenates the uuid with the "item" prefix
+func getItemKey(id uuid.UUID) string {
+	return fmt.Sprintf("item:%s", id.String())
 }
 
 //findItems takes a corkboard object and queries couchbase
@@ -58,7 +63,6 @@ func (corkboard *Corkboard) findItemByID(itemID string) (*Item, error) {
 
 	item := new(Item)
 	itemkey := "item:" + itemID
-	fmt.Println(itemkey)
 	_, err := corkboard.Bucket.Get(itemkey, item)
 	if err != nil {
 		fmt.Println(err)
@@ -68,22 +72,45 @@ func (corkboard *Corkboard) findItemByID(itemID string) (*Item, error) {
 
 }
 
-//getUserKey . . .
-func getItemKey(id uuid.UUID) string {
-	return fmt.Sprintf("item:%s", id.String())
-}
-
-//createNewItem . . .
-func (corkboard *Corkboard) createNewItem(newitem NewItemReq) {
+//createNewItem is called by NewItem, takes a new item request and inserts it into the database
+func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
+	//Add more fields later???
 	var name = newitem.Itemname
 	var desc = newitem.Itemdesc
 	var cat = newitem.Itemcat
 	var price = newitem.Price
 
+	//generate uuid for new item
 	newID := uuid.NewV4()
 	uID := newID.String()
 	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, ItemName: name, ItemDesc: desc, Category: cat, Price: price}, 0)
 	if err != nil {
-		log.Println("error:", err)
+		return err
 	}
+	return nil
+}
+
+//updateItem upserts updated item object to couchbase document
+func (corkboard *Corkboard) updateItem(item *Item) error {
+
+	var theID = "item:" + item.ItemID
+
+	_, err := corkboard.Bucket.Upsert(theID, item, 0)
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+//removeItemByID removes document from couchbase by id
+func (corkboard *Corkboard) removeItemByID(id string) error {
+
+	var docID = "item:" + id
+	_, err := corkboard.Bucket.Remove(docID, 0)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
