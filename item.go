@@ -9,6 +9,7 @@ import (
 
 //Item struct contains properties for a standard item, not all properties are required
 type Item struct {
+	Type     string `json:"type,omitempty"`
 	ItemID   string `json:"itemid,omitempty"`
 	ItemName string `json:"itemname,omitempty"`
 	ItemDesc string `json:"itemdesc,omitempty"`
@@ -34,7 +35,7 @@ func (corkboard *Corkboard) findItems() ([]Item, error) {
 
 	//META(default).id = Items1
 	//TODO: verify object is of type item
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT name FROM `%s` WHERE itemname = 'bike'", corkboard.Bucket.Name())) //nolint: gas
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemcat FROM `%s` WHERE type = 'item'", corkboard.Bucket.Name())) //nolint: gas
 	log.Println(corkboard.Bucket.Name())
 	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
@@ -56,7 +57,7 @@ func (corkboard *Corkboard) findItems() ([]Item, error) {
 //findItemById queries for a specific item by id key
 func (corkboard *Corkboard) findItemByID(itemID string) (*Item, error) {
 
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT * FROM `%s` WHERE itemid = '%s'", corkboard.Bucket.Name(), itemID)) //nolint: gas
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemcat FROM `%s` WHERE itemid = '%s'", corkboard.Bucket.Name(), itemID)) //nolint: gas
 	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{itemID})
 	if err != nil {
 		fmt.Println(err)
@@ -84,5 +85,4 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) {
 	if err != nil {
 		log.Println("error:", err)
 	}
-
 }
