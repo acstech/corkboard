@@ -20,6 +20,15 @@ type User struct {
 	//Itemlist
 }
 
+type GetUserRes struct {
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	//Profilepic
+	Phone string `json:"phone"`
+}
+
 /*Eventually want to change this method to be findUser and determine what the
 search key and return typeare using passed input. Currently, the query
 is hardcoded and the return type is a slice containing all the users currently
@@ -27,7 +36,7 @@ in the bucket*/
 
 //TODO: Change back to array of users
 
-func (cb *Corkboard) findUsers() ([]User, error) {
+func (cb *Corkboard) findUsers() ([]GetUserRes, error) {
 	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone FROM `%s` WHERE _type = 'User'", cb.Bucket.Name())) // nolint: gas
 	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
@@ -35,8 +44,8 @@ func (cb *Corkboard) findUsers() ([]User, error) {
 	}
 	defer res.Close() // nolint: errcheck
 
-	var user = new(User)
-	var users []User
+	var user = new(GetUserRes)
+	var users []GetUserRes
 	for res.Next(user) {
 		users = append(users, *user)
 
@@ -47,11 +56,11 @@ func (cb *Corkboard) findUsers() ([]User, error) {
 	return users, nil
 }
 
-func (cb *Corkboard) findUserByID(id string) (*User, error) {
+func (cb *Corkboard) findUserByID(id string) (*GetUserRes, error) {
 
 	//TODO: Make sure there is a user found by that id or throw error
 	key := "user:" + id
-	user := new(User)
+	user := new(GetUserRes)
 	_, err := cb.Bucket.Get(key, user)
 	if err != nil {
 		log.Println("Unable to get user.")
@@ -60,4 +69,3 @@ func (cb *Corkboard) findUserByID(id string) (*User, error) {
 	return user, nil
 
 }
-
