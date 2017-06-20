@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -11,14 +12,18 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// type GetUsersRes struct {
-// 	Users []User `json:"users"`
-// }
-// type GetUserRes struct {
-// 	User User `json:"user"`
-// }
 
-//GetUsers handles handles "/users"
+/*UpdateUserReq is a structure used to deal with incoming http request body information
+and add it to an existing user in the database*/
+type UpdateUserReq struct {
+	Firstname string `json:"firstname,omitempty"`
+	Lastname  string `json:"lastname,omitempty"`
+	Email     string `json:"email,omitempty"`
+	Phone     string `json:"phone,omitempty"`
+}
+
+
+//GetUsers handles GET requests and responds with a slice of all users from couchbase
 func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	//TODO: Figure out the issue here
 	//users is an aray of User structs
@@ -42,7 +47,7 @@ func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprout
 	}
 }
 
-//GetUser handles GET requests to
+//GetUser handles GET requests and responds with the user identified by the url param
 func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var id string = ps.ByName("id")
 	log.Println(id)
@@ -67,7 +72,7 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 	// w.WriteHeader(http.StatusOK)
 }
 
-//RegisterUser is a HandlerFunc to deal with NewUserRequests
+//RegisterUser is a HandlerFunc to deal with New User requests
 func (cb *Corkboard) RegisterUser() http.HandlerFunc {
 	//TODO: PrivateRSAFile needs to be added to .env
 	cba, err := corkboardauth.New(&corkboardauth.Config{
@@ -85,4 +90,42 @@ func (cb *Corkboard) RegisterUser() http.HandlerFunc {
 	//log.Println("Called the register method")
 
 	return hf
+}
+
+//UpdateUser handles POST requests with UpdateUserReq body data
+func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+	var id string = ps.ByName("id")
+
+	user, err1 := cb.findUserByID(id)
+	if err1 != nil {
+		log.Println(err1)
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	userKey := fmt.Sprintf("user:%s", id)
+
+	userReq := new(UpdateUserReq)
+	err := json.NewDecoder(r.Body).Decode(&userReq)
+	log.Println(userReq.Firstname)
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	user.Firstname = userReq.Firstname
+	user.Lastname = userReq.Lastname
+	user.Phone = userReq.Phone
+	user.Email = userReq.Email
+
+	//TODO: Figure out how to keep Upsert from deleting the _type field without adding it
+	//to the User struct
+
+	_, error := cb.Bucket.Upsert(userKey, user, 0)
+	if error != nil {
+		log.Println(err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
