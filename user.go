@@ -60,3 +60,4 @@ func (cb *Corkboard) findUserByID(id string) (*User, error) {
 	return user, nil
 
 }
+
