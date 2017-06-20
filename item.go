@@ -16,9 +16,9 @@ type Item struct {
 	ItemDesc string `json:"itemdesc,omitempty"`
 	Category string `json:"itemcat,omitempty" `
 	//itempic
-	Price      string `json:"price,omitempty"`
+	Price      string `json:"itemprice,omitempty"`
 	DatePosted string `json:"date,omitempty"`
-	SaleStatus string `json:"status,omitempty"`
+	Status     string `json:"salestatus,omitempty"`
 	UserID     string `json:"userid,omitempty"`
 }
 
@@ -28,6 +28,7 @@ type NewItemReq struct {
 	Itemcat  string `json:"itemcat,omitempty"`
 	Itemdesc string `json:"itemdesc,omitempty"`
 	Price    string `json:"itemprice,omitempty"`
+	Status   string `json:"salestatus,omitempty"`
 	//item picture coming up
 }
 
@@ -79,11 +80,12 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 	var desc = newitem.Itemdesc
 	var cat = newitem.Itemcat
 	var price = newitem.Price
+	var status = newitem.Status
 
 	//generate uuid for new item
 	newID := uuid.NewV4()
 	uID := newID.String()
-	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, ItemName: name, ItemDesc: desc, Category: cat, Price: price}, 0)
+	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, ItemName: name, ItemDesc: desc, Category: cat, Price: price, Status: status}, 0)
 	if err != nil {
 		return err
 	}

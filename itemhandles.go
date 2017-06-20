@@ -15,7 +15,6 @@ func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ h
 	if items == nil {
 		log.Println("Items not found")
 	}
-
 	// array of items is marshalled to JSONobject
 	JSONobject, err := json.Marshal(items)
 	if err != nil {
@@ -87,6 +86,7 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	item.ItemDesc = reqitem.ItemDesc
 	item.Category = reqitem.Category
 	item.Price = reqitem.Price
+	item.Status = reqitem.Status
 
 	//call to updateItem inserts item to couchbase
 	err3 := corkboard.updateItem(item)
