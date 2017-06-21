@@ -7,15 +7,16 @@ import (
 	"github.com/couchbase/gocb"
 )
 
-//User contains all necessary information about users
+//User contains all possible user profile information
 type User struct {
 	ID        string `json:"id"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
 	//Profilepic
-	Email  string `json:"email"`
-	Phone  string `json:"phone"`
-	SiteID string `json:"siteid"`
+	Phone string   `json:"phone"`
+	Sites []string `json:"sites"`
 	//Itemlist
 }
 
@@ -46,9 +47,6 @@ func (cb *Corkboard) findUsers() ([]User, error) {
 	return users, nil
 }
 
-//TODO: Change id param to uuid to match corkboard-auth format
-
-//findUserByID ...
 func (cb *Corkboard) findUserByID(id string) (*User, error) {
 
 	//TODO: Make sure there is a user found by that id or throw error
@@ -62,3 +60,4 @@ func (cb *Corkboard) findUserByID(id string) (*User, error) {
 	return user, nil
 
 }
+
