@@ -37,7 +37,7 @@ in the bucket*/
 
 //TODO: Change back to array of users
 
-func (cb *Corkboard) findUsers() ([]User, error) {
+func (cb *Corkboard) findUsers() ([]GetUserRes, error) {
 	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone FROM `%s` WHERE _type = 'User'", cb.Bucket.Name())) // nolint: gas
 	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
@@ -46,9 +46,14 @@ func (cb *Corkboard) findUsers() ([]User, error) {
 	defer res.Close() // nolint: errcheck
 
 	var user = new(User)
-	var users []User
+	var userres = new(GetUserRes)
+	var users []GetUserRes
 	for res.Next(user) {
-		users = append(users, *user)
+		userres.ID = user.ID
+		userres.Email = user.Email
+		userres.Firstname = user.Firstname
+		userres.Lastname = user.Lastname
+		users = append(users, *userres)
 
 		//log.Println(user)
 		//log.Println("Break")
@@ -57,11 +62,11 @@ func (cb *Corkboard) findUsers() ([]User, error) {
 	return users, nil
 }
 
-func (cb *Corkboard) findUserByID(id string) (*GetUserRes, error) {
+func (cb *Corkboard) findUserByID(id string) (*User, error) {
 
 	//TODO: Make sure there is a user found by that id or throw error
 	key := "user:" + id
-	user := new(GetUserRes)
+	user := new(User)
 	_, err := cb.Bucket.Get(key, user)
 	if err != nil {
 		log.Println("Unable to get user.")
