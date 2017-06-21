@@ -3,20 +3,45 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 
+	"github.com/acstech/corkboard-auth"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/julienschmidt/httprouter"
 )
 
-func testMiddleware2(next httprouter.Handle) httprouter.Handle {
+func (cb *Corkboard) testMiddleware(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		log.Println("YOU HAVE MIDDLEWARED!!!")
-		//auth := cba.token.Valid
-		auth := true
-		if auth {
+		var claims corkboardauth.CustomClaims
+		var parse jwt.Parser
+		authHeader := r.Header.Get("Authorization")
+		authPieces := strings.Split(authHeader, " ")
+		var rawToken string
+		if authPieces[0] == "Bearer" {
+			rawToken = authPieces[1]
+		}
+		//keyFunc needs to be type Keyfunc and get the public key from
+		//corkboardauth somehow.
+
+		token, error := parse.ParseWithClaims(rawToken, &claims, func(token *jwt.Token) (interface{}, error) {
+
+			//Need to use GetPublicPem() once it is public here. It returns pem, err
+
+			return nil, nil
+		})
+		if error != nil {
+			log.Println(error)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		if token.Valid {
 			next(w, r, p)
 		} else {
 			w.WriteHeader(http.StatusUnauthorized)
+			return
 		}
+
 		log.Println("YOU HAVE AFTERWARED!!!")
 	}
 }

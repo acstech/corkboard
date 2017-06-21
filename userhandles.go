@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/acstech/corkboard-auth"
+	corkboardauth "github.com/acstech/corkboard-auth"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -71,7 +71,7 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 
 //RegisterUser is a HandlerFunc to deal with New User requests
 func (cb *Corkboard) RegisterUser() http.HandlerFunc {
-	//TODO: PrivateRSAFile needs to be added to .env
+
 	cba, err := corkboardauth.New(&corkboardauth.Config{
 		CBConnection:   os.Getenv("CB_CONNECTION"),
 		CBBucket:       os.Getenv("CB_BUCKET"),

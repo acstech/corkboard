@@ -13,10 +13,12 @@ import (
 For now, the connection varibales are hard coded*/
 //main ...
 func main() {
+
 	cork, err := NewCorkboard(&CBConfig{
 		Connection: os.Getenv("CB_CONNECTION"),
 		BucketName: os.Getenv("CB_BUCKET"),
 		BucketPass: os.Getenv("CB_BUCKET_PASS"),
+		PrivateRSA: os.Getenv("CB_PRIVATE_RSA"),
 	})
 	if err != nil {
 		fmt.Println(err)
