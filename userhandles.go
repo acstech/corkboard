@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/julienschmidt/httprouter"
 )
+
 
 /*UpdateUserReq is a structure used to deal with incoming http request body information
 and add it to an existing user in the database*/
@@ -17,6 +19,7 @@ type UpdateUserReq struct {
 	Email     string `json:"email,omitempty"`
 	Phone     string `json:"phone,omitempty"`
 }
+
 
 //GetUsers handles GET requests and responds with a slice of all users from couchbase
 func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
