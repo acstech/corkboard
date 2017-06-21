@@ -16,7 +16,7 @@ type User struct {
 	Lastname  string `json:"lastname"`
 	//Profilepic
 	Phone string   `json:"phone"`
-	Sites []string `json:"sites"`
+	Sites []string `json:"sites,omitempty"`
 	//Itemlist
 }
 
@@ -37,7 +37,7 @@ in the bucket*/
 
 //TODO: Change back to array of users
 
-func (cb *Corkboard) findUsers() ([]GetUserRes, error) {
+func (cb *Corkboard) findUsers() ([]User, error) {
 	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone FROM `%s` WHERE _type = 'User'", cb.Bucket.Name())) // nolint: gas
 	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
@@ -45,8 +45,8 @@ func (cb *Corkboard) findUsers() ([]GetUserRes, error) {
 	}
 	defer res.Close() // nolint: errcheck
 
-	var user = new(GetUserRes)
-	var users []GetUserRes
+	var user = new(User)
+	var users []User
 	for res.Next(user) {
 		users = append(users, *user)
 
