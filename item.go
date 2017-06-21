@@ -93,16 +93,7 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 func (corkboard *Corkboard) updateItem(item *Item) error {
 
 	var theID = "item:" + item.ItemID
-
 	_, err := corkboard.Bucket.Upsert(theID, item, 0)
 	return err
 
-}
-
-//removeItemByID removes document from couchbase by id
-func (corkboard *Corkboard) removeItemByID(id string) error {
-
-	var docID = "item:" + id
-	_, err := corkboard.Bucket.Remove(docID, 0)
-	return err
 }

@@ -20,6 +20,7 @@ type User struct {
 	//Itemlist
 }
 
+//GetUserRes serves as intermediary data structure for getting user data
 type GetUserRes struct {
 	ID        string `json:"id"`
 	Email     string `json:"email"`

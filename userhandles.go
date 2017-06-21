@@ -12,7 +12,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-
 /*UpdateUserReq is a structure used to deal with incoming http request body information
 and add it to an existing user in the database*/
 type UpdateUserReq struct {
@@ -21,7 +20,6 @@ type UpdateUserReq struct {
 	Email     string `json:"email,omitempty"`
 	Phone     string `json:"phone,omitempty"`
 }
-
 
 //GetUsers handles GET requests and responds with a slice of all users from couchbase
 func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -128,4 +126,14 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+//DeleteUser removes a user from couchbase bucket by id query
+func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+	var id string = ps.ByName("id")
+	userKey := fmt.Sprintf("user:%s", id)
+
+	cb.Bucket.Remove(userKey, 0)
+
 }

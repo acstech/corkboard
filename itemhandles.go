@@ -99,8 +99,8 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 func (corkboard *Corkboard) DeleteItem(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	theid := p.ByName("id")
-	//removeItemByID will delete the item document from couchbase
-	err := corkboard.removeItemByID(theid)
+	var docID = "item:" + theid
+	_, err := corkboard.Bucket.Remove(docID, 0)
 	if err != nil {
 		log.Println(err)
 	}

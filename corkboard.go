@@ -53,6 +53,7 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router.GET("/api/users", (stdChain.Then(cb.GetUsers)))
 	router.GET("/api/users/:id", cb.GetUser)
 	router.POST("/api/users/edit/:id", cb.UpdateUser)
+	router.DELETE("/api/users/delete/:id", cb.DeleteUser)
 	router.HandlerFunc("POST", "/api/users/register", cb.RegisterUser())
 
 	return router
