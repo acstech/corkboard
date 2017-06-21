@@ -3,10 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "CkniflgmyvpUduhxm/N0UDGfz/I=",
+			"checksumSHA1": "UKaecYJAsVXeViu5pQgnm3s4HpU=",
 			"path": "github.com/acstech/corkboard-auth",
-			"revision": "7acc2c84cddb7378fb20b5e7af8991655633939a",
-			"revisionTime": "2017-06-13T03:17:39Z"
+			"revision": "1940c08839023b50777a65d86322451afa0b4b1e",
+			"revisionTime": "2017-06-21T13:56:48Z"
 		},
 		{
 			"checksumSHA1": "TCLnm8dn9hyxCM5tuOrcfPpXPUw=",

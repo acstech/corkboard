@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
-	corkboardauth "github.com/acstech/corkboard-auth"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -71,21 +69,13 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 
 //RegisterUser is a HandlerFunc to deal with New User requests
 func (cb *Corkboard) RegisterUser() http.HandlerFunc {
+	hf := cb.CorkboardAuth.RegisterUser()
+	return hf
+}
 
-	cba, err := corkboardauth.New(&corkboardauth.Config{
-		CBConnection:   os.Getenv("CB_CONNECTION"),
-		CBBucket:       os.Getenv("CB_BUCKET"),
-		CBBucketPass:   os.Getenv("CB_BUCKET_PASS"),
-		PrivateRSAFile: os.Getenv("CB_PRIVATE_RSA"),
-	})
-	if err != nil {
-		log.Println(err)
-	}
-
-	hf := cba.RegisterUser()
-
-	//log.Println("Called the register method")
-
+//AuthUser is a HandlerFunc to log in users
+func (cb *Corkboard) AuthorizeUser() http.HandlerFunc {
+	hf := cb.CorkboardAuth.AuthUser()
 	return hf
 }
 

@@ -56,11 +56,12 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 //Router returns all the router containing the Corkboard endpoints
 func (cb *Corkboard) Router() *httprouter.Router {
 	router := httprouter.New()
-	stdChain := madhatter.New(cb.testMiddleware)
+	stdChain := madhatter.New(cb.authToken)
 
 	router.GET("/api/users", (stdChain.Then(cb.GetUsers)))
 	router.GET("/api/users/:id", cb.GetUser)
-	router.POST("/api/users/edit/:id", cb.UpdateUser)
+	router.PUT("/api/users/edit/:id", cb.UpdateUser)
 	router.HandlerFunc("POST", "/api/users/register", cb.RegisterUser())
+	router.HandlerFunc("POST", "/api/users/auth", cb.AuthorizeUser())
 	return router
 }
