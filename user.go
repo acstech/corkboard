@@ -16,8 +16,18 @@ type User struct {
 	Lastname  string `json:"lastname"`
 	//Profilepic
 	Phone string   `json:"phone"`
-	Sites []string `json:"sites"`
+	Sites []string `json:"sites,omitempty"`
 	//Itemlist
+}
+
+//GetUserRes serves as intermediary data structure for getting user data
+type GetUserRes struct {
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	//Profilepic
+	Phone string `json:"phone"`
 }
 
 /*Eventually want to change this method to be findUser and determine what the
@@ -27,7 +37,7 @@ in the bucket*/
 
 //TODO: Change back to array of users
 
-func (cb *Corkboard) findUsers() ([]User, error) {
+func (cb *Corkboard) findUsers() ([]GetUserRes, error) {
 	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone FROM `%s` WHERE _type = 'User'", cb.Bucket.Name())) // nolint: gas
 	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
@@ -36,9 +46,14 @@ func (cb *Corkboard) findUsers() ([]User, error) {
 	defer res.Close() // nolint: errcheck
 
 	var user = new(User)
-	var users []User
+	var userres = new(GetUserRes)
+	var users []GetUserRes
 	for res.Next(user) {
-		users = append(users, *user)
+		userres.ID = user.ID
+		userres.Email = user.Email
+		userres.Firstname = user.Firstname
+		userres.Lastname = user.Lastname
+		users = append(users, *userres)
 
 		//log.Println(user)
 		//log.Println("Break")
@@ -58,6 +73,4 @@ func (cb *Corkboard) findUserByID(id string) (*User, error) {
 		return nil, err
 	}
 	return user, nil
-
 }
-

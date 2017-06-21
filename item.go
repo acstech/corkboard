@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/couchbase/gocb"
 	uuid "github.com/satori/go.uuid"
@@ -16,19 +17,21 @@ type Item struct {
 	ItemDesc string `json:"itemdesc,omitempty"`
 	Category string `json:"itemcat,omitempty" `
 	//itempic
-	Price      string `json:"itemprice,omitempty"`
-	DatePosted string `json:"date,omitempty"`
-	Status     string `json:"salestatus,omitempty"`
-	UserID     string `json:"userid,omitempty"`
+	Price      string    `json:"itemprice,omitempty"`
+	DatePosted time.Time `json:"date,omitempty"`
+	Status     string    `json:"salestatus,omitempty"`
+	UserID     string    `json:"userid,omitempty"`
 }
 
 //NewItemReq struct for creating new items
 type NewItemReq struct {
-	Itemname string `json:"itemname,omitempty"`
-	Itemcat  string `json:"itemcat,omitempty"`
-	Itemdesc string `json:"itemdesc,omitempty"`
-	Price    string `json:"itemprice,omitempty"`
-	Status   string `json:"salestatus,omitempty"`
+	Type     string    `json:"type,omitempty"`
+	Itemname string    `json:"itemname,omitempty"`
+	Itemcat  string    `json:"itemcat,omitempty"`
+	Itemdesc string    `json:"itemdesc,omitempty"`
+	Price    string    `json:"itemprice,omitempty"`
+	Status   string    `json:"salestatus,omitempty"`
+	Date     time.Time `json:"date,omitempty"`
 	//item picture coming up
 }
 
@@ -40,7 +43,7 @@ func getItemKey(id uuid.UUID) string {
 //findItems takes a corkboard object and queries couchbase
 func (corkboard *Corkboard) findItems() ([]Item, error) {
 
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemcat FROM `%s` WHERE type = 'item'", corkboard.Bucket.Name())) //nolint: gas
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemcat, date FROM `%s` WHERE type = 'item'", corkboard.Bucket.Name())) //nolint: gas
 	log.Println(corkboard.Bucket.Name())
 	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
@@ -85,7 +88,7 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 	//generate uuid for new item
 	newID := uuid.NewV4()
 	uID := newID.String()
-	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, ItemName: name, ItemDesc: desc, Category: cat, Price: price, Status: status}, 0)
+	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, Price: price, Status: status, DatePosted: time.Now()}, 0)
 	return err
 }
 
@@ -93,16 +96,9 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 func (corkboard *Corkboard) updateItem(item *Item) error {
 
 	var theID = "item:" + item.ItemID
-
+	thetime := time.Now()
+	item.DatePosted = thetime
 	_, err := corkboard.Bucket.Upsert(theID, item, 0)
 	return err
 
-}
-
-//removeItemByID removes document from couchbase by id
-func (corkboard *Corkboard) removeItemByID(id string) error {
-
-	var docID = "item:" + id
-	_, err := corkboard.Bucket.Remove(docID, 0)
-	return err
 }

@@ -14,6 +14,8 @@ func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ h
 	items, _ := corkboard.findItems()
 	if items == nil {
 		log.Println("Items not found")
+		w.WriteHeader(http.StatusNoContent)
+		return
 	}
 	// array of items is marshalled to JSONobject
 	JSONobject, err := json.Marshal(items)
@@ -25,6 +27,7 @@ func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ h
 	if err != nil {
 		log.Println(err2)
 	}
+	w.WriteHeader(http.StatusOK)
 }
 
 //GetItemByID uses the httprouter params to find the item by id, then Marshal & Write it in JSON
@@ -34,6 +37,8 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 	item, _ := corkboard.findItemByID(theid)
 	if item == nil {
 		log.Println("Item could not be found")
+		w.WriteHeader(http.StatusNoContent)
+		return
 	}
 
 	JSONitem, err := json.Marshal(item)
@@ -44,6 +49,7 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 	if err3 != nil {
 		log.Println(err3)
 	}
+	w.WriteHeader(http.StatusOK)
 }
 
 //NewItem endpoint decodes http request, calls createNewItem
@@ -58,8 +64,10 @@ func (corkboard *Corkboard) NewItem(w http.ResponseWriter, r *http.Request, _ ht
 	err2 := corkboard.createNewItem(item)
 	if err2 != nil {
 		log.Println(err2)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
-
+	w.WriteHeader(http.StatusCreated)
 }
 
 //EditItem finds an item to be updated, creates a new item with new info, then appends new info to original item
@@ -80,6 +88,8 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	}
 	if item == nil {
 		log.Println("Item could not be found")
+		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 	//original item has new data appended to its variables
 	item.ItemName = reqitem.ItemName
@@ -87,22 +97,33 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	item.Category = reqitem.Category
 	item.Price = reqitem.Price
 	item.Status = reqitem.Status
+	item.DatePosted = reqitem.DatePosted
 
 	//call to updateItem inserts item to couchbase
 	err3 := corkboard.updateItem(item)
 	if err3 != nil {
 		log.Println(err3)
 	}
+	w.WriteHeader(http.StatusOK)
 }
 
 //DeleteItem calls removeItemByID to delete couchbase document containing item information
 func (corkboard *Corkboard) DeleteItem(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	theid := p.ByName("id")
-	//removeItemByID will delete the item document from couchbase
-	err := corkboard.removeItemByID(theid)
+	item, err := corkboard.findItemByID(theid)
 	if err != nil {
 		log.Println(err)
 	}
-
+	if item == nil {
+		log.Println("Item could not be found")
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	var docID = "item:" + theid
+	_, err2 := corkboard.Bucket.Remove(docID, 0)
+	if err2 != nil {
+		log.Println(err2)
+	}
+	w.WriteHeader(http.StatusOK)
 }
