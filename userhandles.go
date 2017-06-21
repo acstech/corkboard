@@ -29,6 +29,10 @@ func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprout
 	if err != nil {
 		log.Println(err)
 	}
+	if users == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 
 	//I have an array of users (struct format) and I want to marshal
 	//them to JSON and write the response
@@ -52,6 +56,10 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 	//THE ID IS MAKING IT TO HERE :
 	//findUserByID is not working, panicking when serving
 	user, err := cb.findUserByID(id)
+	if user == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -86,7 +94,6 @@ func (cb *Corkboard) RegisterUser() http.HandlerFunc {
 	hf := cba.RegisterUser()
 
 	//log.Println("Called the register method")
-
 	return hf
 }
 
@@ -105,8 +112,6 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 
 	userReq := new(UpdateUserReq)
 	err := json.NewDecoder(r.Body).Decode(&userReq)
-	log.Println(userReq.Firstname)
-
 	if err != nil {
 		log.Println(err)
 		return
@@ -134,6 +139,11 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 	var id string = ps.ByName("id")
 	userKey := fmt.Sprintf("user:%s", id)
 
-	cb.Bucket.Remove(userKey, 0)
+	_, err := cb.Bucket.Remove(userKey, 0)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 
 }
