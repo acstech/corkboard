@@ -59,9 +59,9 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	stdChain := madhatter.New(cb.authToken)
 
 	router.GET("/api/users", (stdChain.Then(cb.GetUsers)))
-	router.GET("/api/users/:id", cb.GetUser)
-	router.PUT("/api/users/edit/:id", cb.UpdateUser)
-	router.HandlerFunc("POST", "/api/users/register", cb.RegisterUser())
-	router.HandlerFunc("POST", "/api/users/auth", cb.AuthorizeUser())
+	router.GET("/api/users/:id", stdChain.Then(cb.GetUser))
+	router.PUT("/api/users/edit/:id", stdChain.Then(cb.UpdateUser))
+	router.HandlerFunc("POST", "/api/users/register", cb.CorkboardAuth.RegisterUser())
+	router.HandlerFunc("POST", "/api/users/auth", cb.CorkboardAuth.AuthUser())
 	return router
 }

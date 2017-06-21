@@ -67,18 +67,6 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 	// w.WriteHeader(http.StatusOK)
 }
 
-//RegisterUser is a HandlerFunc to deal with New User requests
-func (cb *Corkboard) RegisterUser() http.HandlerFunc {
-	hf := cb.CorkboardAuth.RegisterUser()
-	return hf
-}
-
-//AuthorizeUser is a HandlerFunc to log in users
-func (cb *Corkboard) AuthorizeUser() http.HandlerFunc {
-	hf := cb.CorkboardAuth.AuthUser()
-	return hf
-}
-
 //UpdateUser handles POST requests with UpdateUserReq body data
 func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 

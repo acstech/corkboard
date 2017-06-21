@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/x509"
 	"encoding/pem"
 	"log"
@@ -11,6 +12,14 @@ import (
 	"github.com/acstech/corkboard-auth"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/julienschmidt/httprouter"
+)
+
+//ReqCtxKeys is a type to hold all context keys
+type ReqCtxKeys string
+
+var (
+	//ReqCtxClaims is a key for the custom claims in the context
+	ReqCtxClaims ReqCtxKeys = "claims"
 )
 
 func (cb *Corkboard) authToken(next httprouter.Handle) httprouter.Handle {
@@ -52,6 +61,7 @@ func (cb *Corkboard) authToken(next httprouter.Handle) httprouter.Handle {
 			return
 		}
 		if token.Valid {
+			r = r.WithContext(context.WithValue(r.Context(), ReqCtxClaims, claims))
 			next(w, r, p)
 		} else {
 			w.WriteHeader(http.StatusUnauthorized)
