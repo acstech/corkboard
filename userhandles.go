@@ -73,7 +73,7 @@ func (cb *Corkboard) RegisterUser() http.HandlerFunc {
 	return hf
 }
 
-//AuthUser is a HandlerFunc to log in users
+//AuthorizeUser is a HandlerFunc to log in users
 func (cb *Corkboard) AuthorizeUser() http.HandlerFunc {
 	hf := cb.CorkboardAuth.AuthUser()
 	return hf
