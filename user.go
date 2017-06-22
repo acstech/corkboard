@@ -16,49 +16,50 @@ type User struct {
 	Lastname  string `json:"lastname"`
 	//Profilepic
 	Phone string   `json:"phone"`
-	Sites []string `json:"sites,omitempty"`
+	Sites []string `json:"sites"`
 	//Itemlist
 }
+
+//FakeUser is a dummy struct used to add the "_type" field to users
+type FakeUser User
 
 //GetUserRes serves as intermediary data structure for getting user data
 type GetUserRes struct {
 	ID        string `json:"id"`
 	Email     string `json:"email"`
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
+	Firstname string `json:"firstname,omitempty"`
+	Lastname  string `json:"lastname,omitempty"`
 	//Profilepic
-	Phone string `json:"phone"`
+	Phone string `json:"phone,omitempty"`
 }
 
-/*Eventually want to change this method to be findUser and determine what the
-search key and return typeare using passed input. Currently, the query
-is hardcoded and the return type is a slice containing all the users currently
-in the bucket*/
+//MarshalJSON marshals user objects into JSON and adds the appropriate "_type"
+// func (user *User) MarshalJSON() ([]byte, error) {
+// 	return json.Marshal(&struct {
+// 		Type string `json:"_type"`
+// 		FakeUser
+// 	}{
+// 		Type:     "User",
+// 		FakeUser: FakeUser(*user),
+// 	})
+// }
 
-//TODO: Change back to array of users
-
-func (cb *Corkboard) findUsers() ([]GetUserRes, error) {
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone FROM `%s` WHERE _type = 'User'", cb.Bucket.Name())) // nolint: gas
+func (cb *Corkboard) findUsers() ([]User, error) {
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone, sites FROM `%s` WHERE _type = 'User'", cb.Bucket.Name())) // nolint: gas
 	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
 		return nil, err
 	}
+
 	defer res.Close() // nolint: errcheck
 
-	var user = new(User)
-	var userres = new(GetUserRes)
-	var users []GetUserRes
+	var users []User
+	user := new(User)
 	for res.Next(user) {
-		userres.ID = user.ID
-		userres.Email = user.Email
-		userres.Firstname = user.Firstname
-		userres.Lastname = user.Lastname
-		users = append(users, *userres)
-
-		//log.Println(user)
-		//log.Println("Break")
+		users = append(users, *user)
+		user = new(User)
 	}
-
+	//spew.Dump(users)
 	return users, nil
 }
 
