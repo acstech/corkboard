@@ -40,6 +40,17 @@ func getItemKey(id uuid.UUID) string {
 	return fmt.Sprintf("item:%s", id.String())
 }
 
+//TODO: write comment
+// NewReqTransfer comment WILL GO HERE
+// func NewReqTransfer(item *Item, newitem *NewItemReq) {
+// 	newitem.Itemname = item.ItemName
+// 	newitem.Itemcat = item.Category
+// 	newitem.Itemdesc = item.ItemDesc
+// 	newitem.Price = item.Price
+// 	newitem.Status = item.Status
+// 	newitem.Date = item.DatePosted
+// }
+
 //findItems takes a corkboard object and queries couchbase
 func (corkboard *Corkboard) findItems() ([]Item, error) {
 

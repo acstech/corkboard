@@ -8,6 +8,15 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+/*type GetItemReq struct {
+	Itemname string    `json:"itemname,omitempty"`
+	Itemcat  string    `json:"itemcat,omitempty"`
+	Itemdesc string    `json:"itemdesc,omitempty"`
+	Price    string    `json:"itemprice,omitempty"`
+	Status   string    `json:"salestatus,omitempty"`
+	Date     time.Time `json:"date,omitempty"`
+}*/
+
 //GetItems is an http handler for finding an array of items and storing them in the items array
 //Currently, GetItems finds items with a N1QLQuery that searches for a "type" variable
 func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -41,7 +50,16 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	JSONitem, err := json.Marshal(item)
+	var newitem NewItemReq
+	//NewReqTransfer(item, &itemreq)
+	newitem.Itemname = item.ItemName
+	newitem.Itemcat = item.Category
+	newitem.Itemdesc = item.ItemDesc
+	newitem.Price = item.Price
+	newitem.Status = item.Status
+	newitem.Date = item.DatePosted
+
+	JSONitem, err := json.Marshal(newitem)
 	if err != nil {
 		log.Println(err)
 	}
@@ -74,7 +92,7 @@ func (corkboard *Corkboard) NewItem(w http.ResponseWriter, r *http.Request, _ ht
 func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 
 	//reqitem stores information from update request
-	var reqitem Item
+	var reqitem NewItemReq
 	decoder := json.NewDecoder(r.Body)
 	err2 := decoder.Decode(&reqitem)
 	if err2 != nil {
@@ -92,12 +110,12 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 		return
 	}
 	//original item has new data appended to its variables
-	item.ItemName = reqitem.ItemName
-	item.ItemDesc = reqitem.ItemDesc
-	item.Category = reqitem.Category
+	item.ItemName = reqitem.Itemname
+	item.ItemDesc = reqitem.Itemdesc
+	item.Category = reqitem.Itemcat
 	item.Price = reqitem.Price
 	item.Status = reqitem.Status
-	item.DatePosted = reqitem.DatePosted
+	item.DatePosted = reqitem.Date
 
 	//call to updateItem inserts item to couchbase
 	err3 := corkboard.updateItem(item)
