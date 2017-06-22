@@ -4,6 +4,7 @@ Documentation=https://github.com/acstech/corkboard
 After=network.target
 
 [Service]
+EnvironmentFile=/opt/corkboard/environment
 ExecStart=/opt/corkboard/corkboard
 Restart=on-failure
 User=ubuntu
