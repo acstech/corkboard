@@ -66,6 +66,7 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router.GET("/api/users", (stdChain.Then(cb.GetUsers)))
 	//router.GET("/api/users", cb.GetUsers)
 	router.GET("/api/users/:id", stdChain.Then(cb.GetUser))
+	//router.GET("/api/users/:id", cb.GetUser)
 	router.PUT("/api/users/edit/:id", stdChain.Then(cb.UpdateUser))
 	//router.PUT("/api/users/edit/:id", cb.UpdateUser)
 
