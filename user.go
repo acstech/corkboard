@@ -63,7 +63,7 @@ func (cb *Corkboard) findUsers() ([]User, error) {
 	return users, nil
 }
 
-func (cb *Corkboard) findUserByID(id string) (*GetUserRes, error) {
+func (cb *Corkboard) findUserByID(id string) (*User, error) {
 
 	//TODO: Make sure there is a user found by that id or throw error
 	key := "user:" + id
@@ -73,12 +73,12 @@ func (cb *Corkboard) findUserByID(id string) (*GetUserRes, error) {
 		log.Println("Unable to get user.")
 		return nil, err
 	}
-	theuser := new(GetUserRes)
-	theuser.Email = user.Email
-	theuser.Firstname = user.Firstname
-	theuser.Lastname = user.Lastname
-	theuser.Phone = user.Phone
-	theuser.ID = user.ID
+	// theuser := new(GetUserRes)
+	// theuser.Email = user.Email
+	// theuser.Firstname = user.Firstname
+	// theuser.Lastname = user.Lastname
+	// theuser.Phone = user.Phone
+	// theuser.ID = user.ID
 
-	return theuser, nil
+	return user, nil
 }

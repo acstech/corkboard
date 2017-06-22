@@ -145,6 +145,7 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	var id string = ps.ByName("id")
+	key := "user:" + id
 
 	theuser, _ := cb.findUserByID(id)
 	if theuser == nil {
@@ -152,7 +153,7 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	_, err := cb.Bucket.Remove(id, 0)
+	_, err := cb.Bucket.Remove(key, 0)
 	if err != nil {
 		log.Println(err)
 		return
