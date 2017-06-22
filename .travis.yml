@@ -5,8 +5,6 @@ before_install:
 - go get -u github.com/alecthomas/gometalinter
 - gometalinter --install
 - gometalinter --vendor --tests --disable=gotype ./...
-install:
--
 before_deploy:
 - env GOOS=darwin GOARCH=amd64 go build -o "./corkboard_mac"
 - env GOOS=darwin GOARCH=386 go build -o "./corkboard_mac_x86"
