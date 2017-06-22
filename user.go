@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/couchbase/gocb"
-	"github.com/davecgh/go-spew/spew"
 )
 
 //User contains all possible user profile information
@@ -60,7 +59,7 @@ func (cb *Corkboard) findUsers() ([]User, error) {
 		users = append(users, *user)
 		user = new(User)
 	}
-	spew.Dump(users)
+	//spew.Dump(users)
 	return users, nil
 }
 
