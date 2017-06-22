@@ -73,5 +73,12 @@ func (cb *Corkboard) findUserByID(id string) (*User, error) {
 		log.Println("Unable to get user.")
 		return nil, err
 	}
+	// theuser := new(GetUserRes)
+	// theuser.Email = user.Email
+	// theuser.Firstname = user.Firstname
+	// theuser.Lastname = user.Lastname
+	// theuser.Phone = user.Phone
+	// theuser.ID = user.ID
+
 	return user, nil
 }
