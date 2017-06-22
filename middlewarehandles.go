@@ -6,7 +6,6 @@ import (
 	"encoding/pem"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/acstech/corkboard-auth"
@@ -30,13 +29,13 @@ func (cb *Corkboard) authToken(next httprouter.Handle) httprouter.Handle {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			w.WriteHeader(http.StatusUnauthorized)
-			os.Exit(1)
+			return
 		}
 		authPieces := strings.Split(authHeader, " ")
 		var rawToken string
 		if authPieces[0] != "Bearer:" {
 			w.WriteHeader(http.StatusUnauthorized)
-			os.Exit(1)
+			return
 		} else if authPieces[0] == "Bearer:" {
 			rawToken = authPieces[1]
 		}
