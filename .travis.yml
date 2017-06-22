@@ -1,17 +1,23 @@
 language: go
 go:
-  - 1.8.x
+- 1.8.x
 before_install:
-  - go get -u github.com/alecthomas/gometalinter          #Install gometalinter
-  - gometalinter --install                                #Install linters used by gometalinter
-  - gometalinter --vendor --tests --disable=gotype ./...                   #Run the linters to make sure the code is clean
+- go get -u github.com/alecthomas/gometalinter
+- gometalinter --install
+- gometalinter --vendor --tests --disable=gotype ./...
 install:
 before_deploy:
-  - go build -o "./deploy/corkboard-${TRAVIS_TAG}"        #build app and output binary to deploy/corkboard-(tagname)
-  - tar -czf "corkboard-${TRAVIS_TAG}.tar.gz" "./deploy"  #build tarball containing deploy directory
-  - if [ -d compressed ]; then rm -r compressed; fi       #delete compressed directory if exists
-  - mkdir compressed                                      #create compressed directory for push to s3
-  - mv corkboard-${TRAVIS_TAG}.tar.gz ./compressed        #move tarball to compressed directory
+- env GOOS=darwin GOARCH=amd64 go build -o "./corkboard_mac"
+- env GOOS=darwin GOARCH=386 go build -o "./corkboard_mac_x86"
+- env GOOS=linux GOARCH=amd64 go build -o "./corkboard_linux"
+- env GOOS=linux GOARCH=386 go build -o "./corkboard_linux_x86"
+- env GOOS=windows GOARCH=amd64 go build -o "./corkboard.exe"
+- env GOOS=windows GOARCH=386 go build -o "./corkboard_x86.exe"
+- cp "./corkboard_linux" "./deploy/corkboard-${TRAVIS_TAG}"
+- tar -czf "corkboard-${TRAVIS_TAG}.tar.gz" "./deploy"
+- if [ -d compressed ]; then rm -r compressed; fi
+- mkdir compressed
+- mv corkboard-${TRAVIS_TAG}.tar.gz ./compressed
 deploy:
   - provider: s3
     access_key_id: AKIAI6J3DLDG65WB423Q
@@ -37,4 +43,18 @@ deploy:
     on:
       repo: acstech/corkboard
       branch: master
+      tags: true
+  - provider: releases
+    api_key:
+      secure: lOarF7u3UvCkarR370bK5kHoXsTZuBj7j7txmbddcKsOVoNZCz3cj88RDvNT+oaC6AltVAY33O8dTg+5zHV3rl3VWlNUBBIjLhkiTR3cQUh7XcuO9g5xjk6eegkEdcrIPpgRC+vdCKBkHz6sB25aA4encVxIhZcAcWfcYxqtCOok1R8eFHDxB0nG5IBWdZfYeb/TaZZPiM3KsQrmZ3spqPxVKgIJCBO3wEypsOCEBtgnOyl78/3YRduSfZMrQ+Jd+REFocV94TO08F4+e9fzBLGbThyeX2NxzmQUbW8XkqDV69yPwjFlmOeZWoLjUtsB1mjDR2nfupMPN8lg3UrZcj4HEhvDfH7Ud+a5r0bh/xr/7DqRCVzJw5ocSaDaP3pZtj5g/IaPXivpfsxEltzjpIMm5azKo6QUIHrqTFvfKhe7iUEnacyO1naQ/otFii/S1L8oC3zuVLtgU+rzhhTWlRNKy4t3RRyRUQs4oQZXE2/vt/KLXWhCU3tWudKbfdEyL/uBCfwa3KpwxTkKITCrO+ZCgQMzeXggCMSnDkog8Y074vMdmzuiPtczaTS5InRlLE6ySsRbQscTGn3YaIW2fawvepB5OydixOdVFC+udjHZfk61zkTafD76OFgT6WHYhf3MX07gu3BgyFxZ6kB/6szMJlRtIkfDdXn3mtjqhiY=
+    file:
+      - corkboard_mac
+      - corkboard_mac_x86
+      - corkboard_linux
+      - corkboard_linux_x86
+      - corkboard.exe
+      - corkboard_x86.exe
+    skip_cleanup: true
+    on:
+      repo: acstech/corkboard
       tags: true
