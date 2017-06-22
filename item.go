@@ -40,17 +40,6 @@ func getItemKey(id uuid.UUID) string {
 	return fmt.Sprintf("item:%s", id.String())
 }
 
-//TODO: write comment
-// NewReqTransfer comment WILL GO HERE
-// func NewReqTransfer(item *Item, newitem *NewItemReq) {
-// 	newitem.Itemname = item.ItemName
-// 	newitem.Itemcat = item.Category
-// 	newitem.Itemdesc = item.ItemDesc
-// 	newitem.Price = item.Price
-// 	newitem.Status = item.Status
-// 	newitem.Date = item.DatePosted
-// }
-
 //findItems takes a corkboard object and queries couchbase
 func (corkboard *Corkboard) findItems() ([]Item, error) {
 
@@ -96,7 +85,6 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 	var price = newitem.Price
 	var status = newitem.Status
 
-	//generate uuid for new item
 	newID := uuid.NewV4()
 	uID := newID.String()
 	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, Price: price, Status: status, DatePosted: time.Now()}, 0)

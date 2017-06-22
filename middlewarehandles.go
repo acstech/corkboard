@@ -23,7 +23,6 @@ var (
 
 func (cb *Corkboard) authToken(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		//log.Println("YOU HAVE MIDDLEWARED!!!")
 		var claims corkboardauth.CustomClaims
 		var parse jwt.Parser
 		authHeader := r.Header.Get("Authorization")
@@ -36,16 +35,12 @@ func (cb *Corkboard) authToken(next httprouter.Handle) httprouter.Handle {
 		if authPieces[0] != "Bearer:" {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
-		} else if authPieces[0] == "Bearer:" {
+		} else if authPieces[0] == "Bearer" {
 			rawToken = authPieces[1]
 		}
 
-		//keyFunc needs to be type Keyfunc and get the public key from
-		//corkboardauth somehow.
-
 		token, error := parse.ParseWithClaims(rawToken, &claims, func(_ *jwt.Token) (interface{}, error) {
 
-			//Need to use GetPublicPem() once it is public here. It returns pem, err
 			pubPem, err := cb.CorkboardAuth.GetPublicPem()
 			if err != nil {
 				return nil, err
@@ -66,7 +61,14 @@ func (cb *Corkboard) authToken(next httprouter.Handle) httprouter.Handle {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
+	}
+}
 
-		//log.Println("YOU HAVE AFTERWARED!!!")
+func (cb *Corkboard) defaultHeaders(httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
 	}
 }

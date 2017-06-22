@@ -33,17 +33,6 @@ type GetUserRes struct {
 	Phone string `json:"phone,omitempty"`
 }
 
-//MarshalJSON marshals user objects into JSON and adds the appropriate "_type"
-// func (user *User) MarshalJSON() ([]byte, error) {
-// 	return json.Marshal(&struct {
-// 		Type string `json:"_type"`
-// 		FakeUser
-// 	}{
-// 		Type:     "User",
-// 		FakeUser: FakeUser(*user),
-// 	})
-// }
-
 func (cb *Corkboard) findUsers() ([]User, error) {
 	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone, sites FROM `%s` WHERE _type = 'User'", cb.Bucket.Name())) // nolint: gas
 	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
@@ -59,13 +48,11 @@ func (cb *Corkboard) findUsers() ([]User, error) {
 		users = append(users, *user)
 		user = new(User)
 	}
-	//spew.Dump(users)
 	return users, nil
 }
 
 func (cb *Corkboard) findUserByID(id string) (*User, error) {
 
-	//TODO: Make sure there is a user found by that id or throw error
 	key := "user:" + id
 	user := new(User)
 	_, err := cb.Bucket.Get(key, user)
@@ -73,12 +60,5 @@ func (cb *Corkboard) findUserByID(id string) (*User, error) {
 		log.Println("Unable to get user.")
 		return nil, err
 	}
-	// theuser := new(GetUserRes)
-	// theuser.Email = user.Email
-	// theuser.Firstname = user.Firstname
-	// theuser.Lastname = user.Lastname
-	// theuser.Phone = user.Phone
-	// theuser.ID = user.ID
-
 	return user, nil
 }

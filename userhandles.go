@@ -20,8 +20,6 @@ type UpdateUserReq struct {
 
 //GetUsers handles GET requests and responds with a slice of all users from couchbase
 func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	//TODO: Figure out the issue here
-	//users is an aray of User structs
 	users, err := cb.findUsers()
 	if err != nil {
 		log.Println(err)
@@ -32,15 +30,8 @@ func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprout
 		return
 	}
 
-	//I have an array of users (struct format) and I want to marshal
-	//them to JSON and write the response
-	//log.Println("Made it!")
-	//Can I  marshal the whole array at once or do I need to do it
-	//one at a time
 	usersRes := make([]GetUserRes, len(users))
 
-	//TODO: Debug. Any user who does not have firstname/lastname/phone
-	//is returning values from whatever random user was returned last.
 	for i, user := range users {
 		var userRes GetUserRes
 		userRes.Email = user.Email
@@ -67,8 +58,6 @@ func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprout
 func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var id string = ps.ByName("id")
 	log.Println(id)
-	//THE ID IS MAKING IT TO HERE :
-	//findUserByID is not working, panicking when serving
 	user, err := cb.findUserByID(id)
 	if user == nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -79,7 +68,7 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	//log.Println(user.Firstname)
+
 	var userRes GetUserRes
 	userRes.Email = user.Email
 	userRes.Firstname = user.Firstname
@@ -96,7 +85,6 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	// w.WriteHeader(http.StatusOK)
 }
 
 //UpdateUser handles POST requests with UpdateUserReq body data
@@ -123,9 +111,6 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 	user.Lastname = userReq.Lastname
 	user.Phone = userReq.Phone
 	user.Email = userReq.Email
-
-	//TODO: Figure out how to keep Upsert from deleting the _type field without adding it
-	//to the User struct
 
 	_, error := cb.Bucket.Upsert(userKey, &struct {
 		Type string `json:"_type"`
