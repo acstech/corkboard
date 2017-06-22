@@ -54,6 +54,7 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 func (cb *Corkboard) Router() *httprouter.Router {
 	router := httprouter.New()
 	stdChain := madhatter.New(cb.defaultHeaders, cb.authToken)
+	noAuthChain := madhatter.New(cb.defaultHeaders)
 
 	router.GET("/api/items", stdChain.Then(cb.GetItems))
 	router.GET("/api/items/:id", stdChain.Then(cb.GetItemByID))
@@ -63,8 +64,8 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router.GET("/api/users", (stdChain.Then(cb.GetUsers)))
 	router.GET("/api/users/:id", stdChain.Then(cb.GetUser))
 	router.PUT("/api/users/edit/:id", stdChain.Then(cb.UpdateUser))
-	router.HandlerFunc("POST", "/api/users/register", cb.CorkboardAuth.RegisterUser())
-	router.HandlerFunc("POST", "/api/users/auth", cb.CorkboardAuth.AuthUser())
+	router.POST("/api/users/register", noAuthChain.Then(cb.CorkboardAuth.RegisterUser()))
+	router.POST("/api/users/auth", noAuthChain.Then(cb.CorkboardAuth.AuthUser()))
 
 	return router
 }
