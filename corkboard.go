@@ -53,8 +53,8 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 //Router returns the router containing the Corkboard endpoints
 func (cb *Corkboard) Router() *httprouter.Router {
 	router := httprouter.New()
-	stdChain := madhatter.New(cb.corsPreflight, cb.defaultHeaders, cb.authToken)
-	noAuthChain := madhatter.New(cb.corsPreflight, cb.defaultHeaders)
+	stdChain := madhatter.New(cb.defaultHeaders, cb.authToken)
+	noAuthChain := madhatter.New(cb.defaultHeaders)
 
 	router.GET("/api/items", stdChain.Then(cb.GetItems))
 	router.GET("/api/items/:id", stdChain.Then(cb.GetItemByID))

@@ -7,6 +7,7 @@ import (
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/rs/cors"
 )
 
 /* Need to eventually set os env varibales forthe CB Connection.
@@ -24,8 +25,16 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+		AllowedHeaders:   []string{"*"},
+		ExposedHeaders:   []string{"Content-Type", "Date", "Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           3000,
+	})
 	port := fmt.Sprintf(":%s", os.Getenv("CB_PORT"))
 	log.Println("Listening on port ", port)
-	log.Fatal(http.ListenAndServe(port, cork.Router()))
+	log.Fatal(http.ListenAndServe(port, c.Handler(cork.Router())))
 
 }
