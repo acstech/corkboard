@@ -46,6 +46,12 @@
 			"revisionTime": "2017-04-30T22:20:11Z"
 		},
 		{
+			"checksumSHA1": "lZmPAbekxLbMFQirB/vzbdI+5O8=",
+			"path": "github.com/rs/cors",
+			"revision": "8dd4211afb5d08dbb39a533b9bb9e4b486351df6",
+			"revisionTime": "2017-06-08T16:51:55Z"
+		},
+		{
 			"checksumSHA1": "nbjIYFo6HjYVvRIjFjOXhCbPIvo=",
 			"origin": "github.com/acstech/corkboard-auth/vendor/github.com/satori/go.uuid",
 			"path": "github.com/satori/go.uuid",
