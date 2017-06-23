@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/acstech/corkboard"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/cors"
 )
@@ -15,7 +16,7 @@ For now, the connection varibales are hard coded*/
 //main ...
 func main() {
 
-	cork, err := NewCorkboard(&CBConfig{
+	cork, err := corkboard.NewCorkboard(&corkboard.CBConfig{
 		Connection: os.Getenv("CB_CONNECTION"),
 		BucketName: os.Getenv("CB_BUCKET"),
 		BucketPass: os.Getenv("CB_BUCKET_PASS"),
