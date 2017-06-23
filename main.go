@@ -24,8 +24,8 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
-	log.Println("Listening on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", cork.Router()))
+	port := fmt.Sprintf(":%s", os.Getenv("CB_PORT"))
+	log.Println("Listening on port ", port)
+	log.Fatal(http.ListenAndServe(port, cork.Router()))
 
 }
