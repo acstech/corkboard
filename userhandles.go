@@ -104,6 +104,7 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 	err := json.NewDecoder(r.Body).Decode(&userReq)
 	if err != nil {
 		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
