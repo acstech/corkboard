@@ -7,7 +7,7 @@ After=network.target
 EnvironmentFile=/opt/corkboard/environment
 ExecStart=/opt/corkboard/corkboard
 Restart=on-failure
-User=ubuntu
+User=root
 
 [Install]
 WantedBy=multi-user.target
