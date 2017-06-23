@@ -6,17 +6,21 @@ before_install:
 - gometalinter --install
 - gometalinter --vendor --tests --disable=gotype ./...
 before_deploy:
-- env GOOS=darwin GOARCH=amd64 go build -o "./corkboard_mac"
-- env GOOS=darwin GOARCH=386 go build -o "./corkboard_mac_x86"
-- env GOOS=linux GOARCH=amd64 go build -o "./corkboard_linux"
-- env GOOS=linux GOARCH=386 go build -o "./corkboard_linux_x86"
-- env GOOS=windows GOARCH=amd64 go build -o "./corkboard.exe"
-- env GOOS=windows GOARCH=386 go build -o "./corkboard_x86.exe"
-- cp "./corkboard_linux" "./deploy/corkboard-${TRAVIS_TAG}"
-- tar -czf "corkboard-${TRAVIS_TAG}.tar.gz" "./deploy"
-- if [ -d compressed ]; then rm -r compressed; fi
-- mkdir compressed
-- mv corkboard-${TRAVIS_TAG}.tar.gz ./compressed
+- >
+  if ! [ "$BEFORE_DEPLOY_RUN" ]; then
+    export BEFORE_DEPLOY_RUN=1;
+    env GOOS=darwin GOARCH=amd64 go build -o "./corkboard_mac";
+    env GOOS=darwin GOARCH=386 go build -o "./corkboard_mac_x86";
+    env GOOS=linux GOARCH=amd64 go build -o "./corkboard_linux";
+    env GOOS=linux GOARCH=386 go build -o "./corkboard_linux_x86";
+    env GOOS=windows GOARCH=amd64 go build -o "./corkboard.exe";
+    env GOOS=windows GOARCH=386 go build -o "./corkboard_x86.exe";
+    cp "./corkboard_linux" "./deploy/corkboard";
+    tar -czvf "corkboard-${TRAVIS_TAG}.tar.gz" -C deploy .;
+    if [ -d compressed ]; then rm -r compressed; fi;
+    mkdir compressed;
+    mv corkboard-${TRAVIS_TAG}.tar.gz ./compressed;
+  fi
 deploy:
 - provider: s3
   access_key_id: AKIAI6J3DLDG65WB423Q
@@ -36,9 +40,10 @@ deploy:
     secure: fF4JB1ZeuWWLSmOT/HaLLSinsaN0wsiIJLhiRHjs4XZbGZ1+9brz9JVOwwxH2HY0UYdmw9QUAoHUuCldAieBxag0yOLBXQ8BraVZiWGpCdIwe5HKEPCr8VVLMEFprJdaR/KfysdN3e/ESpteju6ssSi9nJLu67bgKgbySlBXc0qm8YDPqw80qw+klGvJ1wXx2S75vcZ2Cjv92ZaDKKVgEznKtZpZL3uxm4Cw1QwMH15+WYTbi0nDJubzNWRe/rxU11SjjOevoCdkBXhjUgAqkW6upwEha/E8SRUPHj34amW1lrxWxiOAbaKGBuUF8B3E4YBeh39anU15glszu3JbNT2ozyV5IZMzNMZ/Oy3wAmsJA+PAYbXIeqrmM0gihxymhV3B6qLStpQiJ3wD5N0eksFtYG4E0l3Yft3FgzNmNJUzF20T87ee8lDoRq7ystIDnGfdvJ+3i68DGe86hQrzrFPeiPe4PBEH+R3TuCWpylqBDyERbemFb5PYbP9CLKm2V9VOM2wdfOvnvHVAcjAWOnDh/3bH0xcW++jtaA4sfTotFjzpXt61dDs4uIJ8pkV5Ysxwd+dc4DkiRSeCZlJOaMz/k0iUeN5cBrY4DkIUa0l7n9Ue3kSvv6MKAnKxR6WPbquOfkuWiDfxUyjfCDH7kfv35PGaIDYkV+cYN2HojqE=
   bucket: corkboard.t.ac.st
   application: corkboard
-  key: corkboard-${TRAVIS_TAG}.tar.gz
+  key: builds/corkboard-${TRAVIS_TAG}.tar.gz
   bundle_type: tgz
   deployment_group: testing
+  skip_cleanup: true
   on:
     repo: acstech/corkboard
     branch: master
@@ -56,4 +61,5 @@ deploy:
   skip_cleanup: true
   on:
     repo: acstech/corkboard
+    branch: master
     tags: true
