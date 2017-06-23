@@ -67,9 +67,18 @@ func (cb *Corkboard) authToken(next httprouter.Handle) httprouter.Handle {
 func (cb *Corkboard) defaultHeaders(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "*")
 		next(w, r, p)
+	}
+}
+func (cb *Corkboard) corsPreflight(next httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		if r.Method == http.MethodOptions {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+			w.Header().Set("Access-Control-Allow-Headers", "*")
+		} else {
+			next(w, r, p)
+		}
+
 	}
 }
