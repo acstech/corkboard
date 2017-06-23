@@ -32,7 +32,7 @@ func (cb *Corkboard) authToken(next httprouter.Handle) httprouter.Handle {
 		}
 		authPieces := strings.Split(authHeader, " ")
 		var rawToken string
-		if authPieces[0] != "Bearer:" {
+		if authPieces[0] != "Bearer" {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		} else if authPieces[0] == "Bearer" {
@@ -64,8 +64,9 @@ func (cb *Corkboard) authToken(next httprouter.Handle) httprouter.Handle {
 	}
 }
 
-func (cb *Corkboard) defaultHeaders(httprouter.Handle) httprouter.Handle {
+func (cb *Corkboard) defaultHeaders(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		w.Header().Set("Content-Type", "application/json")
+		next(w, r, p)
 	}
 }
