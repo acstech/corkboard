@@ -13,7 +13,7 @@ before_deploy:
 - env GOOS=windows GOARCH=amd64 go build -o "./corkboard.exe"
 - env GOOS=windows GOARCH=386 go build -o "./corkboard_x86.exe"
 - cp "./corkboard_linux" "./deploy/corkboard-${TRAVIS_TAG}"
-- tar -czf "corkboard-${TRAVIS_TAG}.tar.gz" "./deploy"
+- tar -czvf "corkboard-${TRAVIS_TAG}.tar.gz" -C deploy .
 - if [ -d compressed ]; then rm -r compressed; fi
 - mkdir compressed
 - mv corkboard-${TRAVIS_TAG}.tar.gz ./compressed
