@@ -32,9 +32,8 @@ deploy:
   local_dir: ${TRAVIS_BUILD_DIR}/compressed
   on:
     repo: acstech/corkboard
-    all_branches: true
-    # branch: master
-    # tags: true
+    branch: master
+    tags: true
 - provider: codedeploy
   access_key_id: AKIAI6J3DLDG65WB423Q
   secret_access_key:
@@ -47,9 +46,8 @@ deploy:
   skip_cleanup: true
   on:
     repo: acstech/corkboard
-    all_branches: true
-    # branch: master
-    # tags: true
+    branch: master
+    tags: true
 - provider: releases
   api_key:
     secure: lOarF7u3UvCkarR370bK5kHoXsTZuBj7j7txmbddcKsOVoNZCz3cj88RDvNT+oaC6AltVAY33O8dTg+5zHV3rl3VWlNUBBIjLhkiTR3cQUh7XcuO9g5xjk6eegkEdcrIPpgRC+vdCKBkHz6sB25aA4encVxIhZcAcWfcYxqtCOok1R8eFHDxB0nG5IBWdZfYeb/TaZZPiM3KsQrmZ3spqPxVKgIJCBO3wEypsOCEBtgnOyl78/3YRduSfZMrQ+Jd+REFocV94TO08F4+e9fzBLGbThyeX2NxzmQUbW8XkqDV69yPwjFlmOeZWoLjUtsB1mjDR2nfupMPN8lg3UrZcj4HEhvDfH7Ud+a5r0bh/xr/7DqRCVzJw5ocSaDaP3pZtj5g/IaPXivpfsxEltzjpIMm5azKo6QUIHrqTFvfKhe7iUEnacyO1naQ/otFii/S1L8oC3zuVLtgU+rzhhTWlRNKy4t3RRyRUQs4oQZXE2/vt/KLXWhCU3tWudKbfdEyL/uBCfwa3KpwxTkKITCrO+ZCgQMzeXggCMSnDkog8Y074vMdmzuiPtczaTS5InRlLE6ySsRbQscTGn3YaIW2fawvepB5OydixOdVFC+udjHZfk61zkTafD76OFgT6WHYhf3MX07gu3BgyFxZ6kB/6szMJlRtIkfDdXn3mtjqhiY=
