@@ -6,17 +6,21 @@ before_install:
 - gometalinter --install
 - gometalinter --vendor --tests --disable=gotype ./...
 before_deploy:
-- env GOOS=darwin GOARCH=amd64 go build -o "./corkboard_mac"
-- env GOOS=darwin GOARCH=386 go build -o "./corkboard_mac_x86"
-- env GOOS=linux GOARCH=amd64 go build -o "./corkboard_linux"
-- env GOOS=linux GOARCH=386 go build -o "./corkboard_linux_x86"
-- env GOOS=windows GOARCH=amd64 go build -o "./corkboard.exe"
-- env GOOS=windows GOARCH=386 go build -o "./corkboard_x86.exe"
-- cp "./corkboard_linux" "./deploy/corkboard"
-- tar -czvf "corkboard-${TRAVIS_TAG}.tar.gz" -C deploy .
-- if [ -d compressed ]; then rm -r compressed; fi
-- mkdir compressed
-- mv corkboard-${TRAVIS_TAG}.tar.gz ./compressed
+- >
+  if ! [ "$BEFORE_DEPLOY_RUN" ]; then
+    export BEFORE_DEPLOY_RUN=1;
+    env GOOS=darwin GOARCH=amd64 go build -o "./corkboard_mac";
+    env GOOS=darwin GOARCH=386 go build -o "./corkboard_mac_x86";
+    env GOOS=linux GOARCH=amd64 go build -o "./corkboard_linux";
+    env GOOS=linux GOARCH=386 go build -o "./corkboard_linux_x86";
+    env GOOS=windows GOARCH=amd64 go build -o "./corkboard.exe";
+    env GOOS=windows GOARCH=386 go build -o "./corkboard_x86.exe";
+    cp "./corkboard_linux" "./deploy/corkboard";
+    tar -czvf "corkboard-${TRAVIS_TAG}.tar.gz" -C deploy .;
+    if [ -d compressed ]; then rm -r compressed; fi;
+    mkdir compressed;
+    mv corkboard-${TRAVIS_TAG}.tar.gz ./compressed;
+  fi
 deploy:
 - provider: s3
   access_key_id: AKIAI6J3DLDG65WB423Q
