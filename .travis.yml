@@ -4,17 +4,18 @@ go:
 before_install:
 - go get -u github.com/alecthomas/gometalinter
 - gometalinter --install
-- gometalinter --vendor --tests --disable=gotype ./...
+- gometalinter --vendor --tests --disable=gotype .
+- gometalinter --vendor --tests --disable=gotype ./cmd/corkboard/.
 before_deploy:
 - >
   if ! [ "$BEFORE_DEPLOY_RUN" ]; then
     export BEFORE_DEPLOY_RUN=1;
-    env GOOS=darwin GOARCH=amd64 go build -o "./corkboard_mac";
-    env GOOS=darwin GOARCH=386 go build -o "./corkboard_mac_x86";
-    env GOOS=linux GOARCH=amd64 go build -o "./corkboard_linux";
-    env GOOS=linux GOARCH=386 go build -o "./corkboard_linux_x86";
-    env GOOS=windows GOARCH=amd64 go build -o "./corkboard.exe";
-    env GOOS=windows GOARCH=386 go build -o "./corkboard_x86.exe";
+    env GOOS=darwin GOARCH=amd64 go build -o "./corkboard_mac" ./cmd/corkboard;
+    env GOOS=darwin GOARCH=386 go build -o "./corkboard_mac_x86" ./cmd/corkboard;
+    env GOOS=linux GOARCH=amd64 go build -o "./corkboard_linux" ./cmd/corkboard;
+    env GOOS=linux GOARCH=386 go build -o "./corkboard_linux_x86" ./cmd/corkboard;
+    env GOOS=windows GOARCH=amd64 go build -o "./corkboard.exe" ./cmd/corkboard;
+    env GOOS=windows GOARCH=386 go build -o "./corkboard_x86.exe" ./cmd/corkboard;
     cp "./corkboard_linux" "./deploy/corkboard";
     tar -czvf "corkboard-${TRAVIS_TAG}.tar.gz" -C deploy .;
     if [ -d compressed ]; then rm -r compressed; fi;

@@ -1,7 +1,7 @@
-package main
+package corkboard
 
 import (
-	"log"
+	"fmt"
 
 	corkboardauth "github.com/acstech/corkboard-auth"
 	"github.com/couchbase/gocb"
@@ -29,13 +29,13 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println("Able to connect!")
 	bucket, err := cluster.OpenBucket(config.BucketName, config.BucketPass)
 	if err != nil {
 		return nil, err
 	}
-	log.Println("successfully opened bucket: ", config.BucketName)
-
+	if err = createIndexes(bucket); err != nil {
+		return nil, err
+	}
 	cba, err := corkboardauth.New(&corkboardauth.Config{
 		CBConnection:   config.Connection,
 		CBBucket:       config.BucketName,
@@ -46,8 +46,30 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 		return nil, err
 	}
 	return &Corkboard{
-		Bucket: bucket, CorkboardAuth: cba}, nil
+		Bucket:        bucket,
+		CorkboardAuth: cba,
+	}, nil
+}
 
+func createIndexes(bucket *gocb.Bucket) error {
+	indexQuery := gocb.NewN1qlQuery(fmt.Sprintf("SELECT `name` FROM system:indexes WHERE keyspace_id = '%s'", bucket.Name())).AdHoc(true) // nolint: gas
+	createPrimaryQuery := gocb.NewN1qlQuery(fmt.Sprintf("CREATE PRIMARY INDEX idx_primary ON `%s` USING GSI", bucket.Name())).AdHoc(true) // nolint: gas
+	res, err := bucket.ExecuteN1qlQuery(indexQuery, nil)
+	if err != nil {
+		return err
+	}
+	var idxs []string
+	var row struct{ Name string }
+	for res.Next(&row) {
+		idxs = append(idxs, row.Name)
+	}
+	if !contains(idxs, "idx_primary") {
+		_, err = bucket.ExecuteN1qlQuery(createPrimaryQuery, nil)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 //Router returns the router containing the Corkboard endpoints
@@ -68,4 +90,13 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router.POST("/api/users/auth", noAuthChain.Then(cb.CorkboardAuth.AuthUser()))
 
 	return router
+}
+
+func contains(a []string, b string) bool {
+	for _, item := range a {
+		if item == b {
+			return true
+		}
+	}
+	return false
 }

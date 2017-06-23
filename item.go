@@ -1,4 +1,4 @@
-package main
+package corkboard
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ type Item struct {
 	ItemDesc string `json:"itemdesc,omitempty"`
 	Category string `json:"itemcat,omitempty" `
 	//itempic
-	Price      string    `json:"itemprice,omitempty"`
+	Price      float64   `json:"itemprice,omitempty"`
 	DatePosted time.Time `json:"date,omitempty"`
 	Status     string    `json:"salestatus,omitempty"`
 	UserID     string    `json:"userid,omitempty"`
@@ -29,7 +29,7 @@ type NewItemReq struct {
 	Itemname string    `json:"itemname,omitempty"`
 	Itemcat  string    `json:"itemcat,omitempty"`
 	Itemdesc string    `json:"itemdesc,omitempty"`
-	Price    string    `json:"itemprice,omitempty"`
+	Price    float64   `json:"itemprice,omitempty"`
 	Status   string    `json:"salestatus,omitempty"`
 	Date     time.Time `json:"date,omitempty"`
 	//item picture coming up
