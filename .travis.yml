@@ -28,6 +28,7 @@ deploy:
   local_dir: ${TRAVIS_BUILD_DIR}/compressed
   on:
     repo: acstech/corkboard
+    all_branches: true
     # branch: master
     # tags: true
 - provider: codedeploy
@@ -41,6 +42,7 @@ deploy:
   deployment_group: testing
   on:
     repo: acstech/corkboard
+    all_branches: true
     # branch: master
     # tags: true
 - provider: releases
