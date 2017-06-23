@@ -4,7 +4,8 @@ go:
 before_install:
 - go get -u github.com/alecthomas/gometalinter
 - gometalinter --install
-- gometalinter --vendor --tests --disable=gotype --deadline 5m ./...
+- gometalinter --vendor --tests --disable=gotype .
+- gometalinter --vendor --tests --disable=gotype ./cmd/corkboard/.
 before_deploy:
 - >
   if ! [ "$BEFORE_DEPLOY_RUN" ]; then
