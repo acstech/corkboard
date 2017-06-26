@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -36,7 +38,7 @@ func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ h
 	if err != nil {
 		log.Println(err2)
 	}
-	w.WriteHeader(http.StatusOK)
+	//w.WriteHeader(http.StatusOK)
 }
 
 //GetItemByID uses the httprouter params to find the item by id, then Marshal & Write it in JSON
@@ -50,14 +52,14 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	var newitem NewItemReq
+	var newitem Item
 	//NewReqTransfer(item, &itemreq)
-	newitem.Itemname = item.ItemName
-	newitem.Itemcat = item.Category
-	newitem.Itemdesc = item.ItemDesc
+	newitem.ItemName = item.ItemName
+	newitem.Category = item.Category
+	newitem.ItemDesc = item.ItemDesc
 	newitem.Price = item.Price
 	newitem.Status = item.Status
-	newitem.Date = item.DatePosted
+	newitem.DatePosted = item.DatePosted
 
 	JSONitem, err := json.Marshal(newitem)
 	if err != nil {
@@ -113,7 +115,13 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	item.ItemName = reqitem.Itemname
 	item.ItemDesc = reqitem.Itemdesc
 	item.Category = reqitem.Itemcat
-	item.Price = reqitem.Price
+	var priceSplit = strings.Split(reqitem.Price, " ")
+	var price, error = strconv.ParseFloat(priceSplit[1], 64)
+	if error != nil {
+		log.Println(error)
+		return
+	}
+	item.Price = price
 	item.Status = reqitem.Status
 	item.DatePosted = reqitem.Date
 

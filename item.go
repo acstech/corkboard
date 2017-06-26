@@ -3,6 +3,8 @@ package corkboard
 import (
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/couchbase/gocb"
@@ -29,7 +31,7 @@ type NewItemReq struct {
 	Itemname string    `json:"itemname,omitempty"`
 	Itemcat  string    `json:"itemcat,omitempty"`
 	Itemdesc string    `json:"itemdesc,omitempty"`
-	Price    float64   `json:"itemprice,omitempty"`
+	Price    string    `json:"itemprice,omitempty"`
 	Status   string    `json:"salestatus,omitempty"`
 	Date     time.Time `json:"date,omitempty"`
 	//item picture coming up
@@ -43,8 +45,8 @@ func getItemKey(id uuid.UUID) string {
 //findItems takes a corkboard object and queries couchbase
 func (corkboard *Corkboard) findItems() ([]Item, error) {
 
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemcat, date FROM `%s` WHERE type = 'item'", corkboard.Bucket.Name())) //nolint: gas
-	log.Println(corkboard.Bucket.Name())
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemprice, itemcat, date FROM `%s` WHERE type = 'item'", corkboard.Bucket.Name())) //nolint: gas
+	//log.Println(corkboard.Bucket.Name())
 	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
 		fmt.Println("caught error: ", err)
@@ -82,7 +84,13 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 	var name = newitem.Itemname
 	var desc = newitem.Itemdesc
 	var cat = newitem.Itemcat
-	var price = newitem.Price
+
+	var priceSplit = strings.Split(newitem.Price, " ")
+	var price, error = strconv.ParseFloat(priceSplit[1], 64)
+	if error != nil {
+		log.Println(error)
+		return error
+	}
 	var status = newitem.Status
 
 	newID := uuid.NewV4()
