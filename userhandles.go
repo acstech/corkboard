@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	corkboardauth "github.com/acstech/corkboard-auth"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -98,6 +99,18 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+
+	claims, ok := r.Context().Value(ReqCtxClaims).(corkboardauth.CustomClaims)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	uid := claims.UID
+	if uid != user.ID {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	userKey := fmt.Sprintf("user:%s", id)
 
 	userReq := new(UpdateUserReq)
@@ -136,6 +149,16 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 	theuser, _ := cb.findUserByID(id)
 	if theuser == nil {
 		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	claims, ok := r.Context().Value(ReqCtxClaims).(corkboardauth.CustomClaims)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	uid := claims.UID
+	if uid != theuser.ID {
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	corkboardauth "github.com/acstech/corkboard-auth"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -81,6 +82,14 @@ func (corkboard *Corkboard) NewItem(w http.ResponseWriter, r *http.Request, _ ht
 	if err != nil {
 		log.Println(err)
 	}
+	claims, ok := r.Context().Value(ReqCtxClaims).(corkboardauth.CustomClaims)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	uid := claims.UID
+
+	item.UserID = uid
 	err2 := corkboard.createNewItem(item)
 	if err2 != nil {
 		log.Println(err2)
@@ -111,6 +120,19 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+	//Could eventually break this out into middleware!!!
+	//would be much more organized!
+	claims, ok := r.Context().Value(ReqCtxClaims).(corkboardauth.CustomClaims)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	uid := claims.UID
+	if uid != item.UserID {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	//original item has new data appended to its variables
 	item.ItemName = reqitem.Itemname
 	item.ItemDesc = reqitem.Itemdesc
@@ -146,6 +168,18 @@ func (corkboard *Corkboard) DeleteItem(w http.ResponseWriter, r *http.Request, p
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
+
+	claims, ok := r.Context().Value(ReqCtxClaims).(corkboardauth.CustomClaims)
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	uid := claims.UID
+	if uid != item.UserID {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
 	var docID = "item:" + theid
 	_, err2 := corkboard.Bucket.Remove(docID, 0)
 	if err2 != nil {
