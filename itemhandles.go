@@ -25,14 +25,13 @@ import (
 func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	items, _ := corkboard.findItems()
 	if items == nil {
-		log.Println("Items not found")
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 	// array of items is marshalled to JSONobject
 	JSONobject, err := json.Marshal(items)
 	if err != nil {
-		log.Println("could not marshal items")
+		log.Println(err)
 	}
 	//All items are written out
 	_, err2 := w.Write(JSONobject)
@@ -48,7 +47,6 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 	theid := p.ByName("id")
 	item, _ := corkboard.findItemByID(theid)
 	if item == nil {
-		log.Println("Item could not be found")
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
