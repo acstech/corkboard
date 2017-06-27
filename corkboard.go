@@ -84,8 +84,9 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router.PUT("/api/items/edit/:id", stdChain.Then(cb.EditItem))
 	router.DELETE("/api/items/delete/:id", stdChain.Then(cb.DeleteItem))
 	router.GET("/api/users", (stdChain.Then(cb.GetUsers)))
-	router.GET("/api/users/:id", stdChain.Then(cb.GetUser))
+	router.GET("/api/users/search/:id", stdChain.Then(cb.GetUser))
 	router.PUT("/api/users/edit/:id", stdChain.Then(cb.UpdateUser))
+	router.GET("/api/search/:key", stdChain.Then(cb.SearchUser))
 	router.POST("/api/users/register", noAuthChain.Then(cb.CorkboardAuth.RegisterUser()))
 	router.POST("/api/users/auth", noAuthChain.Then(cb.CorkboardAuth.AuthUser()))
 

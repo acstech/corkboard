@@ -88,6 +88,34 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 }
 
+//SearchUser handles request to search users by email, firstname and lastname
+func (cb *Corkboard) SearchUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	var key string = ps.ByName("key")
+	log.Println(key)
+	user, err := cb.findUserByKey(key)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	var userRes GetUserRes
+	userRes.Email = user.Email
+	userRes.Firstname = user.Firstname
+	userRes.Lastname = user.Lastname
+	userRes.ID = user.ID
+	userRes.Phone = user.Phone
+	userJSON, err := json.Marshal(userRes)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	_, error := w.Write(userJSON)
+	if error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
 //UpdateUser handles POST requests with UpdateUserReq body data
 func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
