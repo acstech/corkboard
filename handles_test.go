@@ -71,6 +71,7 @@ func init() {
 	}
 
 	server := httptest.NewServer(cork.Router())
+
 	//Connection strings (user)
 	serveURL = server.URL
 	newuserURL = fmt.Sprintf("%s/api/users/register", server.URL)
