@@ -52,7 +52,6 @@ func (cb *Corkboard) findUsers() ([]User, error) {
 }
 
 func (cb *Corkboard) findUserByID(id string) (*User, error) {
-
 	key := "user:" + id
 	user := new(User)
 	_, err := cb.Bucket.Get(key, user)
