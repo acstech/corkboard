@@ -77,7 +77,7 @@ func init() {
 	newuserURL = fmt.Sprintf("%s/api/users/register", server.URL)
 	authStr = fmt.Sprintf("%s/api/users/auth", server.URL)
 	usersURL = fmt.Sprintf("%s/api/users", server.URL)
-	baduserURL = fmt.Sprintf("%s/api/items/15b27e85", server.URL)
+	baduserURL = fmt.Sprintf("%s/api/users/15b27e85", server.URL)
 
 	//Connection strings (item)
 	newitemsURL = fmt.Sprintf("%s/api/items/new", server.URL)
@@ -120,7 +120,7 @@ func TestCreateUserPass(t *testing.T) {
 	if res.StatusCode != 201 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
+	res.Body.Close() //nolint: errcheck
 }
 
 func TestAuthPass(t *testing.T) {
@@ -148,7 +148,7 @@ func TestAuthPass(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
+	res.Body.Close() //nolint: errcheck
 }
 
 //TestGetUserPass tests GetUsers, should always pass
@@ -160,7 +160,6 @@ func TestGetUsersPass(t *testing.T) {
 	}
 	bearer := "Bearer " + header
 	req.Header.Set("authorization", bearer)
-
 	res, err2 := http.DefaultClient.Do(req)
 	if err2 != nil {
 		t.Error(err2)
@@ -177,7 +176,7 @@ func TestGetUsersPass(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
+	res.Body.Close() //nolint: errcheck
 }
 
 //TestGetUserPass tests GetUser, should always pass
@@ -199,13 +198,13 @@ func TestGetUserPass(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
+	res.Body.Close() //nolint: errcheck
 }
 
 func TestEditUserPass(t *testing.T) {
 
 	userJSON :=
-		fmt.Sprintf(`{ "email":"%s@ROCKWELL", "password":"cat", "confirm":"cat", "siteId":"12341234-1234-1234-1234-123412341234", "firstname":"MARCO BELLINELLI"}`, emailaddress)
+		fmt.Sprintf(`{ "email":"%s@ROCKWELL", "password":"cat", "siteId":"12341234-1234-1234-1234-123412341234", "firstname":"MARCO BELLINELLI"}`, emailaddress)
 	reader := strings.NewReader(userJSON)
 
 	edituserURL = fmt.Sprintf("%s/api/users/edit/%s", serveURL, globaluserid)
@@ -225,12 +224,38 @@ func TestEditUserPass(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
+	res.Body.Close() //nolint: errcheck
+}
+
+//FAILURE due to malformed JSON request
+func TestEditUserFail(t *testing.T) {
+	userJSON :=
+		fmt.Sprintf(`{ "em:"%s@ROCKWELL", "password":"cat", "siteId":"12341234-1234-1234-1234-123412341234", "firstname":"MARCO BELLINELLI"}`, emailaddress)
+	reader := strings.NewReader(userJSON)
+
+	edituserURL = fmt.Sprintf("%s/api/users/edit/%s", serveURL, globaluserid)
+	req, err := http.NewRequest("PUT", edituserURL, reader)
+	if err != nil {
+		t.Error(err)
+	}
+
+	bearer := "Bearer " + header
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	if res.StatusCode != 400 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck
 }
 
 func TestDeleteUserPass(t *testing.T) {
 
-	/*deleteuserURL = fmt.Sprintf("%s/api/items/delete/%s", serveURL, globaluserid)
+	deleteuserURL = fmt.Sprintf("%s/api/users/delete/%s", serveURL, globaluserid)
 	req, err := http.NewRequest("DELETE", deleteuserURL, nil)
 	if err != nil {
 		t.Error(err)
@@ -246,17 +271,82 @@ func TestDeleteUserPass(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()*/
-
+	res.Body.Close()
 }
 
 //-----------------------------------------
 //FAILING USER TESTS GO HERE
 //-----------------------------------------
 
+func TestEditUserFail2(t *testing.T) {
+	userJSON :=
+		fmt.Sprintf(`{ "email:"%s@ROCKWELL", "password":"cat", "siteId":"12341234-1234-1234-1234-123412341234", "firstname":"MARCO BELLINELLI"}`, emailaddress)
+	reader := strings.NewReader(userJSON)
+
+	edituserURL = fmt.Sprintf("%s/api/users/edit/%s", serveURL, globaluserid)
+	req, err := http.NewRequest("PUT", edituserURL, reader)
+	if err != nil {
+		t.Error(err)
+	}
+
+	bearer := "Bearer " + header
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	if res.StatusCode != 404 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck
+}
+
 func TestGetUserFail(t *testing.T) {
 
 	req, err := http.NewRequest("GET", baduserURL, nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	bearer := "Bearer " + header
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+	if res.StatusCode != 404 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck
+}
+
+func TestGetUsersFail(t *testing.T) {
+
+	req, err := http.NewRequest("GET", usersURL, nil)
+	if err != nil {
+		log.Println(err)
+	}
+
+	bearer := "Bearer " + header
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		log.Println(err2)
+	}
+
+	if res.StatusCode != 204 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck
+}
+
+func TestDeleteUserFail(t *testing.T) {
+	deleteuserURL = fmt.Sprintf("%s/api/users/delete/%s", serveURL, globaluserid)
+	req, err := http.NewRequest("DELETE", deleteuserURL, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -275,22 +365,19 @@ func TestGetUserFail(t *testing.T) {
 }
 
 //-----------------------------------------
-//ADD SEVERAL MORE TESTS HERE
-//-----------------------------------------
-
-//-----------------------------------------
 //PASSING ITEM TESTS GO HERE
 //-----------------------------------------
 
 func TestCreateItemPass(t *testing.T) {
 
-	itemJSON := `{ "itemname": "word@whip.com", "itemdesc": "finesse", "itemprice": "345"}`
+	itemJSON := `{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 344", "salestatus": "4sale" }`
 	reader := strings.NewReader(itemJSON)
 
 	req, err := http.NewRequest("POST", newitemsURL, reader)
 	if err != nil {
 		t.Error(err)
 	}
+
 	bearer := "Bearer " + header
 	req.Header.Set("authorization", bearer)
 
@@ -298,15 +385,15 @@ func TestCreateItemPass(t *testing.T) {
 	if err2 != nil {
 		t.Error(err2)
 	}
+	defer res.Body.Close() //nolint: errcheck
 
 	if res.StatusCode != 201 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
 }
 
-//TestGetItemPass tests GetItems, should always pass
-func TestGetItemPass(t *testing.T) {
+//TestGetItemsPass tests GetItems, should always pass
+func TestGetItemsPass(t *testing.T) {
 
 	req, err := http.NewRequest("GET", itemsURL, nil)
 	if err != nil {
@@ -314,7 +401,8 @@ func TestGetItemPass(t *testing.T) {
 	}
 	bearer := "Bearer " + header
 	req.Header.Set("authorization", bearer)
-
+	timer := time.NewTimer(time.Second * 1)
+	<-timer.C
 	res, err2 := http.DefaultClient.Do(req)
 	if err2 != nil {
 		t.Error(err2)
@@ -331,7 +419,7 @@ func TestGetItemPass(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
+	res.Body.Close() //nolint: errcheck
 }
 
 //TestGetItemIDPass tests GetItemByID, should always pass
@@ -353,13 +441,13 @@ func TestGetItemIDPass(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
+	res.Body.Close() //nolint: errcheck
 }
 
 //TestUpdateItemPass tests EditItem, should always pass
 func TestUpdateItemPass(t *testing.T) {
 
-	itemJSON := `{ "itemname": "WASHINGTON DC", "itemdesc": "finesse", "itemprice": "not even enough"}`
+	itemJSON := `{ "itemname": "WASHINGTON DC", "itemdesc": "finesse", "itemprice": "$ 345"}`
 	reader := strings.NewReader(itemJSON)
 
 	edititemURL = fmt.Sprintf("%s/api/items/edit/%s", serveURL, globalitemid)
@@ -378,7 +466,7 @@ func TestUpdateItemPass(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
+	res.Body.Close() //nolint: errcheck
 }
 
 func TestDeleteItemPass(t *testing.T) {
@@ -398,7 +486,7 @@ func TestDeleteItemPass(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
+	res.Body.Close() //nolint: errcheck
 }
 
 //-----------------------------------------
@@ -407,6 +495,22 @@ func TestDeleteItemPass(t *testing.T) {
 
 //Test on empty DB
 func TestGetItemsFail(t *testing.T) {
+	req, err := http.NewRequest("GET", itemsURL, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	bearer := "Bearer " + header
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	if res.StatusCode != 204 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck
 }
 
 //TestDeleteItemFail attempts to test DeleteItem with an invalid ID string,
@@ -429,12 +533,11 @@ func TestDeleteItemFail(t *testing.T) {
 	if res.StatusCode != 404 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
+	res.Body.Close() //nolint: errcheck
 }
 
 //TestGetItemFail tests GetItemByID, is passed an invalid ID, should fail
 func TestGetItemFail(t *testing.T) {
-
 	req, err := http.NewRequest("GET", baditemsURL, nil)
 	if err != nil {
 		t.Error(err)
@@ -450,11 +553,34 @@ func TestGetItemFail(t *testing.T) {
 	if res.StatusCode != 204 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
+	res.Body.Close() //nolint: errcheck
 }
 
 func TestEditItemFail(t *testing.T) {
 	req, err := http.NewRequest("PUT", badedititems, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	bearer := "Bearer " + header
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+	//204???
+	if res.StatusCode != 404 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck
+}
+
+//TestCreateItemFail due to malformed JSON
+func TestCreateItemFail(t *testing.T) {
+	/*itemJSON := `{ "ite": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 344", "salestatus": "4sale" }`
+	reader := strings.NewReader(itemJSON)
+
+	req, err := http.NewRequest("POST", newitemsURL, reader)
 	if err != nil {
 		t.Error(err)
 	}
@@ -466,14 +592,9 @@ func TestEditItemFail(t *testing.T) {
 	if err2 != nil {
 		t.Error(err2)
 	}
+	defer res.Body.Close() //nolint: errcheck
 
-	//204???
-	if res.StatusCode != 404 {
+	if res.StatusCode != 400 {
 		t.Errorf("Success expected: %d", res.StatusCode)
-	}
-	res.Body.Close()
+	}*/
 }
-
-//-----------------------------------------
-//ADD SEVERAL MORE TESTS HERE
-//-----------------------------------------
