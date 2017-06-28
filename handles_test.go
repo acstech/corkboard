@@ -28,6 +28,7 @@ var (
 	authStr       string
 	edituserURL   string
 	deleteuserURL string
+	searchuserURL string
 
 	serveURL     string
 	header       string
@@ -251,6 +252,30 @@ func TestEditUserFail(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
+}
+
+//Wait for Update
+func TestSearchUserPass(t *testing.T) {
+
+	/*searchuserURL = fmt.Sprintf("%s/api/search/%s", serveURL, globaluserid)
+
+	  req, err := http.NewRequest("GET", searchuserURL, reader)
+		if err != nil {
+			t.Error(err)
+		}
+
+		bearer := "Bearer " + header
+		req.Header.Set("authorization", bearer)
+
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
+
+		if res.StatusCode != 400 {
+			t.Errorf("Success expected: %d", res.StatusCode)
+		}
+		res.Body.Close() //nolint: errcheck*/
 }
 
 func TestDeleteUserPass(t *testing.T) {
@@ -576,25 +601,25 @@ func TestEditItemFail(t *testing.T) {
 }
 
 //TestCreateItemFail due to malformed JSON
-func TestCreateItemFail(t *testing.T) {
-	/*itemJSON := `{ "ite": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 344", "salestatus": "4sale" }`
-	reader := strings.NewReader(itemJSON)
+func TestCreateItemFail(t *testing.T) { /*
+		itemJSON := `{ "it "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 344", "salestatus": "4sale" }`
+		reader := strings.NewReader(itemJSON)
 
-	req, err := http.NewRequest("POST", newitemsURL, reader)
-	if err != nil {
-		t.Error(err)
-	}
+		req, err := http.NewRequest("POST", newitemsURL, reader)
+		if err != nil {
+			t.Error(err)
+		}
 
-	bearer := "Bearer " + header
-	req.Header.Set("authorization", bearer)
+		bearer := "Bearer " + header
+		req.Header.Set("authorization", bearer)
 
-	res, err2 := http.DefaultClient.Do(req)
-	if err2 != nil {
-		t.Error(err2)
-	}
-	defer res.Body.Close() //nolint: errcheck
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
+		defer res.Body.Close() //nolint: errcheck
 
-	if res.StatusCode != 400 {
-		t.Errorf("Success expected: %d", res.StatusCode)
-	}*/
+		if res.StatusCode != 400 {
+			t.Errorf("Success expected: %d", res.StatusCode)
+		}*/
 }

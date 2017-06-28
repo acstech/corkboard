@@ -1,8 +1,10 @@
 package corkboard
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/couchbase/gocb"
 )
@@ -57,6 +59,39 @@ func (cb *Corkboard) findUserByID(id string) (*User, error) {
 	_, err := cb.Bucket.Get(key, user)
 	if err != nil {
 		log.Println("Unable to get user.")
+		return nil, err
+	}
+	return user, nil
+}
+func (cb *Corkboard) findUserByKey(key string) (*User, error) {
+	parseKey := strings.Split(key, "=")
+	value := parseKey[1]
+	var searchKey string
+
+	if parseKey[0] == "email" {
+		searchKey = "email"
+		log.Println(searchKey)
+	} else if parseKey[0] == "firstname" {
+		searchKey = "firstname"
+		log.Println(searchKey)
+	} else if parseKey[0] == "lastname" {
+		searchKey = "lastname"
+		log.Println(searchKey)
+	} else {
+		log.Println("Request incorrectly formatted")
+		return nil, nil
+	}
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone, sites FROM `%s` WHERE %s = '%s'", cb.Bucket.Name(), searchKey, value)) //nolint: gas
+	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Close() // nolint: errcheck
+	user := new(User)
+	userBytes := res.NextBytes()
+	err = json.Unmarshal(userBytes, user)
+	if err != nil {
 		return nil, err
 	}
 	return user, nil
