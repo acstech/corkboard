@@ -205,7 +205,7 @@ func TestGetUserPass(t *testing.T) {
 func TestEditUserPass(t *testing.T) {
 
 	userJSON :=
-		fmt.Sprintf(`{ "email":"%s@ROCKWELL", "password":"cat", "siteId":"12341234-1234-1234-1234-123412341234", "firstname":"MARCO BELLINELLI"}`, emailaddress)
+		fmt.Sprintf(`{ "email":"%s@ROCKWELL", "password":"cat", "siteId":"12341234-1234-1234-1234-123412341234", "firstname":"MARCO", "lastname":"BELLINELI"}`, emailaddress)
 	reader := strings.NewReader(userJSON)
 
 	edituserURL = fmt.Sprintf("%s/api/users/edit/%s", serveURL, globaluserid)
@@ -255,27 +255,72 @@ func TestEditUserFail(t *testing.T) {
 }
 
 //Wait for Update
-func TestSearchUserPass(t *testing.T) {
+func TestSearchUserPass1(t *testing.T) {
 
-	/*searchuserURL = fmt.Sprintf("%s/api/search/%s", serveURL, globaluserid)
+	searchuserURL = fmt.Sprintf("%s/api/search/email=%s@ROCKWELL", serveURL, emailaddress)
 
-	  req, err := http.NewRequest("GET", searchuserURL, reader)
-		if err != nil {
-			t.Error(err)
-		}
+	req, err := http.NewRequest("GET", searchuserURL, reader)
+	if err != nil {
+		t.Error(err)
+	}
 
-		bearer := "Bearer " + header
-		req.Header.Set("authorization", bearer)
+	bearer := "Bearer " + header
+	req.Header.Set("authorization", bearer)
 
-		res, err2 := http.DefaultClient.Do(req)
-		if err2 != nil {
-			t.Error(err2)
-		}
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
 
-		if res.StatusCode != 400 {
-			t.Errorf("Success expected: %d", res.StatusCode)
-		}
-		res.Body.Close() //nolint: errcheck*/
+	if res.StatusCode != 200 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck*/
+}
+
+func TestSearchUserPass2(t *testing.T) {
+
+	searchuserURL = fmt.Sprintf("%s/api/search/firstname=MARCO", serveURL)
+
+	req, err := http.NewRequest("GET", searchuserURL, reader)
+	if err != nil {
+		t.Error(err)
+	}
+
+	bearer := "Bearer " + header
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	if res.StatusCode != 200 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck*/
+}
+
+func TestSearchUserPass3(t *testing.T) {
+	searchuserURL = fmt.Sprintf("%s/api/search/lastname=BELLINELI", serveURL)
+
+	req, err := http.NewRequest("GET", searchuserURL, reader)
+	if err != nil {
+		t.Error(err)
+	}
+
+	bearer := "Bearer " + header
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	if res.StatusCode != 200 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck*/
 }
 
 func TestDeleteUserPass(t *testing.T) {
