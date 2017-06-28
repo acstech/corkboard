@@ -19,7 +19,6 @@ import (
 )
 
 var (
-	//Should be able to use Server and Reader from itemhandles_test.go
 	server        *httptest.Server
 	reader        io.Reader
 	newuserURL    string
@@ -124,6 +123,7 @@ func TestCreateUserPass(t *testing.T) {
 	res.Body.Close() //nolint: errcheck
 }
 
+//TestAuthPass authorizes user and stores token for future test functions
 func TestAuthPass(t *testing.T) {
 	userJSON :=
 		fmt.Sprintf(`{ "email":"%s@ROCKWELL", "password":"cat", "siteId":"12341234-1234-1234-1234-123412341234"}`, emailaddress)
@@ -153,6 +153,7 @@ func TestAuthPass(t *testing.T) {
 }
 
 //TestGetUserPass tests GetUsers, should always pass
+//Stores user ID from first user in array form GetUsers call for future use
 func TestGetUsersPass(t *testing.T) {
 
 	req, err := http.NewRequest("GET", usersURL, nil)
@@ -202,6 +203,7 @@ func TestGetUserPass(t *testing.T) {
 	res.Body.Close() //nolint: errcheck
 }
 
+//TestEditUserPass adds first and lastname to user
 func TestEditUserPass(t *testing.T) {
 
 	userJSON :=
@@ -254,7 +256,7 @@ func TestEditUserFail(t *testing.T) {
 	res.Body.Close() //nolint: errcheck
 }
 
-//Wait for Update
+//TestSearchUserPass1 query by email
 func TestSearchUserPass1(t *testing.T) {
 
 	searchuserURL = fmt.Sprintf("%s/api/search/email=%s@ROCKWELL", serveURL, emailaddress)
@@ -275,11 +277,11 @@ func TestSearchUserPass1(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close() //nolint: errcheck*/
+	res.Body.Close() //nolint: errcheck
 }
 
+//TestSearchUserPass2 query by firstname
 func TestSearchUserPass2(t *testing.T) {
-
 	searchuserURL = fmt.Sprintf("%s/api/search/firstname=MARCO", serveURL)
 
 	req, err := http.NewRequest("GET", searchuserURL, reader)
@@ -298,9 +300,10 @@ func TestSearchUserPass2(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close() //nolint: errcheck*/
+	res.Body.Close() //nolint: errcheck
 }
 
+//TestSearchUserPass3 query by lastname
 func TestSearchUserPass3(t *testing.T) {
 	searchuserURL = fmt.Sprintf("%s/api/search/lastname=BELLINELI", serveURL)
 
@@ -320,9 +323,10 @@ func TestSearchUserPass3(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close() //nolint: errcheck*/
+	res.Body.Close() //nolint: errcheck
 }
 
+//TestDeleteUserPass cleans up user
 func TestDeleteUserPass(t *testing.T) {
 
 	deleteuserURL = fmt.Sprintf("%s/api/users/delete/%s", serveURL, globaluserid)
@@ -348,6 +352,7 @@ func TestDeleteUserPass(t *testing.T) {
 //FAILING USER TESTS GO HERE
 //-----------------------------------------
 
+//TestEditUserFail2 fails due to non-existent user
 func TestEditUserFail2(t *testing.T) {
 	userJSON :=
 		fmt.Sprintf(`{ "email:"%s@ROCKWELL", "password":"cat", "siteId":"12341234-1234-1234-1234-123412341234", "firstname":"MARCO BELLINELLI"}`, emailaddress)
@@ -373,6 +378,7 @@ func TestEditUserFail2(t *testing.T) {
 	res.Body.Close() //nolint: errcheck
 }
 
+//TestGetUserFail fails due to non-existent user
 func TestGetUserFail(t *testing.T) {
 
 	req, err := http.NewRequest("GET", baduserURL, nil)
@@ -393,6 +399,7 @@ func TestGetUserFail(t *testing.T) {
 	res.Body.Close() //nolint: errcheck
 }
 
+//TestGetUsersFail fails because database is empty, no users to get
 func TestGetUsersFail(t *testing.T) {
 
 	req, err := http.NewRequest("GET", usersURL, nil)
@@ -414,6 +421,7 @@ func TestGetUsersFail(t *testing.T) {
 	res.Body.Close() //nolint: errcheck
 }
 
+//TestDeleteUserFail fails because user does not exist
 func TestDeleteUserFail(t *testing.T) {
 	deleteuserURL = fmt.Sprintf("%s/api/users/delete/%s", serveURL, globaluserid)
 	req, err := http.NewRequest("DELETE", deleteuserURL, nil)
@@ -438,6 +446,7 @@ func TestDeleteUserFail(t *testing.T) {
 //PASSING ITEM TESTS GO HERE
 //-----------------------------------------
 
+//TestCreateItemPass creates an item with multiple fields, should always pass
 func TestCreateItemPass(t *testing.T) {
 
 	itemJSON := `{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 344", "salestatus": "4sale" }`
@@ -539,6 +548,7 @@ func TestUpdateItemPass(t *testing.T) {
 	res.Body.Close() //nolint: errcheck
 }
 
+//TestDeleteItemPass cleans up database, deletes item.
 func TestDeleteItemPass(t *testing.T) {
 	deleteitemURL = fmt.Sprintf("%s/api/items/delete/%s", serveURL, globalitemid)
 	req, err := http.NewRequest("DELETE", deleteitemURL, nil)
@@ -626,7 +636,8 @@ func TestGetItemFail(t *testing.T) {
 	res.Body.Close() //nolint: errcheck
 }
 
-func TestEditItemFail(t *testing.T) {
+//TestUpdateItemFail fails becaues item is gone at this point.
+func TestUpdateItemFail(t *testing.T) {
 	req, err := http.NewRequest("PUT", badedititems, nil)
 	if err != nil {
 		t.Error(err)
@@ -643,28 +654,4 @@ func TestEditItemFail(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
-}
-
-//TestCreateItemFail due to malformed JSON
-func TestCreateItemFail(t *testing.T) { /*
-		itemJSON := `{ "it "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 344", "salestatus": "4sale" }`
-		reader := strings.NewReader(itemJSON)
-
-		req, err := http.NewRequest("POST", newitemsURL, reader)
-		if err != nil {
-			t.Error(err)
-		}
-
-		bearer := "Bearer " + header
-		req.Header.Set("authorization", bearer)
-
-		res, err2 := http.DefaultClient.Do(req)
-		if err2 != nil {
-			t.Error(err2)
-		}
-		defer res.Body.Close() //nolint: errcheck
-
-		if res.StatusCode != 400 {
-			t.Errorf("Success expected: %d", res.StatusCode)
-		}*/
 }
