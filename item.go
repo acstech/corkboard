@@ -86,8 +86,9 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 	var desc = newitem.Itemdesc
 	var cat = newitem.Itemcat
 
-	var priceSplit = strings.Split(newitem.Price, " ")
-	var price, error = strconv.ParseFloat(priceSplit[1], 64)
+	var priceSplit = strings.TrimPrefix(newitem.Price, "$ ")
+	priceSplit = strings.Replace(priceSplit, ",", "", -1)
+	var price, error = strconv.ParseFloat(priceSplit, 64)
 	if error != nil {
 		log.Println(error)
 		return error
