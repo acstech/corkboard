@@ -97,7 +97,7 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 
 	newID := uuid.NewV4()
 	uID := newID.String()
-	log.Println("User ID is: ", newitem.UserID)
+	//log.Println("User ID is: ", newitem.UserID)
 	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, Price: price, Status: status, UserID: newitem.UserID, DatePosted: time.Now()}, 0)
 	return err
 }
