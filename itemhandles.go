@@ -137,8 +137,9 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	item.ItemName = reqitem.Itemname
 	item.ItemDesc = reqitem.Itemdesc
 	item.Category = reqitem.Itemcat
-	var priceSplit = strings.Split(reqitem.Price, " ")
-	var price, error = strconv.ParseFloat(priceSplit[1], 64)
+	var priceSplit = strings.TrimPrefix(reqitem.Price, "$ ")
+	priceSplit = strings.Replace(priceSplit, ",", "", -1)
+	var price, error = strconv.ParseFloat(priceSplit, 64)
 	if error != nil {
 		log.Println(error)
 		return
