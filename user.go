@@ -19,7 +19,11 @@ type User struct {
 	//Profilepic
 	Phone string   `json:"phone"`
 	Sites []string `json:"sites"`
-	//Itemlist
+}
+
+//ItemID is used to unmarshal userItems queries
+type ItemID struct {
+	ID string `json:"itemid"`
 }
 
 //FakeUser is a dummy struct used to add the "_type" field to users
@@ -31,8 +35,8 @@ type GetUserRes struct {
 	Email     string `json:"email"`
 	Firstname string `json:"firstname,omitempty"`
 	Lastname  string `json:"lastname,omitempty"`
-	//Profilepic
-	Phone string `json:"phone,omitempty"`
+	Phone     string `json:"phone,omitempty"`
+	Items     []Item `json:"items,omitempty"`
 }
 
 func (cb *Corkboard) findUsers() ([]User, error) {
@@ -96,4 +100,23 @@ func (cb *Corkboard) findUserByKey(key string) (*User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (cb *Corkboard) findUserItems(userID string) ([]ItemID, error) {
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid FROM `%s` WHERE type = 'item' AND userid = '%s'", cb.Bucket.Name(), userID)) //nolint: gas
+	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Close() //nolint:errcheck
+
+	var items []ItemID
+	itemID := new(ItemID)
+	for res.Next(itemID) {
+		items = append(items, *itemID)
+		itemID = new(ItemID)
+	}
+
+	return items, nil
 }
