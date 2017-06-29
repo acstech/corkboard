@@ -2,7 +2,6 @@ package corkboard_test
 
 import (
 	"fmt"
-	"io"
 	"net/http/httptest"
 	"os"
 
@@ -10,33 +9,33 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-var (
-	server        *httptest.Server //nolint: megacheck
-	reader        io.Reader
-	newuserURL    string
-	usersURL      string
-	useridURL     string
-	authStr       string
-	edituserURL   string
-	deleteuserURL string
-	searchuserURL string
-
-	serveURL     string
-	theToken     string
-	emailaddress string
-	globaluserid string
-	globalitemid string
-
-	newitemsURL   string
-	itemsURL      string
-	itemidURL     string
-	edititemURL   string
-	deleteitemURL string
-	baditemsURL   string
-	badedititems  string
-	/*deleteuserURL string*/
-	baduserURL string
-)
+//var (
+// server        *httptest.Server //nolint: megacheck
+// reader        io.Reader
+// newuserURL    string
+// usersURL      string
+// useridURL     string
+// authStr       string
+// edituserURL   string
+// deleteuserURL string
+// searchuserURL string
+//
+// serveURL     string
+// theToken     string
+// emailaddress string
+// globaluserid string
+// globalitemid string
+//
+// newitemsURL   string
+// itemsURL      string
+// itemidURL     string
+// edititemURL   string
+// deleteitemURL string
+// baditemsURL   string
+// badedititems  string
+// /*deleteuserURL string*/
+// baduserURL string
+// )
 
 // type Token struct {
 // 	Token string `json:"token"`
@@ -65,19 +64,19 @@ func init() {
 	}
 
 	server := httptest.NewServer(cork.Router())
-
+	server.Close()
 	//Connection strings (user)
-	serveURL = server.URL
-	newuserURL = fmt.Sprintf("%s/api/users/register", server.URL)
-	authStr = fmt.Sprintf("%s/api/users/auth", server.URL)
-	usersURL = fmt.Sprintf("%s/api/users", server.URL)
-	baduserURL = fmt.Sprintf("%s/api/users/15b27e85", server.URL)
-
-	//Connection strings (item)
-	newitemsURL = fmt.Sprintf("%s/api/items/new", server.URL)
-	itemsURL = fmt.Sprintf("%s/api/items", server.URL)
-	baditemsURL = fmt.Sprintf("%s/api/items/15b27e85", server.URL)
-	badedititems = fmt.Sprintf("%s/api/items/edit/15b27e85", server.URL)
+	// serveURL = server.URL
+	// newuserURL = fmt.Sprintf("%s/api/users/register", server.URL)
+	// authStr = fmt.Sprintf("%s/api/users/auth", server.URL)
+	// usersURL = fmt.Sprintf("%s/api/users", server.URL)
+	// baduserURL = fmt.Sprintf("%s/api/users/15b27e85", server.URL)
+	//
+	// //Connection strings (item)
+	// newitemsURL = fmt.Sprintf("%s/api/items/new", server.URL)
+	// itemsURL = fmt.Sprintf("%s/api/items", server.URL)
+	// baditemsURL = fmt.Sprintf("%s/api/items/15b27e85", server.URL)
+	// badedititems = fmt.Sprintf("%s/api/items/edit/15b27e85", server.URL)
 }
 
 //-----------------------------------------
