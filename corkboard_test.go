@@ -1,17 +1,10 @@
 package corkboard_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"log"
-	"net/http"
 	"net/http/httptest"
 	"os"
-	"strings"
-	"testing"
-	"time"
 
 	"github.com/acstech/corkboard"
 	_ "github.com/joho/godotenv/autoload"
@@ -45,17 +38,17 @@ var (
 	baduserURL string
 )
 
-type Token struct {
-	Token string `json:"token"`
-}
-
-//new struct???
-type Values struct {
-	TheUserID    string `json:"id"`
-	TheUserEmail string `json:"email"`
-	TheItemID    string `json:"itemid"`
-	ItemUserID   string `json:"userid"`
-}
+// type Token struct {
+// 	Token string `json:"token"`
+// }
+//
+// //new struct???
+// type Values struct {
+// 	TheUserID    string `json:"id"`
+// 	TheUserEmail string `json:"email"`
+// 	TheItemID    string `json:"itemid"`
+// 	ItemUserID   string `json:"userid"`
+// }
 
 func init() {
 
@@ -93,7 +86,7 @@ func init() {
 
 //TestCreateUserPass tests out the RegisterUser function, should pass
 //AND add a user to CB
-func TestCreateUserPass(t *testing.T) {
+/*func TestCreateUserPass(t *testing.T) {
 	emailaddress = "Ma98nfbjh6734vdSa223b"
 
 	userJSON :=
@@ -671,4 +664,4 @@ func TestDeleteUserFail(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
-}
+}*/
