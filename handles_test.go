@@ -33,7 +33,6 @@ var (
 	emailaddress string
 	globaluserid string
 	globalitemid string
-	otheruserid  string
 
 	newitemsURL   string
 	itemsURL      string
@@ -140,7 +139,7 @@ func TestAuthPass(t *testing.T) {
 
 	var theTok Token
 	decoder := json.NewDecoder(res.Body)
-	decoder.Decode(&theTok)
+	decoder.Decode(&theTok) //nolint: errcheck
 	//header stores token from response for future use
 	theToken = theTok.Token
 
@@ -354,7 +353,7 @@ func TestDeleteUserPass(t *testing.T) {
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
+	res.Body.Close() //nolint :errcheck
 }
 
 //-----------------------------------------
@@ -449,7 +448,7 @@ func TestDeleteUserFail(t *testing.T) {
 	if res.StatusCode != 204 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
-	res.Body.Close()
+	res.Body.Close() //nolint: errcheck
 }
 
 //-----------------------------------------
