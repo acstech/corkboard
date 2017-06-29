@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	server        *httptest.Server
+	server        *httptest.Server //nolint: megacheck
 	reader        io.Reader
 	newuserURL    string
 	usersURL      string
