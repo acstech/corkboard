@@ -141,11 +141,31 @@ func TestAuthPass(t *testing.T) {
 		t.Error(err2)
 	}
 
+	//var claims corkboardauth.CustomClaims
+	//var parse jwt.Parser
+
 	var theTok Token
 	decoder := json.NewDecoder(res.Body)
 	decoder.Decode(&theTok)
 	header = theTok.Token
+	/*
+		token, error := parse.ParseWithClaims(header, &claims, func(_ *jwt.Token) (interface{}, error) {
 
+			pubPem, err := cork.CorkboardAuth.GetPublicPem()
+			if err != nil {
+				return nil, err
+			}
+			pubBlock, _ := pem.Decode(pubPem)
+			return x509.ParsePKIXPublicKey(pubBlock.Bytes)
+		})
+
+		if error != nil {
+			log.Println(error)
+			return
+		}
+		claims = token.Claims.(corkboardauth.CustomClaims)
+		log.Println(claims.UID)
+	*/
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
@@ -154,6 +174,7 @@ func TestAuthPass(t *testing.T) {
 
 //TestGetUserPass tests GetUsers, should always pass
 //Stores user ID from first user in array form GetUsers call for future use
+
 func TestGetUsersPass(t *testing.T) {
 
 	req, err := http.NewRequest("GET", usersURL, nil)
@@ -181,6 +202,7 @@ func TestGetUsersPass(t *testing.T) {
 	res.Body.Close() //nolint: errcheck
 }
 
+/*
 //TestGetUserPass tests GetUser, should always pass
 func TestGetUserPass(t *testing.T) {
 
@@ -654,4 +676,4 @@ func TestUpdateItemFail(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
-}
+}*/
