@@ -78,12 +78,15 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 	userRes.Phone = user.Phone
 
 	itemIDList, err := cb.findUserItems(id)
-
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	var itemList []Item
 	for _, element := range itemIDList {
-		item, err := cb.findItemByID(element.ID)
+		item, err2 := cb.findItemByID(element.ID)
 		if err != nil {
-			log.Println(err)
+			log.Println(err2)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}

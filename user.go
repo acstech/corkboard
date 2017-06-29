@@ -21,7 +21,8 @@ type User struct {
 	Sites []string `json:"sites"`
 }
 
-type ItemId struct {
+//ItemID is used to unmarshal userItems queries
+type ItemID struct {
 	ID string `json:"itemid"`
 }
 
@@ -101,8 +102,8 @@ func (cb *Corkboard) findUserByKey(key string) (*User, error) {
 	return user, nil
 }
 
-func (cb *Corkboard) findUserItems(userId string) ([]ItemId, error) {
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid FROM `%s` WHERE type = 'item' AND userid = '%s'", cb.Bucket.Name(), userId))
+func (cb *Corkboard) findUserItems(userID string) ([]ItemID, error) {
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid FROM `%s` WHERE type = 'item' AND userid = '%s'", cb.Bucket.Name(), userID)) //nolint: gas
 	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
 		return nil, err
@@ -110,11 +111,11 @@ func (cb *Corkboard) findUserItems(userId string) ([]ItemId, error) {
 
 	defer res.Close() //nolint:errcheck
 
-	var items []ItemId
-	itemId := new(ItemId)
-	for res.Next(itemId) {
-		items = append(items, *itemId)
-		itemId = new(ItemId)
+	var items []ItemID
+	itemID := new(ItemID)
+	for res.Next(itemID) {
+		items = append(items, *itemID)
+		itemID = new(ItemID)
 	}
 
 	return items, nil
