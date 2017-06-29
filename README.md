@@ -1,7 +1,7 @@
 # corkboard
 
 ## Contributors
-* Jason Moore (github.com/jasonmoore30)
+* [Jason Moore](github.com/jasonmoore30)
 * Ben Wornom
 
 ## Configuration

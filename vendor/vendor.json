@@ -22,10 +22,22 @@
 			"revisionTime": "2017-06-13T03:17:39Z"
 		},
 		{
+			"checksumSHA1": "KIui02MZXkQsIP+Oir4Iv/tq/SU=",
+			"path": "github.com/go-ini/ini",
+			"revision": "d3de07a94d22b4a0972deb4b96d790c2c0ce8333",
+			"revisionTime": "2017-06-02T20:46:24Z"
+		},
+		{
 			"checksumSHA1": "vR/cwKduacEElEc3GOmUHkSgG0Y=",
 			"path": "github.com/jasonmoore30/madhatter",
 			"revision": "37bdb23e961c0aab97eba4cab1c2a858743faae0",
 			"revisionTime": "2017-06-16T16:35:29Z"
+		},
+		{
+			"checksumSHA1": "0ZrwvB6KoGPj2PoDNSEJwxQ6Mog=",
+			"path": "github.com/jmespath/go-jmespath",
+			"revision": "bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d",
+			"revisionTime": "2016-08-03T19:07:31Z"
 		},
 		{
 			"checksumSHA1": "qzl/TNo4WnfR+PZRfk3iFHg68sM=",
