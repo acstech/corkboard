@@ -1,57 +1,66 @@
 package corkboard_test
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
+	"strings"
+	"testing"
+	"time"
 
 	"github.com/acstech/corkboard"
 	_ "github.com/joho/godotenv/autoload"
 )
 
-//var (
-// server        *httptest.Server //nolint: megacheck
-// reader        io.Reader
-// newuserURL    string
-// usersURL      string
-// useridURL     string
-// authStr       string
-// edituserURL   string
-// deleteuserURL string
-// searchuserURL string
-//
-// serveURL     string
-// theToken     string
-// emailaddress string
-// globaluserid string
-// globalitemid string
-//
-// newitemsURL   string
-// itemsURL      string
-// itemidURL     string
-// edititemURL   string
-// deleteitemURL string
-// baditemsURL   string
-// badedititems  string
-// /*deleteuserURL string*/
-// baduserURL string
-// )
+var (
+	server        *httptest.Server //nolint: megacheck
+	reader        io.Reader
+	newuserURL    string
+	usersURL      string
+	useridURL     string
+	authStr       string
+	edituserURL   string
+	deleteuserURL string
+	searchuserURL string
 
-// type Token struct {
-// 	Token string `json:"token"`
-// }
-//
-// //new struct???
-// type Values struct {
-// 	TheUserID    string `json:"id"`
-// 	TheUserEmail string `json:"email"`
-// 	TheItemID    string `json:"itemid"`
-// 	ItemUserID   string `json:"userid"`
-// }
+	serveURL     string
+	theToken     string
+	emailaddress string
+	globaluserid string
+	globalitemid string
+
+	newitemsURL   string
+	itemsURL      string
+	itemidURL     string
+	edititemURL   string
+	deleteitemURL string
+	baditemsURL   string
+	badedititems  string
+	/*deleteuserURL string*/
+	baduserURL string
+)
+
+type Token struct {
+	Token string `json:"token"`
+}
+
+//new struct???
+type Values struct {
+	TheUserID    string `json:"id"`
+	TheUserEmail string `json:"email"`
+	TheItemID    string `json:"itemid"`
+	ItemUserID   string `json:"userid"`
+}
 
 func init() {
 
 	//Set up connection for tests to run on
-	_, err := corkboard.NewCorkboard(&corkboard.CBConfig{
+	cork, err := corkboard.NewCorkboard(&corkboard.CBConfig{
 		Connection: os.Getenv("CB_CONNECTION"),
 		BucketName: os.Getenv("CB_BUCKET"),
 		BucketPass: os.Getenv("CB_BUCKET_PASS"),
@@ -59,23 +68,23 @@ func init() {
 	})
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(2)
+		os.Exit(1)
 	}
 
-	//server := httptest.NewServer(cork.Router())
-	//server.Close()
+	server := httptest.NewServer(cork.Router())
+
 	//Connection strings (user)
-	// serveURL = server.URL
-	// newuserURL = fmt.Sprintf("%s/api/users/register", server.URL)
-	// authStr = fmt.Sprintf("%s/api/users/auth", server.URL)
-	// usersURL = fmt.Sprintf("%s/api/users", server.URL)
-	// baduserURL = fmt.Sprintf("%s/api/users/15b27e85", server.URL)
-	//
-	// //Connection strings (item)
-	// newitemsURL = fmt.Sprintf("%s/api/items/new", server.URL)
-	// itemsURL = fmt.Sprintf("%s/api/items", server.URL)
-	// baditemsURL = fmt.Sprintf("%s/api/items/15b27e85", server.URL)
-	// badedititems = fmt.Sprintf("%s/api/items/edit/15b27e85", server.URL)
+	serveURL = server.URL
+	newuserURL = fmt.Sprintf("%s/api/users/register", server.URL)
+	authStr = fmt.Sprintf("%s/api/users/auth", server.URL)
+	usersURL = fmt.Sprintf("%s/api/users", server.URL)
+	baduserURL = fmt.Sprintf("%s/api/users/15b27e85", server.URL)
+
+	//Connection strings (item)
+	newitemsURL = fmt.Sprintf("%s/api/items/new", server.URL)
+	itemsURL = fmt.Sprintf("%s/api/items", server.URL)
+	baditemsURL = fmt.Sprintf("%s/api/items/15b27e85", server.URL)
+	badedititems = fmt.Sprintf("%s/api/items/edit/15b27e85", server.URL)
 }
 
 //-----------------------------------------
@@ -84,7 +93,7 @@ func init() {
 
 //TestCreateUserPass tests out the RegisterUser function, should pass
 //AND add a user to CB
-/*func TestCreateUserPass(t *testing.T) {
+func TestCreateUserPass(t *testing.T) {
 	emailaddress = "Ma98nfbjh6734vdSa223b"
 
 	userJSON :=
@@ -662,4 +671,4 @@ func TestDeleteUserFail(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
-}*/
+}
