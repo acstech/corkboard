@@ -2,7 +2,6 @@ package corkboard_test
 
 import (
 	"fmt"
-	"net/http/httptest"
 	"os"
 
 	"github.com/acstech/corkboard"
@@ -52,7 +51,7 @@ import (
 func init() {
 
 	//Set up connection for tests to run on
-	cork, err := corkboard.NewCorkboard(&corkboard.CBConfig{
+	_, err := corkboard.NewCorkboard(&corkboard.CBConfig{
 		Connection: os.Getenv("CB_CONNECTION"),
 		BucketName: os.Getenv("CB_BUCKET"),
 		BucketPass: os.Getenv("CB_BUCKET_PASS"),
@@ -63,8 +62,8 @@ func init() {
 		os.Exit(1)
 	}
 
-	server := httptest.NewServer(cork.Router())
-	server.Close()
+	//server := httptest.NewServer(cork.Router())
+	//server.Close()
 	//Connection strings (user)
 	// serveURL = server.URL
 	// newuserURL = fmt.Sprintf("%s/api/users/register", server.URL)
