@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -30,10 +29,11 @@ var (
 	searchuserURL string
 
 	serveURL     string
-	header       string
+	theToken     string
 	emailaddress string
 	globaluserid string
 	globalitemid string
+	otheruserid  string
 
 	newitemsURL   string
 	itemsURL      string
@@ -52,8 +52,9 @@ type Token struct {
 
 //new struct???
 type Values struct {
-	TheUserID string `json:"id"`
-	TheItemID string `json:"itemid"`
+	TheUserID    string `json:"id"`
+	TheUserEmail string `json:"email"`
+	TheItemID    string `json:"itemid"`
 }
 
 func init() {
@@ -93,14 +94,7 @@ func init() {
 //TestCreateUserPass tests out the RegisterUser function, should pass
 //AND add a user to CB
 func TestCreateUserPass(t *testing.T) {
-	rand.Seed(time.Now().UnixNano())
-	var email = []rune("abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-	b := make([]rune, 10)
-	for i := range b {
-		b[i] = email[rand.Intn(len(email))]
-	}
-	emailaddress = string(b)
+	emailaddress = "Ma98nfbjh6734vdSa223b"
 
 	userJSON :=
 		fmt.Sprintf(`{ "email":"%s@ROCKWELL", "password":"cat", "confirm":"cat", "siteId":"12341234-1234-1234-1234-123412341234"}`, emailaddress)
@@ -147,25 +141,9 @@ func TestAuthPass(t *testing.T) {
 	var theTok Token
 	decoder := json.NewDecoder(res.Body)
 	decoder.Decode(&theTok)
-	header = theTok.Token
-	/*
-		token, error := parse.ParseWithClaims(header, &claims, func(_ *jwt.Token) (interface{}, error) {
+	//header stores token from response for future use
+	theToken = theTok.Token
 
-			pubPem, err := cork.CorkboardAuth.GetPublicPem()
-			if err != nil {
-				return nil, err
-			}
-			pubBlock, _ := pem.Decode(pubPem)
-			return x509.ParsePKIXPublicKey(pubBlock.Bytes)
-		})
-
-		if error != nil {
-			log.Println(error)
-			return
-		}
-		claims = token.Claims.(corkboardauth.CustomClaims)
-		log.Println(claims.UID)
-	*/
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
@@ -181,28 +159,37 @@ func TestGetUsersPass(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	bearer := "Bearer " + header
+
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 	res, err2 := http.DefaultClient.Do(req)
 	if err2 != nil {
 		t.Error(err2)
 	}
 
+	//store fields from returned users into array
 	var Arr []Values
 	body, _ := ioutil.ReadAll(res.Body)
 	errre := json.Unmarshal(body, &Arr)
 	if errre != nil {
 		log.Println(errre)
 	}
-	globaluserid = Arr[0].TheUserID
 
+	//iterate through array and find authorized user by email
+	for i := 0; i < len(Arr); i++ {
+		email := Arr[i].TheUserEmail
+		if email == "Ma98nfbjh6734vdSa223b@ROCKWELL" {
+			log.Print("equality")
+			globaluserid = Arr[i].TheUserID //assign globaluserid for future use
+		}
+	}
+	//globaluserid = Arr[0].TheUserID
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
 
-/*
 //TestGetUserPass tests GetUser, should always pass
 func TestGetUserPass(t *testing.T) {
 
@@ -211,7 +198,7 @@ func TestGetUserPass(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -238,7 +225,7 @@ func TestEditUserPass(t *testing.T) {
 		t.Error(err)
 	}
 
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -264,7 +251,7 @@ func TestEditUserFail(t *testing.T) {
 		t.Error(err)
 	}
 
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -288,7 +275,7 @@ func TestSearchUserPass1(t *testing.T) {
 		t.Error(err)
 	}
 
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -311,7 +298,7 @@ func TestSearchUserPass2(t *testing.T) {
 		t.Error(err)
 	}
 
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -334,7 +321,7 @@ func TestSearchUserPass3(t *testing.T) {
 		t.Error(err)
 	}
 
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -357,7 +344,7 @@ func TestDeleteUserPass(t *testing.T) {
 		t.Error(err)
 	}
 
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -374,6 +361,29 @@ func TestDeleteUserPass(t *testing.T) {
 //FAILING USER TESTS GO HERE
 //-----------------------------------------
 
+//TestSearchUserFail fails because of invalid value
+func TestSearchUserFail(t *testing.T) {
+	searchuserURL = fmt.Sprintf("%s/api/search/email=%sROCKWELL", serveURL, emailaddress)
+
+	req, err := http.NewRequest("GET", searchuserURL, reader)
+	if err != nil {
+		t.Error(err)
+	}
+
+	bearer := "Bearer " + theToken
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	if res.StatusCode != 500 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck
+}
+
 //TestEditUserFail2 fails due to non-existent user
 func TestEditUserFail2(t *testing.T) {
 	userJSON :=
@@ -386,7 +396,7 @@ func TestEditUserFail2(t *testing.T) {
 		t.Error(err)
 	}
 
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -408,7 +418,7 @@ func TestGetUserFail(t *testing.T) {
 		t.Error(err)
 	}
 
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -416,28 +426,6 @@ func TestGetUserFail(t *testing.T) {
 		t.Error(err2)
 	}
 	if res.StatusCode != 404 {
-		t.Errorf("Success expected: %d", res.StatusCode)
-	}
-	res.Body.Close() //nolint: errcheck
-}
-
-//TestGetUsersFail fails because database is empty, no users to get
-func TestGetUsersFail(t *testing.T) {
-
-	req, err := http.NewRequest("GET", usersURL, nil)
-	if err != nil {
-		log.Println(err)
-	}
-
-	bearer := "Bearer " + header
-	req.Header.Set("authorization", bearer)
-
-	res, err2 := http.DefaultClient.Do(req)
-	if err2 != nil {
-		log.Println(err2)
-	}
-
-	if res.StatusCode != 204 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
@@ -451,7 +439,7 @@ func TestDeleteUserFail(t *testing.T) {
 		t.Error(err)
 	}
 
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -479,7 +467,7 @@ func TestCreateItemPass(t *testing.T) {
 		t.Error(err)
 	}
 
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -500,7 +488,7 @@ func TestGetItemsPass(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 	timer := time.NewTimer(time.Second * 1)
 	<-timer.C
@@ -531,7 +519,7 @@ func TestGetItemIDPass(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -556,7 +544,7 @@ func TestUpdateItemPass(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -577,7 +565,7 @@ func TestDeleteItemPass(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -601,7 +589,7 @@ func TestGetItemsFail(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -624,7 +612,7 @@ func TestDeleteItemFail(t *testing.T) {
 		t.Error(err)
 	}
 
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -644,7 +632,7 @@ func TestGetItemFail(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -664,7 +652,7 @@ func TestUpdateItemFail(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	bearer := "Bearer " + header
+	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 
 	res, err2 := http.DefaultClient.Do(req)
@@ -676,4 +664,4 @@ func TestUpdateItemFail(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
-}*/
+}
