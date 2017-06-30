@@ -19,7 +19,7 @@ type Item struct {
 	ItemDesc string `json:"itemdesc,omitempty"`
 	Category string `json:"itemcat,omitempty" `
 	//itempic
-	Price      float64   `json:"itemprice,omitempty"`
+	Price      float64   `json:"itemprice"`
 	DatePosted time.Time `json:"date,omitempty"`
 	Status     string    `json:"salestatus,omitempty"`
 	UserID     string    `json:"userid,omitempty"`
@@ -86,19 +86,25 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 	var desc = newitem.Itemdesc
 	var cat = newitem.Itemcat
 
-	var priceSplit = strings.Split(newitem.Price, " ")
-	var price, error = strconv.ParseFloat(priceSplit[1], 64)
+	var priceSplit = strings.TrimPrefix(newitem.Price, "$ ")
+	priceSplit = strings.Replace(priceSplit, ",", "", -1)
+
+	price, error := strconv.ParseFloat(priceSplit, 64)
 	if error != nil {
 		log.Println(error)
 		return error
 	}
+	if priceSplit == "0.00" {
+		price = 0.00
+		//log.Println(price)
+	}
+	log.Println(price)
 	var status = newitem.Status
-
 	newID := uuid.NewV4()
 	uID := newID.String()
 	log.Println("User ID is: ", newitem.UserID)
-	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, Price: price, Status: status, UserID: newitem.UserID, DatePosted: time.Now()}, 0)
-	return err
+	_, err2 := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, Price: price, Status: status, UserID: newitem.UserID, DatePosted: time.Now()}, 0)
+	return err2
 }
 
 //updateItem upserts updated item object to couchbase document

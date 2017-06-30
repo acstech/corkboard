@@ -2,9 +2,10 @@ package corkboard
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -18,38 +19,29 @@ import (
 //New image is a handle to deal with New Image Requests
 func (cb *Corkboard) NewImage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	var imageRes NewImageRes
-
 	newID := uuid.NewV4()
-	picID := newID.String()
-
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1")},
-	)
+	imageID := newID.String()
+	svc := s3.New(session.New(&aws.Config{Region: aws.String("us-east-1")}))
+	//h := md5.New()
+	req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
+		Bucket: aws.String(os.Getenv("CB_S3_BUCKET")),
+		Key:    aws.String(os.Getenv("CB_S3_BUCKET_KEY")),
+		Body:   strings.NewReader("EXPECTED CONTENTS"),
+	})
+	url, err := req.Presign(15 * time.Minute)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	imageRes.ImageID = picID
-	svc := s3.New(sess)
+	//log.Println("The URL is: ", url)
+	// md5s := base64.StdEncoding.EncodeToString(h.Sum(nil))
+	// req.HTTPRequest.Header.Set("Content-MD5", md5s)
 
-	input := &s3.PutObjectInput{
-		Bucket: aws.String("CB_S3_BUCKET"),
-		Key:    aws.String(picID),
-	}
-	req, _ := svc.PutObjectRequest(input)
-
-	var checksum string
-	checksum = r.Header.Get("Content-MD5")
-	log.Println("Checksum: ", checksum)
 	//This is supposedly where the presigned URL is created, but I can't find
 	//where I can use the image guid and the MD5 checksum in the url-gen
-	url, err := req.Presign(time.Minute * 15)
-	if err != nil {
-		log.Println("Error Presigning Request")
-		log.Println(err)
-		return
-	}
-	fmt.Println("URL ", url)
+
+	// fmt.Println("URL ", url)
+	imageRes.ImageID = imageID
 	imageRes.URL = url
 	imageResJSON, err := json.Marshal(imageRes)
 	if err != nil {
