@@ -578,6 +578,26 @@ func TestDeleteUserPass(t *testing.T) {
 	res.Body.Close() //nolint :errcheck
 }
 
+/*func TestGetUsersFailAuth(t *testing.T) {
+
+	req, err := http.NewRequest("GET", usersURL, nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	bearer := "Bearer " + theToken
+	req.Header.Set("authorization", bearer)
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	if res.StatusCode != 403 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck
+}*/
+
 //-----------------------------------------
 //FAILING USER TESTS GO HERE
 //-----------------------------------------

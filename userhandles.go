@@ -183,6 +183,7 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	uid := claims.UID
 	if uid != theuser.ID {
 		w.WriteHeader(http.StatusForbidden)
