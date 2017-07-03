@@ -9,6 +9,12 @@
 			"revisionTime": "2017-06-22T19:04:37Z"
 		},
 		{
+			"checksumSHA1": "CSL+SAvkMXMC9Z42fpkiYmHgLt8=",
+			"path": "github.com/aws/aws-sdk-go",
+			"revision": "87aa1287b67f86a66c22477c9c730568c9b5977a",
+			"revisionTime": "2017-06-29T20:29:58Z"
+		},
+		{
 			"checksumSHA1": "TCLnm8dn9hyxCM5tuOrcfPpXPUw=",
 			"path": "github.com/couchbase/gocb",
 			"revision": "bf740f17ea6cd6a1bbd5ca3583266c8f74692524",
