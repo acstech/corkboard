@@ -1,7 +1,13 @@
 package corkboard
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
+	"log"
+	"os"
 
 	corkboardauth "github.com/acstech/corkboard-auth"
 	"github.com/couchbase/gocb"
@@ -36,6 +42,34 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 	if err = createIndexes(bucket); err != nil {
 		return nil, err
 	}
+
+	if config.PrivateRSA == "" {
+		config.PrivateRSA = "id_rsa"
+	}
+	if _, err = os.Stat(config.PrivateRSA); os.IsNotExist(err) {
+
+		//IF we dont have an RSA, make one
+		key, err2 := rsa.GenerateKey(rand.Reader, 2048)
+		if err2 != nil {
+			log.Println(err2)
+		}
+		//if err = privKey.Validate(
+		marshalKey := x509.MarshalPKCS1PrivateKey(key)
+		privPem := &pem.Block{
+			Type:  "RSA PRIVATE KEY",
+			Bytes: marshalKey,
+		}
+		file, err2 := os.OpenFile(config.PrivateRSA, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0400)
+		if err2 != nil {
+			log.Println(err2)
+		}
+		defer file.Close() //nolint: errcheck
+		err = pem.Encode(file, privPem)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
 	cba, err := corkboardauth.New(&corkboardauth.Config{
 		CBConnection:   config.Connection,
 		CBBucket:       config.BucketName,
@@ -86,6 +120,7 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router.GET("/api/users", (stdChain.Then(cb.GetUsers)))
 	router.GET("/api/users/:id", stdChain.Then(cb.GetUser))
 	router.PUT("/api/users/edit/:id", stdChain.Then(cb.UpdateUser))
+	router.DELETE("/api/users/delete/:id", stdChain.Then(cb.DeleteUser))
 	router.GET("/api/search/:key", stdChain.Then(cb.SearchUser))
 	router.DELETE("/api/user/delete/:id", stdChain.Then(cb.DeleteUser))
 	router.POST("/api/users/register", noAuthChain.Then(cb.CorkboardAuth.RegisterUser()))

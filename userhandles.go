@@ -58,7 +58,6 @@ func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprout
 //GetUser handles GET requests and responds with the user identified by the url param
 func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var id string = ps.ByName("id")
-	//log.Println(id)
 	user, err := cb.findUserByID(id)
 	if user == nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -202,6 +201,7 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
 	uid := claims.UID
 	if uid != theuser.ID {
 		w.WriteHeader(http.StatusForbidden)

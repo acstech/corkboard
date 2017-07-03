@@ -70,19 +70,3 @@ func (cb *Corkboard) defaultHeaders(next httprouter.Handle) httprouter.Handle {
 		next(w, r, p)
 	}
 }
-
-// func (cb *Corkboard) verifyUser(next httprouter.Handle) httprouter.Handle {
-// 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-// 		claims, ok := r.Context().Value(ReqCtxClaims).(corkboardauth.CustomClaims)
-// 		if !ok {
-// 			w.WriteHeader(http.StatusInternalServerError)
-// 			return
-// 		}
-// 		uid := claims.UID
-// 		if uid !=  {
-// 			w.WriteHeader(http.StatusForbidden)
-// 			return
-// 		}
-// 		next(w, r, p)
-// 	}
-// }
