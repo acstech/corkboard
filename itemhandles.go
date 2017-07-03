@@ -41,6 +41,11 @@ func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ h
 	//w.WriteHeader(http.StatusOK)
 }
 
+// func (corkboard *Corkboard) GetItemsByCat(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+// 	category := p.ByName("cat")
+// 	item, _ := corkboard.findItemsByCat(category)
+// }
+
 //GetItemByID uses the httprouter params to find the item by id, then Marshal & Write it in JSON
 func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 

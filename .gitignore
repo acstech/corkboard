@@ -2,3 +2,4 @@
 id_rsa
 id_rsa.pub
 .DS_Store
+*.test

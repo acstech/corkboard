@@ -58,10 +58,6 @@ func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprout
 //GetUser handles GET requests and responds with the user identified by the url param
 func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var id string = ps.ByName("id")
-<<<<<<< HEAD
-=======
-	//log.Println(id)
->>>>>>> 4a1d7c2cfea21ea0b9b78e5b9ecd090d40b4502a
 	user, err := cb.findUserByID(id)
 	if user == nil {
 		w.WriteHeader(http.StatusNotFound)

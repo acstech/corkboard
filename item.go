@@ -65,6 +65,10 @@ func (corkboard *Corkboard) findItems() ([]Item, error) {
 
 }
 
+// func (corkboard *Corkboard) findItemsByCat(itemCat string) ([]Item, error) {
+// 	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemprice, itemcat, date, userid FROM `%s` WHERE itemcat = %s", corkboard.Bucket.Name(), itemCat))
+// }
+
 //findItemById queries for a specific item by id key
 func (corkboard *Corkboard) findItemByID(itemID string) (*Item, error) {
 
@@ -102,15 +106,9 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 	var status = newitem.Status
 	newID := uuid.NewV4()
 	uID := newID.String()
-<<<<<<< HEAD
-	//log.Println("User ID is: ", newitem.UserID)
 	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, Price: price, Status: status, UserID: newitem.UserID, DatePosted: time.Now()}, 0)
 	return err
-=======
-	log.Println("User ID is: ", newitem.UserID)
-	_, err2 := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, Price: price, Status: status, UserID: newitem.UserID, DatePosted: time.Now()}, 0)
-	return err2
->>>>>>> 4a1d7c2cfea21ea0b9b78e5b9ecd090d40b4502a
+
 }
 
 //updateItem upserts updated item object to couchbase document
