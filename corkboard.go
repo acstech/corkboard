@@ -63,7 +63,7 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 		if err2 != nil {
 			log.Println(err2)
 		}
-		defer file.Close()
+		defer file.Close() //nolint: errcheck
 		err = pem.Encode(file, privPem)
 		if err != nil {
 			log.Println(err)
