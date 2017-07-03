@@ -1,11 +1,23 @@
 language: go
 go:
 - 1.8.x
+env:
+- CB_CONNECTION="couchbase://localhost"
+- CB_BUCKET=test
 before_install:
 - go get -u github.com/alecthomas/gometalinter
 - gometalinter --install
 - gometalinter --vendor --tests --disable=gotype .
 - gometalinter --vendor --tests --disable=gotype ./cmd/corkboard/.
+- >
+  if [ "$TRAVIS_EVENT_TYPE" = "pull_request" ]; then
+    chmod +x ./standup_couchbase.sh ./stop_couchbase.sh;
+    ./standup_couchbase.sh;
+  fi
+install:
+- if [ "$TRAVIS_EVENT_TYPE" = "pull_request" ]; then ./standup_couchbase.sh; fi
+after_stript:
+- if [ "$TRAVIS_EVENT_TYPE" = "pull_request" ]; then ./stop_couchbase.sh; fi
 before_deploy:
 - >
   if ! [ "$BEFORE_DEPLOY_RUN" ]; then
