@@ -2,8 +2,9 @@ language: go
 go:
 - 1.8.x
 env:
-- CB_CONNECTION="couchbase://localhost"
-- CB_BUCKET=test
+  global:
+  - CB_CONNECTION="couchbase://localhost"
+  - CB_BUCKET=test
 before_install:
 - go get -u github.com/alecthomas/gometalinter
 - gometalinter --install
