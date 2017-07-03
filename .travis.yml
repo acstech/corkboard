@@ -17,7 +17,7 @@ before_install:
   fi
 install:
 - if [ "$TRAVIS_EVENT_TYPE" = "pull_request" ]; then ./standup_couchbase.sh; fi
-after_stript:
+after_script:
 - if [ "$TRAVIS_EVENT_TYPE" = "pull_request" ]; then ./stop_couchbase.sh; fi
 before_deploy:
 - >
