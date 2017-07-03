@@ -10,11 +10,7 @@ before_install:
 - gometalinter --install
 - gometalinter --vendor --tests --disable=gotype .
 - gometalinter --vendor --tests --disable=gotype ./cmd/corkboard/.
-- >
-  if [ "$TRAVIS_EVENT_TYPE" = "pull_request" ]; then
-    chmod +x ./standup_couchbase.sh ./stop_couchbase.sh;
-    ./standup_couchbase.sh;
-  fi
+- if [ "$TRAVIS_EVENT_TYPE" = "pull_request" ]; then chmod +x ./standup_couchbase.sh ./stop_couchbase.sh; fi
 install:
 - if [ "$TRAVIS_EVENT_TYPE" = "pull_request" ]; then ./standup_couchbase.sh; fi
 after_script:
