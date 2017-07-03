@@ -58,6 +58,10 @@ func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprout
 //GetUser handles GET requests and responds with the user identified by the url param
 func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var id string = ps.ByName("id")
+<<<<<<< HEAD
+=======
+	//log.Println(id)
+>>>>>>> 4a1d7c2cfea21ea0b9b78e5b9ecd090d40b4502a
 	user, err := cb.findUserByID(id)
 	if user == nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -75,6 +79,24 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 	userRes.Lastname = user.Lastname
 	userRes.ID = user.ID
 	userRes.Phone = user.Phone
+
+	itemIDList, err := cb.findUserItems(id)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	var itemList []Item
+	for _, element := range itemIDList {
+		item, err2 := cb.findItemByID(element.ID)
+		if err != nil {
+			log.Println(err2)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		itemList = append(itemList, *item)
+	}
+	userRes.Items = itemList
+
 	userJSON, err := json.Marshal(userRes)
 	if err != nil {
 		log.Println(err)
