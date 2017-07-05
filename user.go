@@ -16,6 +16,7 @@ type User struct {
 	Password  string `json:"password"`
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
+	Zipcode   string `json:"zipcode"`
 	//Profilepic
 	Phone string   `json:"phone"`
 	Sites []string `json:"sites"`
@@ -36,11 +37,12 @@ type GetUserRes struct {
 	Firstname string `json:"firstname,omitempty"`
 	Lastname  string `json:"lastname,omitempty"`
 	Phone     string `json:"phone,omitempty"`
+	Zipcode   string `json:"zipcode,omitempty"`
 	Items     []Item `json:"items,omitempty"`
 }
 
 func (cb *Corkboard) findUsers() ([]User, error) {
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone, sites FROM `%s` WHERE _type = 'User'", cb.Bucket.Name())) // nolint: gas
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone, sites, zipcode FROM `%s` WHERE _type = 'User'", cb.Bucket.Name())) // nolint: gas
 	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
 		return nil, err
@@ -85,7 +87,7 @@ func (cb *Corkboard) findUserByKey(key string) (*User, error) {
 		log.Println("Request incorrectly formatted")
 		return nil, nil
 	}
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone, sites FROM `%s` WHERE %s = '%s'", cb.Bucket.Name(), searchKey, value)) //nolint: gas
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone, sites, zipcode FROM `%s` WHERE %s = '%s'", cb.Bucket.Name(), searchKey, value)) //nolint: gas
 	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
 		return nil, err
