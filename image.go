@@ -11,9 +11,10 @@ type ItemImage struct {
 	ImageID string `json:"picid"`
 	ItemID  string `json:"itemid"`
 }
-type Image struct {
-	Image []byte `json:"image"`
-}
+
+// type Image struct {
+// 	Image []byte `json:"image"`
+// }
 
 //NewImageReq is used to decode NewImage body into usable data.
 //Used with NewImage and MockURL handles.

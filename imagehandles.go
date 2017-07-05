@@ -12,19 +12,24 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	//This blank import is to ensure proper use of autoload
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/julienschmidt/httprouter"
 	uuid "github.com/satori/go.uuid"
 )
 
-//New image is a handle to deal with New Image Requests
+//NewImageURL is a handle to deal with New Image Requests
 func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	if os.Getenv("CB_ENVIRONMENT") == "dev" {
 		log.Println("MockURL is being called")
 		picID := new(NewImageReq)
 		var imageRes NewImageRes
-		json.NewDecoder(r.Body).Decode(&picID)
+		err := json.NewDecoder(r.Body).Decode(&picID)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 		imageGUID := uuid.NewV4()
 		key := fmt.Sprintf("%s.%s", imageGUID, picID.Extension)
 		imageRes.ImageKey = key
@@ -37,15 +42,23 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		w.Write(imageResJSON)
+		_, err = w.Write(imageResJSON)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 	} else {
 		picID := new(NewImageReq)
 		var imageRes NewImageRes
-		json.NewDecoder(r.Body).Decode(&picID)
+		err := json.NewDecoder(r.Body).Decode(&picID)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 		//for i := 0; i < len(picID.Checksum); i++ {
 		imageGUID := uuid.NewV4().String()
 		key := fmt.Sprintf("%s.%s", imageGUID, picID.Extension)
-		svc := s3.New(session.New(&aws.Config{Region: aws.String("us-east-1")}))
+		svc := s3.New(session.New(&aws.Config{Region: aws.String("us-east-1")})) //nolint: staticcheck
 		req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
 			Bucket: aws.String(os.Getenv("CB_S3_BUCKET")),
 			Key:    aws.String(key),
@@ -66,7 +79,11 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		w.Write(imageResJSON)
+		_, err = w.Write(imageResJSON)
+		if err != nil {
+			log.Println(err)
+			return
+		}
 	}
 }
 
@@ -79,12 +96,10 @@ func (cb *Corkboard) MockS3(w http.ResponseWriter, r *http.Request, ps httproute
 
 	key := ps.ByName("key")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.Mkdir(path, 0777)
+		os.Mkdir(path, 0777) //nolint: gas, errcheck
 		log.Println("Created directory 's3images' inside current directory")
 	}
-	//need to get the image from form data and copy it to a file in the directory
-	defer r.Body.Close()
-	//for i := 0; i < len(imagesReq.ImageID); i++ {
+	defer r.Body.Close() //nolint: errcheck
 
 	file, err := os.Create(fmt.Sprintf("%s/%s", path, key))
 	if err != nil {
