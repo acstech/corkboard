@@ -58,7 +58,12 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 
 		imageGUID := uuid.NewV4().String()
 		key := fmt.Sprintf("%s.%s", imageGUID, picID.Extension)
-		svc := s3.New(session.New(&aws.Config{Region: aws.String("us-east-1")})) //nolint: staticcheck
+		sess, err := session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		svc := s3.New(sess)
 		req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
 			Bucket: aws.String(os.Getenv("CB_S3_BUCKET")),
 			Key:    aws.String(key),
