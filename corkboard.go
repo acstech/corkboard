@@ -2,6 +2,7 @@ package corkboard
 
 import (
 	"fmt"
+	"os"
 
 	corkboardauth "github.com/acstech/corkboard-auth"
 	"github.com/couchbase/gocb"
@@ -77,6 +78,7 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router := httprouter.New()
 	stdChain := madhatter.New(cb.defaultHeaders, cb.authToken)
 	noAuthChain := madhatter.New(cb.defaultHeaders)
+	environment := os.Getenv("CB_ENVIRONMENT")
 
 	router.GET("/api/items", stdChain.Then(cb.GetItems))
 	router.GET("/api/items/:id", stdChain.Then(cb.GetItemByID))
@@ -87,12 +89,15 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router.GET("/api/users/:id", stdChain.Then(cb.GetUser))
 	router.PUT("/api/users/edit/:id", stdChain.Then(cb.UpdateUser))
 	router.GET("/api/search/:key", stdChain.Then(cb.SearchUser))
-	router.POST("/api/image/new", stdChain.Then(cb.NewImage))
+	router.POST("/api/image/new", stdChain.Then(cb.NewImageURL))
+	if environment == "dev" {
+		router.POST("/api/image/post/:key", stdChain.Then(cb.MockS3))
+	}
 	router.DELETE("/api/user/delete/:id", stdChain.Then(cb.DeleteUser))
 	router.POST("/api/users/register", noAuthChain.Then(cb.CorkboardAuth.RegisterUser()))
 	router.POST("/api/users/auth", noAuthChain.Then(cb.CorkboardAuth.AuthUser()))
-
 	return router
+
 }
 
 func contains(a []string, b string) bool {
