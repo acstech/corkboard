@@ -213,15 +213,15 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	items, _ := cb.findUserItems(id)
-
-	for i := 0; i < len(items); i++ {
-		var docID = "item:" + items[i].ID
-		_, err := cb.Bucket.Remove(docID, 0)
-		if err != nil {
-			log.Println(err)
-		}
-	}
+	// items, _ := cb.findUserItems(id)
+	//
+	// for i := 0; i < len(items); i++ {
+	// 	var docID = "item:" + items[i].ID
+	// 	_, err := cb.Bucket.Remove(docID, 0)
+	// 	if err != nil {
+	// 		log.Println(err)
+	// 	}
+	// }
 
 	w.WriteHeader(http.StatusOK)
 
