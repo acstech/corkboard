@@ -135,7 +135,7 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-
+	//TODO: I bet changing an items price to 0 still gives NaN
 	//original item has new data appended to its variables
 	item.ItemName = reqitem.Itemname
 	item.ItemDesc = reqitem.Itemdesc
@@ -146,6 +146,9 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	if error != nil {
 		log.Println(error)
 		return
+	}
+	if priceSplit == "0.00" {
+		price = 0.00
 	}
 	item.Price = price
 	item.Status = reqitem.Status
