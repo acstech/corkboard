@@ -65,9 +65,24 @@ func (corkboard *Corkboard) findItems() ([]Item, error) {
 
 }
 
-// func (corkboard *Corkboard) findItemsByCat(itemCat string) ([]Item, error) {
-// 	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemprice, itemcat, date, userid FROM `%s` WHERE itemcat = %s", corkboard.Bucket.Name(), itemCat))
-// }
+func (corkboard *Corkboard) findItemsByCat(itemCat string) ([]Item, error) {
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemprice, itemcat, date, userid FROM `%s` WHERE itemcat = '%s'", corkboard.Bucket.Name(), itemCat))
+
+	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{})
+	if err != nil {
+		fmt.Println("caught error: ", err)
+		return nil, err
+	}
+
+	defer rows.Close() //nolint: errcheck
+
+	var item = new(Item)
+	var items []Item
+	for rows.Next(item) {
+		items = append(items, *item)
+	}
+	return items, nil
+}
 
 //findItemById queries for a specific item by id key
 func (corkboard *Corkboard) findItemByID(itemID string) (*Item, error) {
