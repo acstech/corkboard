@@ -17,7 +17,6 @@ type UpdateUserReq struct {
 	Lastname  string `json:"lastname,omitempty"`
 	Email     string `json:"email"`
 	Phone     string `json:"phone,omitempty"`
-	Zipcode   string `json:"zipcode,omitempty"`
 }
 
 //GetUsers handles GET requests and responds with a slice of all users from couchbase
@@ -41,7 +40,6 @@ func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprout
 		userRes.Lastname = user.Lastname
 		userRes.ID = user.ID
 		userRes.Phone = user.Phone
-		userRes.Zipcode = user.Zipcode
 		usersRes[i] = userRes
 	}
 
@@ -77,7 +75,6 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 	userRes.Lastname = user.Lastname
 	userRes.ID = user.ID
 	userRes.Phone = user.Phone
-	userRes.Zipcode = user.Zipcode
 
 	itemIDList, err := cb.findUserItems(id)
 	if err != nil {
@@ -123,7 +120,6 @@ func (cb *Corkboard) SearchUser(w http.ResponseWriter, r *http.Request, ps httpr
 	userRes.Lastname = user.Lastname
 	userRes.ID = user.ID
 	userRes.Phone = user.Phone
-	userRes.Zipcode = user.Zipcode
 	userJSON, err := json.Marshal(userRes)
 	if err != nil {
 		log.Println(err)
@@ -173,7 +169,6 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 	user.Lastname = userReq.Lastname
 	user.Phone = userReq.Phone
 	user.Email = userReq.Email
-	user.Zipcode = userReq.Zipcode
 
 	_, error := cb.Bucket.Upsert(userKey, &struct {
 		Type string `json:"_type"`
@@ -218,15 +213,15 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	// items, _ := cb.findUserItems(id)
-	//
-	// for i := 0; i < len(items); i++ {
-	// 	var docID = "item:" + items[i].ID
-	// 	_, err := cb.Bucket.Remove(docID, 0)
-	// 	if err != nil {
-	// 		log.Println(err)
-	// 	}
-	// }
+	items, _ := cb.findUserItems(id)
+
+	for i := 0; i < len(items); i++ {
+		var docID = "item:" + items[i].ID
+		_, err := cb.Bucket.Remove(docID, 0)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 
 	w.WriteHeader(http.StatusOK)
 

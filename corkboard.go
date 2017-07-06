@@ -127,7 +127,7 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	if environment == "dev" {
 		router.POST("/api/image/post/:key", stdChain.Then(cb.MockS3))
 	}
-	router.DELETE("/api/user/delete/:id", stdChain.Then(cb.DeleteUser))
+	router.DELETE("/api/users/delete/:id", stdChain.Then(cb.DeleteUser))
 	router.POST("/api/users/register", noAuthChain.Then(cb.CorkboardAuth.RegisterUser()))
 	router.POST("/api/users/auth", noAuthChain.Then(cb.CorkboardAuth.AuthUser()))
 	return router
