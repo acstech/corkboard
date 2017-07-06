@@ -28,13 +28,11 @@ var (
 	deleteuserURL string
 	searchuserURL string
 
-	serveURL      string
-	theToken      string
-	emailaddress2 string
-	emailaddress  string
-	globaluserid  string
-	newuserid     string
-	globalitemid  string
+	serveURL     string
+	theToken     string
+	emailaddress string
+	globaluserid string
+	globalitemid string
 
 	newitemsURL   string
 	itemsURL      string

@@ -65,7 +65,7 @@ func (corkboard *Corkboard) findItems() ([]Item, error) {
 }
 
 func (corkboard *Corkboard) findItemsByCat(itemCat string) ([]Item, error) {
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemprice, itemcat, date, userid FROM `%s` WHERE itemcat = '%s'", corkboard.Bucket.Name(), itemCat))
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemprice, itemcat, date, userid FROM `%s` WHERE itemcat = '%s'", corkboard.Bucket.Name(), itemCat)) //nolint: gas
 
 	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
