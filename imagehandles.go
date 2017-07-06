@@ -30,8 +30,9 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 			log.Println(err)
 			return
 		}
+		imageExtension := picID.Extension
 		imageGUID := uuid.NewV4()
-		key := fmt.Sprintf("%s.%s", imageGUID, picID.Extension)
+		key := fmt.Sprintf("%s.%s", imageGUID, imageExtension)
 		imageRes.ImageKey = key
 		url := fmt.Sprintf("localhost:%s/api/image/post/%s", os.Getenv("CB_PORT"), key)
 
@@ -55,9 +56,9 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 			log.Println(err)
 			return
 		}
-
+		imageExtension := picID.Extension
 		imageGUID := uuid.NewV4().String()
-		key := fmt.Sprintf("%s.%s", imageGUID, picID.Extension)
+		key := fmt.Sprintf("%s.%s", imageGUID, imageExtension)
 		sess, err := session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
 		if err != nil {
 			log.Println(err)
