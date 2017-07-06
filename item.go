@@ -47,7 +47,6 @@ func getItemKey(id uuid.UUID) string {
 func (corkboard *Corkboard) findItems() ([]Item, error) {
 
 	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemprice, itemcat, date, userid FROM `%s` WHERE type = 'item'", corkboard.Bucket.Name())) //nolint: gas
-	//log.Println(corkboard.Bucket.Name())
 	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
 		fmt.Println("caught error: ", err)
@@ -115,9 +114,7 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 	}
 	if priceSplit == "0.00" {
 		price = 0.00
-		//log.Println(price)
 	}
-	log.Println(price)
 	var status = newitem.Status
 	newID := uuid.NewV4()
 	uID := newID.String()

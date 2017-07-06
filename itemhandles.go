@@ -134,7 +134,6 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 		log.Println(err)
 	}
 	if item == nil {
-		log.Println("Item could not be found")
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -183,7 +182,6 @@ func (corkboard *Corkboard) DeleteItem(w http.ResponseWriter, r *http.Request, p
 		log.Println(err)
 	}
 	if item == nil {
-		log.Println("Item could not be found")
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}

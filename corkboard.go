@@ -123,7 +123,6 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router.PUT("/api/users/edit/:id", stdChain.Then(cb.UpdateUser))
 	router.DELETE("/api/users/delete/:id", stdChain.Then(cb.DeleteUser))
 	router.GET("/api/search/:key", stdChain.Then(cb.SearchUser))
-	router.DELETE("/api/user/delete/:id", stdChain.Then(cb.DeleteUser))
 	router.POST("/api/users/register", noAuthChain.Then(cb.CorkboardAuth.RegisterUser()))
 	router.POST("/api/users/auth", noAuthChain.Then(cb.CorkboardAuth.AuthUser()))
 

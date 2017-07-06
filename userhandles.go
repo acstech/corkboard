@@ -108,7 +108,6 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 //SearchUser handles request to search users by email, firstname and lastname
 func (cb *Corkboard) SearchUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var key string = ps.ByName("key")
-	log.Println(key)
 	user, err := cb.findUserByKey(key)
 	if err != nil {
 		log.Println(err)
@@ -213,6 +212,17 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 		log.Println(err)
 		return
 	}
+
+	items, _ := cb.findUserItems(id)
+
+	for i := 0; i < len(items); i++ {
+		var docID = "item:" + items[i].ID
+		_, err := cb.Bucket.Remove(docID, 0)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
 	w.WriteHeader(http.StatusOK)
 
 }
