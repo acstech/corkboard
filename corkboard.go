@@ -111,6 +111,7 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router := httprouter.New()
 	stdChain := madhatter.New(cb.defaultHeaders, cb.authToken)
 	noAuthChain := madhatter.New(cb.defaultHeaders)
+	//noHeadersChain := madhatter.New(cb.authToken)
 	environment := os.Getenv("CB_ENVIRONMENT")
 
 	router.GET("/api/items", stdChain.Then(cb.GetItems))
@@ -125,9 +126,9 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router.GET("/api/search/:key", stdChain.Then(cb.SearchUser))
 	router.POST("/api/image/new", stdChain.Then(cb.NewImageURL))
 	if environment == "dev" {
-		router.POST("/api/image/post/:key", stdChain.Then(cb.MockS3))
+		router.POST("/api/image/post/:key", cb.MockS3)
+		router.GET("/api/images/:key", cb.GetImageMock)
 	}
-	router.DELETE("/api/user/delete/:id", stdChain.Then(cb.DeleteUser))
 	router.POST("/api/users/register", noAuthChain.Then(cb.CorkboardAuth.RegisterUser()))
 	router.POST("/api/users/auth", noAuthChain.Then(cb.CorkboardAuth.AuthUser()))
 	return router
