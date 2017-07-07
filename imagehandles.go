@@ -93,6 +93,40 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 	}
 }
 
+//DeleteImageURL is a function
+func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+	key := ps.ByName("key")
+	if os.Getenv("CB_ENVIRONMENT") == "dev" {
+		// delete an image: get current image
+		path := "./s3images"
+		filepath := fmt.Sprintf("%s/%s", path, key)
+		if _, err := os.Stat(filepath); os.IsNotExist(err) {
+			log.Println("image not exist")
+		}
+		os.Remove(filepath)
+
+	} else {
+		sess, err := session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		svc := s3.New(sess)
+		_, err2 := svc.DeleteObject(&s3.DeleteObjectInput{
+			Bucket: aws.String(os.Getenv("CB_S3_BUCKET")),
+			Key:    aws.String(key),
+		})
+		if err2 != nil {
+			log.Println(err2)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
+	w.WriteHeader(http.StatusOK)
+
+}
+
 //MockS3 checks for directory where files will be stored. If they don't, create it for them
 // the "presigned url's" that direct to this endpoint will have to be mocked by a fake "dev env"
 //endpoint. This endpoint should only be used for development purposes as well.

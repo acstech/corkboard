@@ -64,6 +64,7 @@ func (corkboard *Corkboard) findItems() ([]Item, error) {
 
 }
 
+//findItemsByCat queries couchbase for items by category matching the parameter
 func (corkboard *Corkboard) findItemsByCat(itemCat string) ([]Item, error) {
 	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemprice, itemcat, date, userid FROM `%s` WHERE itemcat = '%s'", corkboard.Bucket.Name(), itemCat)) //nolint: gas
 

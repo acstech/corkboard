@@ -49,7 +49,6 @@ type Token struct {
 	Token string `json:"token"`
 }
 
-//new struct???
 type Values struct {
 	TheUserID    string `json:"id"`
 	TheUserEmail string `json:"email"`
@@ -146,6 +145,7 @@ func TestAuthPass(t *testing.T) {
 		t.Error(err)
 	}
 
+	//one second delay to allow DB time to update
 	timer := time.NewTimer(time.Second * 1)
 	<-timer.C
 	res, err2 := http.DefaultClient.Do(req)
@@ -153,13 +153,10 @@ func TestAuthPass(t *testing.T) {
 		t.Error(err2)
 	}
 
-	//var claims corkboardauth.CustomClaims
-	//var parse jwt.Parser
-
 	var theTok Token
 	decoder := json.NewDecoder(res.Body)
 	decoder.Decode(&theTok) //nolint: errcheck
-	//header stores token from response for future use
+	//theToken stores token from response for future use
 	theToken = theTok.Token
 
 	if res.StatusCode != 200 {
@@ -177,6 +174,7 @@ func TestGetUsersPass(t *testing.T) {
 		t.Error(err)
 	}
 
+	//put token in request header
 	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 	res, err2 := http.DefaultClient.Do(req)
@@ -199,7 +197,7 @@ func TestGetUsersPass(t *testing.T) {
 			globaluserid = Arr[i].TheUserID //assign globaluserid for future use
 		}
 	}
-	//globaluserid = Arr[0].TheUserID
+
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
@@ -325,6 +323,10 @@ func TestSearchUserPass3(t *testing.T) {
 	}
 	res.Body.Close() //nolint: errcheck
 }
+
+//-----------------------------------------
+//FAILING USER TESTS GO HERE
+//-----------------------------------------
 
 //TestGetUsersFailAuth attempts to pass an invalid token
 func TestGetUsersFailAuth(t *testing.T) {
@@ -596,26 +598,6 @@ func TestDeleteItemPass(t *testing.T) {
 //FAILING ITEM TESTS GO HERE
 //-----------------------------------------
 
-//TestGetItemsFail will attempt to call getitems on an empty DB
-// func TestGetItemsFail(t *testing.T) {
-// 	req, err := http.NewRequest("GET", itemsURL, nil)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	bearer := "Bearer " + theToken
-// 	req.Header.Set("authorization", bearer)
-//
-// 	res, err2 := http.DefaultClient.Do(req)
-// 	if err2 != nil {
-// 		t.Error(err2)
-// 	}
-//
-// 	if res.StatusCode != 204 {
-// 		t.Errorf("Success expected: %d", res.StatusCode)
-// 	}
-// 	res.Body.Close() //nolint: errcheck
-// }
-
 //TestCreateItemFail malforms the price field
 func TestCreateItemFail(t *testing.T) {
 	itemJSON := `{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "dollars", "salestatus": "4sale" }`
@@ -640,7 +622,7 @@ func TestCreateItemFail(t *testing.T) {
 	}
 }
 
-//TestGetItemsByCatPassFail
+//TestGetItemsByCatFail searches for nonexistent category
 func TestGetItemsByCatFail(t *testing.T) {
 	caturl := fmt.Sprintf("%s/api/category/%s", serveURL, "i dont live")
 	req, err := http.NewRequest("GET", caturl, nil)
@@ -745,27 +727,6 @@ func TestDeleteUserPass(t *testing.T) {
 	}
 	res.Body.Close() //nolint :errcheck
 }
-
-// //TestGetUsersFail3 fails due to empty DB
-// func TestGetUsersFail3(t *testing.T) {
-//
-// req, err := http.NewRequest("GET", usersURL, nil)
-// if err != nil {
-// t.Error(err)
-// }
-//
-// bearer := "Bearer " + theToken
-// req.Header.Set("authorization", bearer)
-// res, err2 := http.DefaultClient.Do(req)
-// if err2 != nil {
-// t.Error(err2)
-// }
-//
-// if res.StatusCode != 204 {
-// t.Errorf("Success expected: %d", res.StatusCode)
-// }
-// res.Body.Close() //nolint: errcheck
-// }
 
 //-----------------------------------------
 //FAILING USER TESTS GO HERE
