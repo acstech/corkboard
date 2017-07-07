@@ -40,6 +40,7 @@ type NewItemReq struct {
 	//item picture coming up
 }
 
+//GetItemRes is used to return all image data and include the Id and url of the primary pic
 type GetItemRes struct {
 	ItemID     string    `json:"itemid,omitempty"`
 	ItemName   string    `json:"itemname,omitempty"`

@@ -23,7 +23,7 @@ import (
 //NewImageURL is a handle to deal with New Image Requests
 func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
-	if os.Getenv("CB_ENVIRONMENT") == "dev" {
+	if cb.Environment == envDev {
 		log.Println("MockURL is being called")
 		picID := new(NewImageReq)
 		var imageRes NewImageRes
@@ -134,6 +134,7 @@ func (cb *Corkboard) MockS3(w http.ResponseWriter, r *http.Request, ps httproute
 	w.WriteHeader(http.StatusCreated)
 }
 
+//GetImageMock retrieves image from mocks3 storage during development
 func (cb *Corkboard) GetImageMock(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	path := "./s3images"
 	key := ps.ByName("key")
@@ -151,7 +152,7 @@ func (cb *Corkboard) GetImageMock(w http.ResponseWriter, r *http.Request, ps htt
 	}
 	w.Header().Set("Content-Type", fmt.Sprintf("image/%s", extension))
 
-	w.Write(pic)
+	_, err = w.Write(pic)
 	if err != nil {
 		log.Println(err)
 		return

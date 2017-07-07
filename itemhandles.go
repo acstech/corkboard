@@ -61,7 +61,7 @@ func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ h
 		itemRes.UserID = item.UserID
 
 		itemsRes = append(itemsRes, *itemRes)
-		itemRes = new(GetItemRes)
+		itemRes = new(GetItemRes) //nolint: staticcheck
 	}
 
 	// array of items is marshalled to JSONobject
