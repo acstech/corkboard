@@ -101,6 +101,7 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 //endpoint. This endpoint should only be used for development purposes as well.
 //Still want to use the image GUID.tag as the key
 func (cb *Corkboard) MockS3(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	log.Println("Entering MockS3...")
 	path := "./s3images"
 
 	key := ps.ByName("key")
