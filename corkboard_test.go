@@ -1,6 +1,7 @@
 package corkboard_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -33,6 +34,8 @@ var (
 	emailaddress string
 	globaluserid string
 	globalitemid string
+	globalprice  float64
+	globalimage  string
 
 	newitemsURL   string
 	itemsURL      string
@@ -43,6 +46,8 @@ var (
 	badedititems  string
 	/*deleteuserURL string*/
 	baduserURL string
+
+	newimageurl string
 )
 
 type Token struct {
@@ -50,20 +55,23 @@ type Token struct {
 }
 
 type Values struct {
-	TheUserID    string `json:"id"`
-	TheUserEmail string `json:"email"`
-	TheItemID    string `json:"itemid"`
-	ItemUserID   string `json:"userid"`
+	TheUserID    string  `json:"id"`
+	TheUserEmail string  `json:"email"`
+	TheItemID    string  `json:"itemid"`
+	ItemUserID   string  `json:"userid"`
+	PriceType    float64 `json:"itemprice"`
+	PicID        string  `json:"picid"`
 }
 
 func init() {
 
 	//Set up connection for tests to run on
 	cork, err := corkboard.NewCorkboard(&corkboard.CBConfig{
-		Connection: os.Getenv("CB_CONNECTION"),
-		BucketName: os.Getenv("CB_BUCKET"),
-		BucketPass: os.Getenv("CB_BUCKET_PASS"),
-		PrivateRSA: os.Getenv("CB_PRIVATE_RSA"),
+		Connection:  os.Getenv("CB_CONNECTION"),
+		BucketName:  os.Getenv("CB_BUCKET"),
+		BucketPass:  os.Getenv("CB_BUCKET_PASS"),
+		PrivateRSA:  os.Getenv("CB_PRIVATE_RSA"),
+		Environment: os.Getenv("CB_ENVIRONMENT"),
 	})
 	if err != nil {
 		fmt.Println(err)
@@ -84,6 +92,9 @@ func init() {
 	itemsURL = fmt.Sprintf("%s/api/items", server.URL)
 	baditemsURL = fmt.Sprintf("%s/api/items/15b27e85", server.URL)
 	badedititems = fmt.Sprintf("%s/api/items/edit/15b27e85", server.URL)
+
+	//Connection strings (image)
+	newimageurl = fmt.Sprintf("%s/api/image/new", server.URL)
 }
 
 //-----------------------------------------
@@ -425,7 +436,7 @@ func TestEditUserFail(t *testing.T) {
 //TestCreateItemPass creates an item with multiple fields, should always pass
 func TestCreateItemPass(t *testing.T) {
 
-	itemJSON := `{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 344", "salestatus": "4sale" }`
+	itemJSON := `{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 2", "salestatus": "4sale" }`
 	reader := strings.NewReader(itemJSON)
 
 	req, err := http.NewRequest("POST", newitemsURL, reader)
@@ -440,6 +451,7 @@ func TestCreateItemPass(t *testing.T) {
 	if err2 != nil {
 		t.Error(err2)
 	}
+
 	defer res.Body.Close() //nolint: errcheck
 
 	if res.StatusCode != 201 {
@@ -475,7 +487,14 @@ func TestGetItemsPass(t *testing.T) {
 		id := Arr[i].ItemUserID
 		if id == globaluserid {
 			globalitemid = Arr[i].TheItemID
+			globalprice = Arr[i].PriceType
 		}
+	}
+	intprice := int(globalprice)
+	strprice := string(intprice)
+
+	if len(strprice) == 0 {
+		t.Error("Unexpected empty field")
 	}
 
 	if res.StatusCode != 200 {
@@ -527,6 +546,72 @@ func TestGetItemIDPass(t *testing.T) {
 	res.Body.Close() //nolint: errcheck
 }
 
+//TestCreateImageURLPass will create URL and we will store it for future use
+func TestCreateImageURLPass(t *testing.T) {
+
+	itemJSON := `{"checksum": "h892y93g4rf", "extension": "jpg"}`
+	reader := strings.NewReader(itemJSON)
+
+	req, err := http.NewRequest("POST", newimageurl, reader)
+	if err != nil {
+		t.Error(err)
+	}
+
+	bearer := "Bearer " + theToken
+	req.Header.Set("authorization", bearer)
+	// timer := time.NewTimer(time.Second * 1)
+	// <-timer.C
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	defer res.Body.Close() //nolint: errcheck
+
+	var Arr Values
+	body, _ := ioutil.ReadAll(res.Body)
+	errre := json.Unmarshal(body, &Arr)
+	if errre != nil {
+		log.Println(errre)
+	}
+
+	//iterate through array and find images under user
+	globalimage = Arr.PicID
+
+	if res.StatusCode != 200 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+}
+
+func TestNewImagePass(t *testing.T) {
+	imageurl := fmt.Sprintf("%s/api/image/post/%s", serveURL, globalimage)
+
+	path := "./testassets/cat.jpg"
+
+	pic, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Println(err)
+	}
+
+	reader := bytes.NewReader(pic)
+	req, err := http.NewRequest("POST", imageurl, reader)
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+	if res.StatusCode != 201 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+}
+
+// func TestDeleteImagePass(t *testing.T){
+// 	url := fmt.Sprintf("%s/api/image/delete/%s", serveURL, globalimage)
+// }
 //TestGetItemsByCatPass will do this
 func TestGetItemsByCatPass(t *testing.T) {
 	caturl := fmt.Sprintf("%s/api/category/%s", serveURL, "sports")
@@ -621,6 +706,31 @@ func TestCreateItemFail(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 }
+
+// func TestCreateItemFail2(t *testing.T) {
+//
+// 	itemJSON := `{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ ", "salestatus": "4sale" }`
+// 	reader := strings.NewReader(itemJSON)
+//
+// 	req, err := http.NewRequest("POST", newitemsURL, reader)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+//
+// 	bearer := "Bearer " + theToken
+// 	req.Header.Set("authorization", bearer)
+//
+// 	res, err2 := http.DefaultClient.Do(req)
+// 	if err2 != nil {
+// 		t.Error(err2)
+// 	}
+//
+// 	defer res.Body.Close() //nolint: errcheck
+//
+// 	if res.StatusCode != 400 {
+// 		t.Errorf("Success expected: %d", res.StatusCode)
+// 	}
+// }
 
 //TestGetItemsByCatFail searches for nonexistent category
 func TestGetItemsByCatFail(t *testing.T) {
