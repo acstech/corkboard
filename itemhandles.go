@@ -36,7 +36,7 @@ func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ h
 		itemRes := new(GetItemRes)
 		var primaryID string
 		var url string
-		if os.Getenv("CB_ENVIRONMENT") == "dev" {
+		if corkboard.Environment == envDev {
 			if item.PictureID != nil {
 				primaryID = item.PictureID[0]
 				url = fmt.Sprintf("localhost:%s/api/images/%s", os.Getenv("CB_PORT"), primaryID)
@@ -61,7 +61,6 @@ func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ h
 		itemRes.UserID = item.UserID
 
 		itemsRes = append(itemsRes, *itemRes)
-		itemRes = new(GetItemRes) //nolint: staticcheck
 	}
 
 	// array of items is marshalled to JSONobject
