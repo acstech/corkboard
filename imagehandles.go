@@ -105,7 +105,8 @@ func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps h
 		filepath := fmt.Sprintf("%s/%s", path, key)
 		log.Println(filepath)
 		if _, err := os.Stat(filepath); os.IsNotExist(err) {
-			log.Println("image not exist")
+			w.WriteHeader(http.StatusNotFound)
+			return
 		}
 		os.Remove(filepath)
 

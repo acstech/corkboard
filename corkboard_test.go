@@ -609,9 +609,50 @@ func TestNewImagePass(t *testing.T) {
 	}
 }
 
-// func TestDeleteImagePass(t *testing.T){
-// 	url := fmt.Sprintf("%s/api/image/delete/%s", serveURL, globalimage)
-// }
+func TestDeleteImagePass(t *testing.T) {
+
+	url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, globalimage)
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	bearer := "Bearer " + theToken
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	if res.StatusCode != 200 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck
+
+}
+
+func TestDeleteImageFail(t *testing.T) {
+
+	url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, "IDONTEXISTS")
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	bearer := "Bearer " + theToken
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	if res.StatusCode != 404 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck
+
+}
+
 //TestGetItemsByCatPass will do this
 func TestGetItemsByCatPass(t *testing.T) {
 	caturl := fmt.Sprintf("%s/api/category/%s", serveURL, "sports")
