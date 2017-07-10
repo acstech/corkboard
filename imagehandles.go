@@ -37,7 +37,7 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 		key := fmt.Sprintf("%s.%s", imageGUID, imageExtension)
 		log.Println(key)
 		imageRes.ImageKey = key
-		url := fmt.Sprintf("/api/image/post/%s", key)
+		url := fmt.Sprintf("http://localhost:%s/api/image/post/%s", os.Getenv("CB_PORT"), key)
 
 		imageRes.URL = url
 		imageResJSON, err := json.Marshal(imageRes)
