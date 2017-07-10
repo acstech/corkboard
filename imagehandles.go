@@ -93,7 +93,7 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 	}
 }
 
-//DeleteImageURL is a function
+//DeleteImageURL does a simple object removal from database
 func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	key := ps.ByName("key")
@@ -126,6 +126,13 @@ func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps h
 	w.WriteHeader(http.StatusOK)
 
 }
+
+//
+// func (cb *Corkboard) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+// cb.DeleteImageURL(w, r, ps)
+// cb.NewImageURL(w, r, _)
+// 	w.WriteHeader(http.StatusOK)
+// }
 
 //MockS3 checks for directory where files will be stored. If they don't, create it for them
 // the "presigned url's" that direct to this endpoint will have to be mocked by a fake "dev env"
