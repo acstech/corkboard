@@ -38,6 +38,8 @@ type GetUserRes struct {
 	Lastname  string `json:"lastname,omitempty"`
 	Phone     string `json:"phone,omitempty"`
 	Zipcode   string `json:"zipcode,omitempty"`
+	PicID     string `json:"picid,omitempty"`
+	PicURL    string `json:"url,omitempty"`
 	Items     []Item `json:"items,omitempty"`
 }
 

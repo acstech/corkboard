@@ -48,7 +48,7 @@ type GetItemRes struct {
 	Category   string    `json:"itemcat,omitempty"`
 	PictureID  string    `json:"picid,omitempty"`
 	PicURL     string    `json:"url, omitempty"`
-	Price      float64   `json:"itemprice,omitempty"`
+	Price      float64   `json:"itemprice"`
 	DatePosted time.Time `json:"date,omitempty"`
 	Status     string    `json:"salestatus,omitempty"`
 	UserID     string    `json:"userid,omitempty"`
