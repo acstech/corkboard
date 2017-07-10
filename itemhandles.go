@@ -2,8 +2,10 @@ package corkboard
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -28,8 +30,41 @@ func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ h
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
+	var itemsRes []GetItemRes
+	for _, item := range items {
+
+		itemRes := new(GetItemRes)
+		var primaryID string
+		var url string
+		if corkboard.Environment == envDev {
+			if item.PictureID != nil {
+				primaryID = item.PictureID[0]
+				url = fmt.Sprintf("localhost:%s/api/images/%s", os.Getenv("CB_PORT"), primaryID)
+			}
+		} else {
+			if item.PictureID != nil {
+				primaryID = item.PictureID[0]
+				url = corkboard.getImageURL(primaryID)
+			}
+		}
+		itemRes.Category = item.Category
+		itemRes.DatePosted = item.DatePosted
+		itemRes.ItemDesc = item.ItemDesc
+		itemRes.ItemID = item.ItemID
+		itemRes.ItemName = item.ItemName
+		if url != "" {
+			itemRes.PicURL = url
+		}
+		itemRes.PictureID = primaryID
+		itemRes.Price = item.Price
+		itemRes.Status = item.Status
+		itemRes.UserID = item.UserID
+
+		itemsRes = append(itemsRes, *itemRes)
+	}
+
 	// array of items is marshalled to JSONobject
-	JSONobject, err := json.Marshal(items)
+	JSONobject, err := json.Marshal(itemsRes)
 	if err != nil {
 		log.Println(err)
 	}
@@ -78,8 +113,14 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 	newitem.ItemDesc = item.ItemDesc
 	newitem.Price = item.Price
 	newitem.Status = item.Status
+	newitem.PictureID = item.PictureID
 	newitem.DatePosted = item.DatePosted
-
+	allID := item.PictureID
+	for _, id := range allID {
+		//newitem.PicURL[index] = corkboard.getImageURL(id)
+		url := corkboard.getImageURL(id)
+		newitem.PicURL = append(newitem.PicURL, url)
+	}
 	JSONitem, err := json.Marshal(newitem)
 	if err != nil {
 		log.Println(err)
@@ -88,7 +129,6 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 	if err3 != nil {
 		log.Println(err3)
 	}
-	w.WriteHeader(http.StatusOK)
 }
 
 //NewItem endpoint decodes http request, calls createNewItem
@@ -166,6 +206,7 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	}
 	item.Price = price
 	item.Status = reqitem.Status
+	item.PictureID = reqitem.PictureID
 	item.DatePosted = reqitem.Date
 
 	//call to updateItem appends item to couchbase

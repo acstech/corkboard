@@ -1,5 +1,17 @@
 package corkboard
 
+import (
+	"log"
+	"os"
+	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	//This blank import is to ensure proper use of autoload
+	_ "github.com/joho/godotenv/autoload"
+)
+
 //
 // import (
 //
@@ -19,18 +31,29 @@ type NewImageReq struct {
 	Extension string `json:"extension"`
 }
 
-//ProfilePicture bundles the ImageID, userID, and image into one object to simplify
-//posting/getting profile photos
-// type ProfilePicture struct {
-// 	ImageID string `json:"imageid"`
-// 	UserID  string `json:"userid"`
-// 	Image   []byte `json:"image,omitempty"`
-// }
-
 //NewImageRes bundles the image guid and the presigned url to be returned
 //to the client so they can make a PUT request directly to the S3 instance. Used with
 //NewImage handle
 type NewImageRes struct {
 	ImageKey string `json:"picid"`
 	URL      string `json:"url"`
+}
+
+func (cb *Corkboard) getImageURL(key string) string {
+	sess, err := session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+	svc := s3.New(sess)
+	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(os.Getenv("CB_S3_BUCKET")),
+		Key:    aws.String(key),
+	})
+	url, err := req.Presign(15 * time.Minute)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+	return url
 }
