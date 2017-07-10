@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -21,7 +23,7 @@ import (
 //NewImageURL is a handle to deal with New Image Requests
 func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
-	if os.Getenv("CB_ENVIRONMENT") == "dev" {
+	if cb.Environment == envDev {
 		log.Println("MockURL is being called")
 		picID := new(NewImageReq)
 		var imageRes NewImageRes
@@ -117,17 +119,42 @@ func (cb *Corkboard) MockS3(w http.ResponseWriter, r *http.Request, ps httproute
 	//It works up to here, file is created in the correct dir with the correct name.
 	//Now we just need to be able to read the data from the form and copy it into the
 	//file we have just created somehow.
-	image, _, err1 := r.FormFile("Image")
-	if err1 != nil {
-		log.Println(err1)
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	// image, _, err1 := r.FormFile("Image")
+	// if err1 != nil {
+	// 	log.Println(err1)
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// }
 	//log.Println(image)
-	_, err = io.Copy(file, image)
+	_, err = io.Copy(file, r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println(err)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
+}
+
+//GetImageMock retrieves image from mocks3 storage during development
+func (cb *Corkboard) GetImageMock(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	path := "./s3images"
+	key := ps.ByName("key")
+	ext := strings.Split(key, ".")
+	var extension string
+	if len(ext) == 2 {
+		extension = ext[1]
+	}
+	image := fmt.Sprintf("%s/%s", path, key)
+	// var imageByte []byte
+
+	pic, err := ioutil.ReadFile(image)
+	if err != nil {
+		log.Println(err)
+	}
+	w.Header().Set("Content-Type", fmt.Sprintf("image/%s", extension))
+
+	_, err = w.Write(pic)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 }

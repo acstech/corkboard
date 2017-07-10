@@ -11,15 +11,15 @@ import (
 
 //User contains all possible user profile information
 type User struct {
-	ID        string `json:"id"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
-	Zipcode   string `json:"zipcode"`
-	//Profilepic
-	Phone string   `json:"phone"`
-	Sites []string `json:"sites"`
+	ID        string   `json:"id"`
+	Email     string   `json:"email"`
+	Password  string   `json:"password"`
+	Firstname string   `json:"firstname"`
+	Lastname  string   `json:"lastname"`
+	Zipcode   string   `json:"zipcode"`
+	PicID     string   `json:"picid"`
+	Phone     string   `json:"phone"`
+	Sites     []string `json:"sites"`
 }
 
 //ItemID is used to unmarshal userItems queries

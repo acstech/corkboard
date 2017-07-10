@@ -15,18 +15,24 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+const (
+	envDev = "dev"
+)
+
 //Corkboard is an instance of the Corkboard server
 type Corkboard struct {
 	Bucket        *gocb.Bucket
 	CorkboardAuth *corkboardauth.CorkboardAuth
+	Environment   string
 }
 
 //CBConfig is all the necessary input values to configure a new CB Connection
 type CBConfig struct {
-	Connection string
-	BucketName string
-	BucketPass string
-	PrivateRSA string
+	Connection  string
+	BucketName  string
+	BucketPass  string
+	PrivateRSA  string
+	Environment string
 }
 
 //NewCorkboard creates a Corkboard and connects to the  CBConfig passed to it
@@ -82,6 +88,7 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 	return &Corkboard{
 		Bucket:        bucket,
 		CorkboardAuth: cba,
+		Environment:   config.Environment,
 	}, nil
 }
 
@@ -111,8 +118,8 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router := httprouter.New()
 	stdChain := madhatter.New(cb.defaultHeaders, cb.authToken)
 	noAuthChain := madhatter.New(cb.defaultHeaders)
+	noHeadersChain := madhatter.New(cb.authToken)
 	environment := os.Getenv("CB_ENVIRONMENT")
-
 	router.GET("/api/items", stdChain.Then(cb.GetItems))
 	router.GET("/api/items/:id", stdChain.Then(cb.GetItemByID))
 	router.POST("/api/items/new", stdChain.Then(cb.NewItem))
@@ -125,8 +132,10 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router.GET("/api/search/:key", stdChain.Then(cb.SearchUser))
 	router.POST("/api/image/new", stdChain.Then(cb.NewImageURL))
 	if environment == "dev" {
-		router.POST("/api/image/post/:key", stdChain.Then(cb.MockS3))
+		router.POST("/api/image/post/:key", cb.MockS3)
+		router.GET("/api/images/:key", noHeadersChain.Then(cb.GetImageMock))
 	}
+
 	router.DELETE("/api/users/delete/:id", stdChain.Then(cb.DeleteUser))
 	router.POST("/api/users/register", noAuthChain.Then(cb.CorkboardAuth.RegisterUser()))
 	router.POST("/api/users/auth", noAuthChain.Then(cb.CorkboardAuth.AuthUser()))

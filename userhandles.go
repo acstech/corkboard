@@ -15,8 +15,11 @@ and add it to an existing user in the database*/
 type UpdateUserReq struct {
 	Firstname string `json:"firstname,omitempty"`
 	Lastname  string `json:"lastname,omitempty"`
-	Email     string `json:"email"`
+	Email     string `json:"email,omitempty"`
 	Phone     string `json:"phone,omitempty"`
+	Zipcode   string `json:"zipcode,omitempty"`
+	PicID     string `json:"picid,omitempty"`
+
 }
 
 //GetUsers handles GET requests and responds with a slice of all users from couchbase
