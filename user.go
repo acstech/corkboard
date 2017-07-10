@@ -64,7 +64,6 @@ func (cb *Corkboard) findUserByID(id string) (*User, error) {
 	user := new(User)
 	_, err := cb.Bucket.Get(key, user)
 	if err != nil {
-		log.Println("Unable to get user.")
 		return nil, err
 	}
 	return user, nil
@@ -76,13 +75,10 @@ func (cb *Corkboard) findUserByKey(key string) (*User, error) {
 
 	if parseKey[0] == "email" {
 		searchKey = "email"
-		log.Println(searchKey)
 	} else if parseKey[0] == "firstname" {
 		searchKey = "firstname"
-		log.Println(searchKey)
 	} else if parseKey[0] == "lastname" {
 		searchKey = "lastname"
-		log.Println(searchKey)
 	} else {
 		log.Println("Request incorrectly formatted")
 		return nil, nil

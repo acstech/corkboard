@@ -76,10 +76,25 @@ func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ h
 	//w.WriteHeader(http.StatusOK)
 }
 
-// func (corkboard *Corkboard) GetItemsByCat(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-// 	category := p.ByName("cat")
-// 	item, _ := corkboard.findItemsByCat(category)
-// }
+//GetItemsByCat provides searchability for items by category
+func (corkboard *Corkboard) GetItemsByCat(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	category := p.ByName("key")
+	items, _ := corkboard.findItemsByCat(category)
+	if items == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	JSONobj, err := json.Marshal(items)
+	if err != nil {
+		log.Println(err)
+	}
+
+	_, err2 := w.Write(JSONobj)
+	if err2 != nil {
+		log.Println(err2)
+	}
+	w.WriteHeader(http.StatusOK)
+}
 
 //GetItemByID uses the httprouter params to find the item by id, then Marshal & Write it in JSON
 func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -159,7 +174,6 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 		log.Println(err)
 	}
 	if item == nil {
-		log.Println("Item could not be found")
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -212,7 +226,6 @@ func (corkboard *Corkboard) DeleteItem(w http.ResponseWriter, r *http.Request, p
 		log.Println(err)
 	}
 	if item == nil {
-		log.Println("Item could not be found")
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
