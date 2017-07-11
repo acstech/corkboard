@@ -113,7 +113,7 @@ func TestCreateUserPass(t *testing.T) {
 	emailaddress = "Ma98nfbjh6734vdSa223b"
 
 	userJSON :=
-		fmt.Sprintf(`{ "email":"%s@ROCKWELL", "password":"cat", "confirm":"cat", "siteId":"12341234-1234-1234-1234-123412341234"}`, emailaddress)
+		fmt.Sprintf(`{ "email":"%s@ROCKWELL.com", "password":"ca12341t", "confirm":"ca12341t", "siteId":"12341234-1234-1234-1234-123412341234"}`, emailaddress)
 	reader := strings.NewReader(userJSON)
 
 	req, err := http.NewRequest("POST", newuserURL, reader)
@@ -154,7 +154,7 @@ func TestGetUsersFail(t *testing.T) {
 //TestAuthPass authorizes user and stores token for future test functions
 func TestAuthPass(t *testing.T) {
 	userJSON :=
-		fmt.Sprintf(`{ "email":"%s@ROCKWELL", "password":"cat", "siteId":"12341234-1234-1234-1234-123412341234"}`, emailaddress)
+		fmt.Sprintf(`{ "email":"%s@ROCKWELL.com", "password":"ca12341t", "siteId":"12341234-1234-1234-1234-123412341234"}`, emailaddress)
 	reader := strings.NewReader(userJSON)
 
 	req, err := http.NewRequest("POST", authStr, reader)
@@ -210,7 +210,7 @@ func TestGetUsersPass(t *testing.T) {
 	//iterate through array and find authorized user by email
 	for i := 0; i < len(Arr); i++ {
 		email := Arr[i].TheUserEmail
-		if email == "Ma98nfbjh6734vdSa223b@ROCKWELL" {
+		if email == "Ma98nfbjh6734vdSa223b@ROCKWELL.com" {
 			globaluserid = Arr[i].TheUserID //assign globaluserid for future use
 		}
 	}
