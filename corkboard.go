@@ -129,9 +129,9 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router.PUT("/api/users/edit/:id", stdChain.Then(cb.UpdateUser))
 	router.GET("/api/search/:key", stdChain.Then(cb.SearchUser))
 	router.POST("/api/image/new", stdChain.Then(cb.NewImageURL))
-	router.DELETE("/api/images/delete/:key", stdChain.Then(cb.DeleteImageURL))
+	router.DELETE("/api/images/delete/:key", stdChain.Then(cb.DeleteImage))
 	if cb.Environment == envDev {
-		router.POST("/api/image/post/:key", cb.MockS3)
+		router.PUT("/api/image/post/:key", cb.MockS3)
 		router.GET("/api/images/:key", cb.GetImageMock)
 	}
 	router.DELETE("/api/users/delete/:id", stdChain.Then(cb.DeleteUser))

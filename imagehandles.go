@@ -98,11 +98,11 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 	}
 }
 
-//DeleteImageURL does a simple object removal from database
-func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+//DeleteImage does a simple object removal from database
+func (cb *Corkboard) DeleteImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	key := ps.ByName("key")
-	if os.Getenv("CB_ENVIRONMENT") == "dev" {
+	if cb.Environment == envDev {
 		// delete an image: get current image
 		filepath := fmt.Sprintf("%s/%s", path, key)
 		log.Println(filepath)
@@ -136,13 +136,6 @@ func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps h
 
 }
 
-//
-// func (cb *Corkboard) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-// cb.DeleteImageURL(w, r, ps)
-// cb.NewImageURL(w, r, _)
-// 	w.WriteHeader(http.StatusOK)
-// }
-
 //MockS3 checks for directory where files will be stored. If they don't, create it for them
 // the "presigned url's" that direct to this endpoint will have to be mocked by a fake "dev env"
 //endpoint. This endpoint should only be used for development purposes as well.
@@ -150,7 +143,6 @@ func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps h
 func (cb *Corkboard) MockS3(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	log.Println("Entering MockS3...")
-
 
 	key := ps.ByName("key")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
