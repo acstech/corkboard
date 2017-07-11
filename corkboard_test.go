@@ -883,6 +883,29 @@ func TestDeleteUserPass(t *testing.T) {
 //FAILING USER TESTS GO HERE
 //-----------------------------------------
 
+//GetUsersFail checks if Database is empty, then calls GetUsers
+func GetUsersFail(t *testing.T) {
+
+	//bucket :=
+	// useridURL = fmt.Sprintf("%s/api/users/%s", serveURL, globaluserid)
+	// req, err := http.NewRequest("GET", useridURL, nil)
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+	// bearer := "Bearer " + theToken
+	// req.Header.Set("authorization", bearer)
+	//
+	// res, err2 := http.DefaultClient.Do(req)
+	// if err2 != nil {
+	// 	t.Error(err2)
+	// }
+	//
+	// if res.StatusCode != 204 {
+	// 	t.Errorf("Success expected: %d", res.StatusCode)
+	// }
+	// res.Body.Close() //nolint: errcheck
+}
+
 //TestSearchUserFail fails because of invalid value
 func TestSearchUserFail(t *testing.T) {
 	searchuserURL = fmt.Sprintf("%s/api/search/email=%sROCKWELL", serveURL, emailaddress)
