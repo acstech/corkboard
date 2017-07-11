@@ -583,6 +583,7 @@ func TestCreateImageURLPass(t *testing.T) {
 	}
 }
 
+//TestNewImagePass uses the Url from TestCreateImageURLPass and puts our image in local storage
 func TestNewImagePass(t *testing.T) {
 	imageurl := fmt.Sprintf("%s/api/image/post/%s", serveURL, globalimage)
 
@@ -609,6 +610,31 @@ func TestNewImagePass(t *testing.T) {
 	}
 }
 
+//TestGetImagePass calls GetImage
+func TestGetImagePass(t *testing.T) {
+
+	geturl := fmt.Sprintf("%s/api/images/%s", serveURL, globalimage)
+
+	req, err := http.NewRequest("GET", geturl, nil)
+	if err != nil {
+		log.Println(err)
+	}
+
+	bearer := "Bearer " + theToken
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	if res.StatusCode != 200 {
+		t.Errorf("Success Expected:", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck
+}
+
+//TestDeleteImagePass removes our image from the local folder
 func TestDeleteImagePass(t *testing.T) {
 
 	url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, globalimage)
@@ -628,9 +654,9 @@ func TestDeleteImagePass(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
-
 }
 
+//TestDeleteImageFail attempts to delete a image with an invalid url
 func TestDeleteImageFail(t *testing.T) {
 
 	url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, "IDONTEXISTS")
@@ -882,29 +908,6 @@ func TestDeleteUserPass(t *testing.T) {
 //-----------------------------------------
 //FAILING USER TESTS GO HERE
 //-----------------------------------------
-
-//GetUsersFail checks if Database is empty, then calls GetUsers
-func GetUsersFail(t *testing.T) {
-
-	//bucket :=
-	// useridURL = fmt.Sprintf("%s/api/users/%s", serveURL, globaluserid)
-	// req, err := http.NewRequest("GET", useridURL, nil)
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	// bearer := "Bearer " + theToken
-	// req.Header.Set("authorization", bearer)
-	//
-	// res, err2 := http.DefaultClient.Do(req)
-	// if err2 != nil {
-	// 	t.Error(err2)
-	// }
-	//
-	// if res.StatusCode != 204 {
-	// 	t.Errorf("Success expected: %d", res.StatusCode)
-	// }
-	// res.Body.Close() //nolint: errcheck
-}
 
 //TestSearchUserFail fails because of invalid value
 func TestSearchUserFail(t *testing.T) {
