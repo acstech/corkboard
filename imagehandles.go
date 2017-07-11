@@ -37,8 +37,9 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 		imageExtension := picID.Extension
 		imageGUID := uuid.NewV4()
 		key := fmt.Sprintf("%s.%s", imageGUID, imageExtension)
+		log.Println(key)
 		imageRes.ImageKey = key
-		url := fmt.Sprintf("localhost:%s/api/image/post/%s", os.Getenv("CB_PORT"), key)
+		url := fmt.Sprintf("http://localhost:%s/api/image/post/%s", os.Getenv("CB_PORT"), key)
 
 		imageRes.URL = url
 		imageResJSON, err := json.Marshal(imageRes)
@@ -147,6 +148,9 @@ func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps h
 //endpoint. This endpoint should only be used for development purposes as well.
 //Still want to use the image GUID.tag as the key
 func (cb *Corkboard) MockS3(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+	log.Println("Entering MockS3...")
+
 
 	key := ps.ByName("key")
 	if _, err := os.Stat(path); os.IsNotExist(err) {

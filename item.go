@@ -123,6 +123,7 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 	var name = newitem.Itemname
 	var desc = newitem.Itemdesc
 	var cat = newitem.Itemcat
+	var picid = newitem.PictureID
 
 	var priceSplit = strings.TrimPrefix(newitem.Price, "$ ")
 	priceSplit = strings.Replace(priceSplit, ",", "", -1)
@@ -138,7 +139,7 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 	var status = newitem.Status
 	newID := uuid.NewV4()
 	uID := newID.String()
-	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, Price: price, Status: status, UserID: newitem.UserID, DatePosted: time.Now()}, 0)
+	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, PictureID: picid, Price: price, Status: status, UserID: newitem.UserID, DatePosted: time.Now()}, 0)
 	return err
 
 }

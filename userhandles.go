@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	corkboardauth "github.com/acstech/corkboard-auth"
 	"github.com/julienschmidt/httprouter"
@@ -19,7 +20,6 @@ type UpdateUserReq struct {
 	Phone     string `json:"phone,omitempty"`
 	Zipcode   string `json:"zipcode,omitempty"`
 	PicID     string `json:"picid,omitempty"`
-
 }
 
 //GetUsers handles GET requests and responds with a slice of all users from couchbase
@@ -33,7 +33,7 @@ func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprout
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-
+	//TODO: GetUsers should return the picID/GetURL of the user
 	usersRes := make([]GetUserRes, len(users))
 
 	for i, user := range users {
@@ -78,7 +78,15 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 	userRes.Lastname = user.Lastname
 	userRes.ID = user.ID
 	userRes.Phone = user.Phone
-
+	userRes.PicID = user.PicID
+	var url string
+	if cb.Environment == envDev {
+		url = fmt.Sprintf("localhost:%s/api/images/%s", os.Getenv("CB_PORT"), user.PicID)
+	} else {
+		primaryID := user.PicID
+		url = cb.getImageURL(primaryID)
+	}
+	userRes.PicURL = url
 	itemIDList, err := cb.findUserItems(id)
 	if err != nil {
 		log.Println(err)
@@ -172,6 +180,7 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 	user.Lastname = userReq.Lastname
 	user.Phone = userReq.Phone
 	user.Email = userReq.Email
+	user.PicID = userReq.PicID
 
 	_, error := cb.Bucket.Upsert(userKey, &struct {
 		Type string `json:"_type"`

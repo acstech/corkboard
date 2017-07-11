@@ -116,11 +116,19 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 	newitem.PictureID = item.PictureID
 	newitem.DatePosted = item.DatePosted
 	allID := item.PictureID
-	for _, id := range allID {
-		//newitem.PicURL[index] = corkboard.getImageURL(id)
-		url := corkboard.getImageURL(id)
-		newitem.PicURL = append(newitem.PicURL, url)
+	if corkboard.Environment == envDev {
+		for _, id := range allID {
+			url := fmt.Sprintf("localhost:%s/api/images/%s", os.Getenv("CB_PORT"), id)
+			newitem.PicURL = append(newitem.PicURL, url)
+		}
+	} else {
+		for _, id := range allID {
+			//newitem.PicURL[index] = corkboard.getImageURL(id)
+			url := corkboard.getImageURL(id)
+			newitem.PicURL = append(newitem.PicURL, url)
+		}
 	}
+
 	JSONitem, err := json.Marshal(newitem)
 	if err != nil {
 		log.Println(err)

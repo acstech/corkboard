@@ -118,8 +118,6 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router := httprouter.New()
 	stdChain := madhatter.New(cb.defaultHeaders, cb.authToken)
 	noAuthChain := madhatter.New(cb.defaultHeaders)
-	noHeadersChain := madhatter.New(cb.authToken)
-	environment := os.Getenv("CB_ENVIRONMENT")
 	router.GET("/api/items", stdChain.Then(cb.GetItems))
 	router.GET("/api/items/:id", stdChain.Then(cb.GetItemByID))
 	router.POST("/api/items/new", stdChain.Then(cb.NewItem))
@@ -131,17 +129,16 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router.PUT("/api/users/edit/:id", stdChain.Then(cb.UpdateUser))
 	router.GET("/api/search/:key", stdChain.Then(cb.SearchUser))
 	router.POST("/api/image/new", stdChain.Then(cb.NewImageURL))
-	if environment == "dev" {
+  router.DELETE("/api/images/delete/:key", noHeadersChain.Then(cb.DeleteImageURL))
+	if cb.Environment == envDev {
 		router.POST("/api/image/post/:key", cb.MockS3)
-		router.GET("/api/images/:key", noHeadersChain.Then(cb.GetImageMock))
-		router.DELETE("/api/images/delete/:key", noHeadersChain.Then(cb.DeleteImageURL))
+		router.GET("/api/images/:key", cb.GetImageMock)
 	}
 
 	router.DELETE("/api/users/delete/:id", stdChain.Then(cb.DeleteUser))
 	router.POST("/api/users/register", noAuthChain.Then(cb.CorkboardAuth.RegisterUser()))
 	router.POST("/api/users/auth", noAuthChain.Then(cb.CorkboardAuth.AuthUser()))
 	return router
-
 }
 
 func contains(a []string, b string) bool {
