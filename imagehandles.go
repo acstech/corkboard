@@ -99,7 +99,7 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 }
 
 //DeleteImageURL does a simple object removal from database
-func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (cb *Corkboard) DeleteImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	key := ps.ByName("key")
 	if os.Getenv("CB_ENVIRONMENT") == "dev" {
@@ -150,7 +150,6 @@ func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps h
 func (cb *Corkboard) MockS3(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	log.Println("Entering MockS3...")
-
 
 	key := ps.ByName("key")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
