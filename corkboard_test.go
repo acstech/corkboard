@@ -46,6 +46,7 @@ var (
 	badedititems  string
 	/*deleteuserURL string*/
 	baduserURL string
+	dev        bool
 
 	newimageurl string
 )
@@ -76,6 +77,11 @@ func init() {
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+	if len(cork.Environment) == 0 {
+		dev = false
+	} else {
+		dev = true
 	}
 
 	server := httptest.NewServer(cork.Router())
@@ -548,135 +554,140 @@ func TestGetItemIDPass(t *testing.T) {
 
 //TestCreateImageURLPass will create URL and we will store it for future use
 func TestCreateImageURLPass(t *testing.T) {
+	if dev == true {
+		itemJSON := `{"checksum": "h892y93g4rf", "extension": "jpg"}`
+		reader := strings.NewReader(itemJSON)
 
-	itemJSON := `{"checksum": "h892y93g4rf", "extension": "jpg"}`
-	reader := strings.NewReader(itemJSON)
+		req, err := http.NewRequest("POST", newimageurl, reader)
+		if err != nil {
+			t.Error(err)
+		}
 
-	req, err := http.NewRequest("POST", newimageurl, reader)
-	if err != nil {
-		t.Error(err)
-	}
+		bearer := "Bearer " + theToken
+		req.Header.Set("authorization", bearer)
+		// timer := time.NewTimer(time.Second * 1)
+		// <-timer.C
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
 
-	bearer := "Bearer " + theToken
-	req.Header.Set("authorization", bearer)
-	// timer := time.NewTimer(time.Second * 1)
-	// <-timer.C
-	res, err2 := http.DefaultClient.Do(req)
-	if err2 != nil {
-		t.Error(err2)
-	}
+		defer res.Body.Close() //nolint: errcheck
 
-	defer res.Body.Close() //nolint: errcheck
+		var Arr Values
+		body, _ := ioutil.ReadAll(res.Body)
+		errre := json.Unmarshal(body, &Arr)
+		if errre != nil {
+			log.Println(errre)
+		}
 
-	var Arr Values
-	body, _ := ioutil.ReadAll(res.Body)
-	errre := json.Unmarshal(body, &Arr)
-	if errre != nil {
-		log.Println(errre)
-	}
+		//iterate through array and find images under user
+		globalimage = Arr.PicID
 
-	//iterate through array and find images under user
-	globalimage = Arr.PicID
-
-	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		if res.StatusCode != 200 {
+			t.Errorf("Success expected: %d", res.StatusCode)
+		}
 	}
 }
 
 //TestNewImagePass uses the Url from TestCreateImageURLPass and puts our image in local storage
 func TestNewImagePass(t *testing.T) {
-	imageurl := fmt.Sprintf("%s/api/image/post/%s", serveURL, globalimage)
+	if dev == true {
+		imageurl := fmt.Sprintf("%s/api/image/post/%s", serveURL, globalimage)
 
-	path := "./testassets/cat.jpg"
+		path := "./testassets/cat.jpg"
 
-	pic, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Println(err)
-	}
+		pic, err := ioutil.ReadFile(path)
+		if err != nil {
+			log.Println(err)
+		}
 
-	reader := bytes.NewReader(pic)
-	req, err := http.NewRequest("POST", imageurl, reader)
+		reader := bytes.NewReader(pic)
+		req, err := http.NewRequest("POST", imageurl, reader)
 
-	if err != nil {
-		log.Println(err)
-	}
+		if err != nil {
+			log.Println(err)
+		}
 
-	res, err2 := http.DefaultClient.Do(req)
-	if err2 != nil {
-		t.Error(err2)
-	}
-	if res.StatusCode != 201 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
+		if res.StatusCode != 201 {
+			t.Errorf("Success expected: %d", res.StatusCode)
+		}
 	}
 }
 
 //TestGetImagePass calls GetImage
 func TestGetImagePass(t *testing.T) {
+	if dev == true {
+		geturl := fmt.Sprintf("%s/api/images/%s", serveURL, globalimage)
 
-	geturl := fmt.Sprintf("%s/api/images/%s", serveURL, globalimage)
+		req, err := http.NewRequest("GET", geturl, nil)
+		if err != nil {
+			log.Println(err)
+		}
 
-	req, err := http.NewRequest("GET", geturl, nil)
-	if err != nil {
-		log.Println(err)
+		bearer := "Bearer " + theToken
+		req.Header.Set("authorization", bearer)
+
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
+
+		if res.StatusCode != 200 {
+			t.Errorf("Success Expected:", res.StatusCode)
+		}
+		res.Body.Close() //nolint: errcheck
 	}
-
-	bearer := "Bearer " + theToken
-	req.Header.Set("authorization", bearer)
-
-	res, err2 := http.DefaultClient.Do(req)
-	if err2 != nil {
-		t.Error(err2)
-	}
-
-	if res.StatusCode != 200 {
-		t.Errorf("Success Expected:", res.StatusCode)
-	}
-	res.Body.Close() //nolint: errcheck
 }
 
 //TestDeleteImagePass removes our image from the local folder
 func TestDeleteImagePass(t *testing.T) {
+	if dev == true {
+		url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, globalimage)
+		req, err := http.NewRequest("DELETE", url, nil)
+		if err != nil {
+			log.Println(err)
+		}
+		bearer := "Bearer " + theToken
+		req.Header.Set("authorization", bearer)
 
-	url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, globalimage)
-	req, err := http.NewRequest("DELETE", url, nil)
-	if err != nil {
-		log.Println(err)
-	}
-	bearer := "Bearer " + theToken
-	req.Header.Set("authorization", bearer)
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
 
-	res, err2 := http.DefaultClient.Do(req)
-	if err2 != nil {
-		t.Error(err2)
+		if res.StatusCode != 200 {
+			t.Errorf("Success expected: %d", res.StatusCode)
+		}
+		res.Body.Close() //nolint: errcheck
 	}
-
-	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
-	}
-	res.Body.Close() //nolint: errcheck
 }
 
 //TestDeleteImageFail attempts to delete a image with an invalid url
 func TestDeleteImageFail(t *testing.T) {
+	if dev == true {
+		url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, "IDONTEXISTS")
+		req, err := http.NewRequest("DELETE", url, nil)
+		if err != nil {
+			log.Println(err)
+		}
+		bearer := "Bearer " + theToken
+		req.Header.Set("authorization", bearer)
 
-	url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, "IDONTEXISTS")
-	req, err := http.NewRequest("DELETE", url, nil)
-	if err != nil {
-		log.Println(err)
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
+
+		if res.StatusCode != 404 {
+			t.Errorf("Success expected: %d", res.StatusCode)
+		}
+		res.Body.Close() //nolint: errcheck
 	}
-	bearer := "Bearer " + theToken
-	req.Header.Set("authorization", bearer)
-
-	res, err2 := http.DefaultClient.Do(req)
-	if err2 != nil {
-		t.Error(err2)
-	}
-
-	if res.StatusCode != 404 {
-		t.Errorf("Success expected: %d", res.StatusCode)
-	}
-	res.Body.Close() //nolint: errcheck
-
 }
 
 //TestGetItemsByCatPass will do this
