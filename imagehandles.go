@@ -20,6 +20,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+const path = "./s3images"
+
 //NewImageURL is a handle to deal with New Image Requests
 func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
@@ -101,14 +103,16 @@ func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps h
 	key := ps.ByName("key")
 	if os.Getenv("CB_ENVIRONMENT") == "dev" {
 		// delete an image: get current image
-		path := "./s3images"
 		filepath := fmt.Sprintf("%s/%s", path, key)
 		log.Println(filepath)
 		if _, err := os.Stat(filepath); os.IsNotExist(err) {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		os.Remove(filepath)
+		err := os.Remove(filepath)
+		if err != nil {
+			log.Println(err)
+		}
 
 	} else {
 		sess, err := session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
@@ -143,7 +147,6 @@ func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps h
 //endpoint. This endpoint should only be used for development purposes as well.
 //Still want to use the image GUID.tag as the key
 func (cb *Corkboard) MockS3(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	path := "./s3images"
 
 	key := ps.ByName("key")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -179,7 +182,6 @@ func (cb *Corkboard) MockS3(w http.ResponseWriter, r *http.Request, ps httproute
 
 //GetImageMock retrieves image from mocks3 storage during development
 func (cb *Corkboard) GetImageMock(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	path := "./s3images"
 	key := ps.ByName("key")
 	ext := strings.Split(key, ".")
 	var extension string
