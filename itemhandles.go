@@ -106,30 +106,7 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	var newitem Item
-	//NewReqTransfer(item, &itemreq)
-	newitem.ItemName = item.ItemName
-	newitem.Category = item.Category
-	newitem.ItemDesc = item.ItemDesc
-	newitem.Price = item.Price
-	newitem.Status = item.Status
-	newitem.PictureID = item.PictureID
-	newitem.DatePosted = item.DatePosted
-	allID := item.PictureID
-	if corkboard.Environment == envDev {
-		for _, id := range allID {
-			url := fmt.Sprintf("http://localhost:%s/api/images/%s", os.Getenv("CB_PORT"), id)
-			newitem.PicURL = append(newitem.PicURL, url)
-		}
-	} else {
-		for _, id := range allID {
-			//newitem.PicURL[index] = corkboard.getImageURL(id)
-			url := corkboard.getImageURL(id)
-			newitem.PicURL = append(newitem.PicURL, url)
-		}
-	}
-
-	JSONitem, err := json.Marshal(newitem)
+	JSONitem, err := json.Marshal(item)
 	if err != nil {
 		log.Println(err)
 	}

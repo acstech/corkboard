@@ -3,6 +3,7 @@ package corkboard
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -105,13 +106,23 @@ func (corkboard *Corkboard) findItemsByCat(itemCat string) ([]Item, error) {
 
 //findItemById queries for a specific item by id key
 func (corkboard *Corkboard) findItemByID(itemID string) (*Item, error) {
-
 	item := new(Item)
 	itemkey := "item:" + itemID
 	_, err := corkboard.Bucket.Get(itemkey, item)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
+	}
+	if corkboard.Environment == envDev {
+		for _, id := range item.PictureID {
+			url := fmt.Sprintf("http://localhost:%s/api/images/%s", os.Getenv("CB_PORT"), id)
+			item.PicURL = append(item.PicURL, url)
+		}
+	} else {
+		for _, id := range item.PictureID {
+			url := corkboard.getImageURL(id)
+			item.PicURL = append(item.PicURL, url)
+		}
 	}
 	return item, nil
 
