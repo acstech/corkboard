@@ -43,6 +43,7 @@ func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprout
 		userRes.Lastname = user.Lastname
 		userRes.ID = user.ID
 		userRes.Phone = user.Phone
+		userRes.Zipcode = user.Zipcode
 		usersRes[i] = userRes
 	}
 
@@ -78,6 +79,7 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 	userRes.Lastname = user.Lastname
 	userRes.ID = user.ID
 	userRes.Phone = user.Phone
+	userRes.Zipcode = user.Zipcode
 	userRes.PicID = user.PicID
 	var url string
 	if cb.Environment == envDev {
@@ -131,6 +133,7 @@ func (cb *Corkboard) SearchUser(w http.ResponseWriter, r *http.Request, ps httpr
 	userRes.Lastname = user.Lastname
 	userRes.ID = user.ID
 	userRes.Phone = user.Phone
+	userRes.Zipcode = user.Zipcode
 	userJSON, err := json.Marshal(userRes)
 	if err != nil {
 		log.Println(err)
@@ -180,6 +183,7 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 	user.Lastname = userReq.Lastname
 	user.Phone = userReq.Phone
 	user.Email = userReq.Email
+	user.Zipcode = userReq.Zipcode
 	user.PicID = userReq.PicID
 
 	_, error := cb.Bucket.Upsert(userKey, &struct {
