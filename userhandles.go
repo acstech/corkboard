@@ -83,7 +83,7 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 	userRes.PicID = user.PicID
 	var url string
 	if cb.Environment == envDev {
-		url = fmt.Sprintf("localhost:%s/api/images/%s", os.Getenv("CB_PORT"), user.PicID)
+		url = fmt.Sprintf("http://localhost:%s/api/images/%s", os.Getenv("CB_PORT"), user.PicID)
 	} else {
 		primaryID := user.PicID
 		url = cb.getImageURL(primaryID)

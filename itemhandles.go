@@ -118,7 +118,7 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 	allID := item.PictureID
 	if corkboard.Environment == envDev {
 		for _, id := range allID {
-			url := fmt.Sprintf("localhost:%s/api/images/%s", os.Getenv("CB_PORT"), id)
+			url := fmt.Sprintf("http://localhost:%s/api/images/%s", os.Getenv("CB_PORT"), id)
 			newitem.PicURL = append(newitem.PicURL, url)
 		}
 	} else {
