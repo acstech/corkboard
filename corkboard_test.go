@@ -590,6 +590,10 @@ func TestCreateImageURLPass(t *testing.T) {
 	}
 }
 
+//----------------------------------------------------------
+//Images Tests Go Here
+//----------------------------------------------------------
+
 //TestNewImagePass uses the Url from TestCreateImageURLPass and puts our image in local storage
 func TestNewImagePass(t *testing.T) {
 	if dev {
