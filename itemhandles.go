@@ -39,7 +39,7 @@ func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ h
 		if corkboard.Environment == envDev {
 			if item.PictureID != nil {
 				primaryID = item.PictureID[0]
-				url = fmt.Sprintf("localhost:%s/api/images/%s", os.Getenv("CB_PORT"), primaryID)
+				url = fmt.Sprintf("http://localhost:%s/api/images/%s", os.Getenv("CB_PORT"), primaryID)
 			}
 		} else {
 			if item.PictureID != nil {
