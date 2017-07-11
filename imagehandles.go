@@ -34,7 +34,12 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 			log.Println(err)
 			return
 		}
-		imageExtension := picID.Extension
+		var imageExtension string
+		if picID.Extension == "jpg" {
+			imageExtension = "jpeg"
+		} else {
+			imageExtension = picID.Extension
+		}
 		imageGUID := uuid.NewV4()
 		key := fmt.Sprintf("%s.%s", imageGUID, imageExtension)
 		log.Println(key)
@@ -191,6 +196,7 @@ func (cb *Corkboard) GetImageMock(w http.ResponseWriter, r *http.Request, ps htt
 	if err != nil {
 		log.Println(err)
 	}
+
 	w.Header().Set("Content-Type", fmt.Sprintf("image/%s", extension))
 
 	_, err = w.Write(pic)
