@@ -102,7 +102,7 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 func (cb *Corkboard) DeleteImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	key := ps.ByName("key")
-	if os.Getenv("CB_ENVIRONMENT") == "dev" {
+	if cb.Environment == envDev {
 		// delete an image: get current image
 		filepath := fmt.Sprintf("%s/%s", path, key)
 		log.Println(filepath)
