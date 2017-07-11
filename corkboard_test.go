@@ -554,7 +554,7 @@ func TestGetItemIDPass(t *testing.T) {
 
 //TestCreateImageURLPass will create URL and we will store it for future use
 func TestCreateImageURLPass(t *testing.T) {
-	if dev == true {
+	if dev {
 		itemJSON := `{"checksum": "h892y93g4rf", "extension": "jpg"}`
 		reader := strings.NewReader(itemJSON)
 
@@ -592,7 +592,7 @@ func TestCreateImageURLPass(t *testing.T) {
 
 //TestNewImagePass uses the Url from TestCreateImageURLPass and puts our image in local storage
 func TestNewImagePass(t *testing.T) {
-	if dev == true {
+	if dev {
 		imageurl := fmt.Sprintf("%s/api/image/post/%s", serveURL, globalimage)
 
 		path := "./testassets/cat.jpg"
@@ -621,7 +621,7 @@ func TestNewImagePass(t *testing.T) {
 
 //TestGetImagePass calls GetImage
 func TestGetImagePass(t *testing.T) {
-	if dev == true {
+	if dev {
 		geturl := fmt.Sprintf("%s/api/images/%s", serveURL, globalimage)
 
 		req, err := http.NewRequest("GET", geturl, nil)
@@ -646,7 +646,7 @@ func TestGetImagePass(t *testing.T) {
 
 //TestDeleteImagePass removes our image from the local folder
 func TestDeleteImagePass(t *testing.T) {
-	if dev == true {
+	if dev {
 		url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, globalimage)
 		req, err := http.NewRequest("DELETE", url, nil)
 		if err != nil {
@@ -669,7 +669,7 @@ func TestDeleteImagePass(t *testing.T) {
 
 //TestDeleteImageFail attempts to delete a image with an invalid url
 func TestDeleteImageFail(t *testing.T) {
-	if dev == true {
+	if dev {
 		url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, "IDONTEXISTS")
 		req, err := http.NewRequest("DELETE", url, nil)
 		if err != nil {
