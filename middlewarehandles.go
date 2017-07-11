@@ -21,6 +21,8 @@ var (
 	ReqCtxClaims ReqCtxKeys = "claims"
 )
 
+//authToken middleware function parses through request header and
+//checks if token is valid before allowing access to router handles
 func (cb *Corkboard) authToken(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		var claims corkboardauth.CustomClaims
@@ -64,6 +66,8 @@ func (cb *Corkboard) authToken(next httprouter.Handle) httprouter.Handle {
 	}
 }
 
+//defaultHeaders middleware function is for "register" and "auth" handles that do not
+//require authorization
 func (cb *Corkboard) defaultHeaders(next httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		w.Header().Set("Content-Type", "application/json")
