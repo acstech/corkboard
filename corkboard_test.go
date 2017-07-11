@@ -1,6 +1,7 @@
 package corkboard_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -33,6 +34,8 @@ var (
 	emailaddress string
 	globaluserid string
 	globalitemid string
+	globalprice  float64
+	globalimage  string
 
 	newitemsURL   string
 	itemsURL      string
@@ -43,32 +46,42 @@ var (
 	badedititems  string
 	/*deleteuserURL string*/
 	baduserURL string
+	dev        bool
+
+	newimageurl string
 )
 
 type Token struct {
 	Token string `json:"token"`
 }
 
-//new struct???
 type Values struct {
-	TheUserID    string `json:"id"`
-	TheUserEmail string `json:"email"`
-	TheItemID    string `json:"itemid"`
-	ItemUserID   string `json:"userid"`
+	TheUserID    string  `json:"id"`
+	TheUserEmail string  `json:"email"`
+	TheItemID    string  `json:"itemid"`
+	ItemUserID   string  `json:"userid"`
+	PriceType    float64 `json:"itemprice"`
+	PicID        string  `json:"picid"`
 }
 
 func init() {
 
 	//Set up connection for tests to run on
 	cork, err := corkboard.NewCorkboard(&corkboard.CBConfig{
-		Connection: os.Getenv("CB_CONNECTION"),
-		BucketName: os.Getenv("CB_BUCKET"),
-		BucketPass: os.Getenv("CB_BUCKET_PASS"),
-		PrivateRSA: os.Getenv("CB_PRIVATE_RSA"),
+		Connection:  os.Getenv("CB_CONNECTION"),
+		BucketName:  os.Getenv("CB_BUCKET"),
+		BucketPass:  os.Getenv("CB_BUCKET_PASS"),
+		PrivateRSA:  os.Getenv("CB_PRIVATE_RSA"),
+		Environment: os.Getenv("CB_ENVIRONMENT"),
 	})
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+	if len(cork.Environment) == 0 {
+		dev = false
+	} else {
+		dev = true
 	}
 
 	server := httptest.NewServer(cork.Router())
@@ -85,6 +98,9 @@ func init() {
 	itemsURL = fmt.Sprintf("%s/api/items", server.URL)
 	baditemsURL = fmt.Sprintf("%s/api/items/15b27e85", server.URL)
 	badedititems = fmt.Sprintf("%s/api/items/edit/15b27e85", server.URL)
+
+	//Connection strings (image)
+	newimageurl = fmt.Sprintf("%s/api/image/new", server.URL)
 }
 
 //-----------------------------------------
@@ -146,6 +162,7 @@ func TestAuthPass(t *testing.T) {
 		t.Error(err)
 	}
 
+	//one second delay to allow DB time to update
 	timer := time.NewTimer(time.Second * 1)
 	<-timer.C
 	res, err2 := http.DefaultClient.Do(req)
@@ -153,13 +170,10 @@ func TestAuthPass(t *testing.T) {
 		t.Error(err2)
 	}
 
-	//var claims corkboardauth.CustomClaims
-	//var parse jwt.Parser
-
 	var theTok Token
 	decoder := json.NewDecoder(res.Body)
 	decoder.Decode(&theTok) //nolint: errcheck
-	//header stores token from response for future use
+	//theToken stores token from response for future use
 	theToken = theTok.Token
 
 	if res.StatusCode != 200 {
@@ -177,6 +191,7 @@ func TestGetUsersPass(t *testing.T) {
 		t.Error(err)
 	}
 
+	//put token in request header
 	bearer := "Bearer " + theToken
 	req.Header.Set("authorization", bearer)
 	res, err2 := http.DefaultClient.Do(req)
@@ -199,7 +214,7 @@ func TestGetUsersPass(t *testing.T) {
 			globaluserid = Arr[i].TheUserID //assign globaluserid for future use
 		}
 	}
-	//globaluserid = Arr[0].TheUserID
+
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
@@ -326,6 +341,10 @@ func TestSearchUserPass3(t *testing.T) {
 	res.Body.Close() //nolint: errcheck
 }
 
+//-----------------------------------------
+//FAILING USER TESTS GO HERE
+//-----------------------------------------
+
 //TestGetUsersFailAuth attempts to pass an invalid token
 func TestGetUsersFailAuth(t *testing.T) {
 	req, err := http.NewRequest("GET", usersURL, nil)
@@ -423,7 +442,7 @@ func TestEditUserFail(t *testing.T) {
 //TestCreateItemPass creates an item with multiple fields, should always pass
 func TestCreateItemPass(t *testing.T) {
 
-	itemJSON := `{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 344", "salestatus": "4sale" }`
+	itemJSON := `{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 2", "salestatus": "4sale" }`
 	reader := strings.NewReader(itemJSON)
 
 	req, err := http.NewRequest("POST", newitemsURL, reader)
@@ -438,6 +457,7 @@ func TestCreateItemPass(t *testing.T) {
 	if err2 != nil {
 		t.Error(err2)
 	}
+
 	defer res.Body.Close() //nolint: errcheck
 
 	if res.StatusCode != 201 {
@@ -473,7 +493,14 @@ func TestGetItemsPass(t *testing.T) {
 		id := Arr[i].ItemUserID
 		if id == globaluserid {
 			globalitemid = Arr[i].TheItemID
+			globalprice = Arr[i].PriceType
 		}
+	}
+	intprice := int(globalprice)
+	strprice := string(intprice)
+
+	if len(strprice) == 0 {
+		t.Error("Unexpected empty field")
 	}
 
 	if res.StatusCode != 200 {
@@ -523,6 +550,144 @@ func TestGetItemIDPass(t *testing.T) {
 		t.Errorf("Success expected: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
+}
+
+//TestCreateImageURLPass will create URL and we will store it for future use
+func TestCreateImageURLPass(t *testing.T) {
+	if dev {
+		itemJSON := `{"checksum": "h892y93g4rf", "extension": "jpg"}`
+		reader := strings.NewReader(itemJSON)
+
+		req, err := http.NewRequest("POST", newimageurl, reader)
+		if err != nil {
+			t.Error(err)
+		}
+
+		bearer := "Bearer " + theToken
+		req.Header.Set("authorization", bearer)
+		// timer := time.NewTimer(time.Second * 1)
+		// <-timer.C
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
+
+		defer res.Body.Close() //nolint: errcheck
+
+		var Arr Values
+		body, _ := ioutil.ReadAll(res.Body)
+		errre := json.Unmarshal(body, &Arr)
+		if errre != nil {
+			log.Println(errre)
+		}
+
+		//iterate through array and find images under user
+		globalimage = Arr.PicID
+
+		if res.StatusCode != 200 {
+			t.Errorf("Success expected: %d", res.StatusCode)
+		}
+	}
+}
+
+//TestNewImagePass uses the Url from TestCreateImageURLPass and puts our image in local storage
+func TestNewImagePass(t *testing.T) {
+	if dev {
+		imageurl := fmt.Sprintf("%s/api/image/post/%s", serveURL, globalimage)
+
+		path := "./testassets/cat.jpg"
+
+		pic, err := ioutil.ReadFile(path)
+		if err != nil {
+			log.Println(err)
+		}
+
+		reader := bytes.NewReader(pic)
+		req, err := http.NewRequest("POST", imageurl, reader)
+
+		if err != nil {
+			log.Println(err)
+		}
+
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
+		if res.StatusCode != 201 {
+			t.Errorf("Success expected: %d", res.StatusCode)
+		}
+	}
+}
+
+//TestGetImagePass calls GetImage
+func TestGetImagePass(t *testing.T) {
+	if dev {
+		geturl := fmt.Sprintf("%s/api/images/%s", serveURL, globalimage)
+
+		req, err := http.NewRequest("GET", geturl, nil)
+		if err != nil {
+			log.Println(err)
+		}
+
+		bearer := "Bearer " + theToken
+		req.Header.Set("authorization", bearer)
+
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
+
+		if res.StatusCode != 200 {
+			t.Errorf("Success Expected:", res.StatusCode)
+		}
+		res.Body.Close() //nolint: errcheck
+	}
+}
+
+//TestDeleteImagePass removes our image from the local folder
+func TestDeleteImagePass(t *testing.T) {
+	if dev {
+		url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, globalimage)
+		req, err := http.NewRequest("DELETE", url, nil)
+		if err != nil {
+			log.Println(err)
+		}
+		bearer := "Bearer " + theToken
+		req.Header.Set("authorization", bearer)
+
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
+
+		if res.StatusCode != 200 {
+			t.Errorf("Success expected: %d", res.StatusCode)
+		}
+		res.Body.Close() //nolint: errcheck
+	}
+}
+
+//TestDeleteImageFail attempts to delete a image with an invalid url
+func TestDeleteImageFail(t *testing.T) {
+	if dev {
+		url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, "IDONTEXISTS")
+		req, err := http.NewRequest("DELETE", url, nil)
+		if err != nil {
+			log.Println(err)
+		}
+		bearer := "Bearer " + theToken
+		req.Header.Set("authorization", bearer)
+
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
+
+		if res.StatusCode != 404 {
+			t.Errorf("Success expected: %d", res.StatusCode)
+		}
+		res.Body.Close() //nolint: errcheck
+	}
 }
 
 //TestGetItemsByCatPass will do this
@@ -596,26 +761,6 @@ func TestDeleteItemPass(t *testing.T) {
 //FAILING ITEM TESTS GO HERE
 //-----------------------------------------
 
-//TestGetItemsFail will attempt to call getitems on an empty DB
-// func TestGetItemsFail(t *testing.T) {
-// 	req, err := http.NewRequest("GET", itemsURL, nil)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	bearer := "Bearer " + theToken
-// 	req.Header.Set("authorization", bearer)
-//
-// 	res, err2 := http.DefaultClient.Do(req)
-// 	if err2 != nil {
-// 		t.Error(err2)
-// 	}
-//
-// 	if res.StatusCode != 204 {
-// 		t.Errorf("Success expected: %d", res.StatusCode)
-// 	}
-// 	res.Body.Close() //nolint: errcheck
-// }
-
 //TestCreateItemFail malforms the price field
 func TestCreateItemFail(t *testing.T) {
 	itemJSON := `{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "dollars", "salestatus": "4sale" }`
@@ -640,7 +785,32 @@ func TestCreateItemFail(t *testing.T) {
 	}
 }
 
-//TestGetItemsByCatPassFail
+// func TestCreateItemFail2(t *testing.T) {
+//
+// 	itemJSON := `{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ ", "salestatus": "4sale" }`
+// 	reader := strings.NewReader(itemJSON)
+//
+// 	req, err := http.NewRequest("POST", newitemsURL, reader)
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+//
+// 	bearer := "Bearer " + theToken
+// 	req.Header.Set("authorization", bearer)
+//
+// 	res, err2 := http.DefaultClient.Do(req)
+// 	if err2 != nil {
+// 		t.Error(err2)
+// 	}
+//
+// 	defer res.Body.Close() //nolint: errcheck
+//
+// 	if res.StatusCode != 400 {
+// 		t.Errorf("Success expected: %d", res.StatusCode)
+// 	}
+// }
+
+//TestGetItemsByCatFail searches for nonexistent category
 func TestGetItemsByCatFail(t *testing.T) {
 	caturl := fmt.Sprintf("%s/api/category/%s", serveURL, "i dont live")
 	req, err := http.NewRequest("GET", caturl, nil)
@@ -745,27 +915,6 @@ func TestDeleteUserPass(t *testing.T) {
 	}
 	res.Body.Close() //nolint :errcheck
 }
-
-// //TestGetUsersFail3 fails due to empty DB
-// func TestGetUsersFail3(t *testing.T) {
-//
-// req, err := http.NewRequest("GET", usersURL, nil)
-// if err != nil {
-// t.Error(err)
-// }
-//
-// bearer := "Bearer " + theToken
-// req.Header.Set("authorization", bearer)
-// res, err2 := http.DefaultClient.Do(req)
-// if err2 != nil {
-// t.Error(err2)
-// }
-//
-// if res.StatusCode != 204 {
-// t.Errorf("Success expected: %d", res.StatusCode)
-// }
-// res.Body.Close() //nolint: errcheck
-// }
 
 //-----------------------------------------
 //FAILING USER TESTS GO HERE

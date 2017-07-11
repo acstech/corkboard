@@ -48,7 +48,7 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 	if err = createIndexes(bucket); err != nil {
 		return nil, err
 	}
-
+	//Check environment variable for a rsa key
 	if config.PrivateRSA == "" {
 		config.PrivateRSA = "id_rsa"
 	}
@@ -59,7 +59,7 @@ func NewCorkboard(config *CBConfig) (*Corkboard, error) {
 		if err2 != nil {
 			log.Println(err2)
 		}
-		//if err = privKey.Validate(
+
 		marshalKey := x509.MarshalPKCS1PrivateKey(key)
 		privPem := &pem.Block{
 			Type:  "RSA PRIVATE KEY",
@@ -129,11 +129,11 @@ func (cb *Corkboard) Router() *httprouter.Router {
 	router.PUT("/api/users/edit/:id", stdChain.Then(cb.UpdateUser))
 	router.GET("/api/search/:key", stdChain.Then(cb.SearchUser))
 	router.POST("/api/image/new", stdChain.Then(cb.NewImageURL))
+	router.DELETE("/api/images/delete/:key", stdChain.Then(cb.DeleteImageURL))
 	if cb.Environment == envDev {
 		router.POST("/api/image/post/:key", cb.MockS3)
 		router.GET("/api/images/:key", cb.GetImageMock)
 	}
-
 	router.DELETE("/api/users/delete/:id", stdChain.Then(cb.DeleteUser))
 	router.POST("/api/users/register", noAuthChain.Then(cb.CorkboardAuth.RegisterUser()))
 	router.POST("/api/users/auth", noAuthChain.Then(cb.CorkboardAuth.AuthUser()))

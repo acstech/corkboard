@@ -217,7 +217,7 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	item.PictureID = reqitem.PictureID
 	item.DatePosted = reqitem.Date
 
-	//call to updateItem inserts item to couchbase
+	//call to updateItem appends item to couchbase
 	err3 := corkboard.updateItem(item)
 	if err3 != nil {
 		log.Println(err3)
