@@ -106,6 +106,16 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
+	// var newitem Item
+	// //NewReqTransfer(item, &itemreq)
+	// newitem.ItemName = item.ItemName
+	// newitem.Category = item.Category
+	// newitem.ItemDesc = item.ItemDesc
+	// newitem.Price = item.Price
+	// newitem.Status = item.Status
+	// newitem.PictureID = item.PictureID
+	// newitem.DatePosted = item.DatePosted
+
 	JSONitem, err := json.Marshal(item)
 	if err != nil {
 		log.Println(err)
@@ -193,6 +203,8 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	item.Status = reqitem.Status
 	item.PictureID = reqitem.PictureID
 	item.DatePosted = reqitem.Date
+	//The URL generated in "findItemByID" is not needed here
+	item.PicURL = nil
 
 	//call to updateItem appends item to couchbase
 	err3 := corkboard.updateItem(item)
