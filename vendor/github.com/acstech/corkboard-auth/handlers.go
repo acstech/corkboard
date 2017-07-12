@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -57,9 +58,21 @@ func (cba *CorkboardAuth) RegisterUser() httprouter.Handle {
 		}
 		//TODO: Check that site exist
 		var errs []ErrorRes
+
+		email, _ := regexp.MatchString("(.+@.+\\...+)", req.Email)
+		if email == false {
+			errs = append(errs, ErrorRes{Message: "Email must be in valid format"})
+		}
+
 		if req.Email == "" {
 			errs = append(errs, ErrorRes{Message: "Must include an email address"})
 		}
+
+		password, _ := regexp.MatchString("(........+)", req.Password)
+		if password == false {
+			errs = append(errs, ErrorRes{Message: "Password must be at least 8 characters"})
+		}
+
 		if req.SiteID == "" {
 			errs = append(errs, ErrorRes{Message: "Must include a siteId"})
 		} else {
