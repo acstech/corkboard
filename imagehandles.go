@@ -22,86 +22,95 @@ import (
 
 const path = "./s3images"
 
-//NewImageURL is a handle to deal with New Image Requests
-func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-
-	if cb.Environment == envDev {
-		log.Println("MockURL is being called")
-		picID := new(NewImageReq)
-		var imageRes NewImageRes
-		err := json.NewDecoder(r.Body).Decode(&picID)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		imageExtension := picID.Extension
-		imageGUID := uuid.NewV4()
-		key := fmt.Sprintf("%s.%s", imageGUID, imageExtension)
-		imageRes.ImageKey = key
-		url := fmt.Sprintf("http://localhost:%s/api/image/post/%s", os.Getenv("CB_PORT"), key)
-
-		imageRes.URL = url
-		imageResJSON, err := json.Marshal(imageRes)
-		if err != nil {
-			log.Println("Could not marshal image response")
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		_, err = w.Write(imageResJSON)
-		if err != nil {
-			log.Println(err)
-			return
-		}
+func mockURL(w http.ResponseWriter, r *http.Request) {
+	picID := new(NewImageReq)
+	var imageRes NewImageRes
+	err := json.NewDecoder(r.Body).Decode(&picID)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	var imageExtension string
+	if picID.Extension == "jpg" {
+		imageExtension = "jpeg"
 	} else {
-		picID := new(NewImageReq)
-		var imageRes NewImageRes
-		err := json.NewDecoder(r.Body).Decode(&picID)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		imageExtension := picID.Extension
-		imageGUID := uuid.NewV4().String()
-		key := fmt.Sprintf("%s.%s", imageGUID, imageExtension)
-		sess, err := session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		svc := s3.New(sess)
-		req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
-			Bucket: aws.String(os.Getenv("CB_S3_BUCKET")),
-			Key:    aws.String(key),
-		})
-		checksum := picID.Checksum
-		req.HTTPRequest.Header.Set("Content-MD5", checksum)
-		url, err := req.Presign(15 * time.Minute)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		imageRes.ImageKey = key
-		imageRes.URL = url
-		//}
-		imageResJSON, err := json.Marshal(imageRes)
-		if err != nil {
-			log.Println("Could not marshal image response")
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		_, err = w.Write(imageResJSON)
-		if err != nil {
-			log.Println(err)
-			return
-		}
+		imageExtension = picID.Extension
+	}
+	imageGUID := uuid.NewV4()
+	key := fmt.Sprintf("%s.%s", imageGUID, imageExtension)
+	imageRes.ImageKey = key
+	url := fmt.Sprintf("http://localhost:%s/api/image/post/%s", os.Getenv("CB_PORT"), key)
+
+	imageRes.URL = url
+	imageResJSON, err := json.Marshal(imageRes)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	_, err = w.Write(imageResJSON)
+	if err != nil {
+		log.Println(err)
+		return
 	}
 }
 
-//DeleteImageURL does a simple object removal from database
-func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func imageURL(w http.ResponseWriter, r *http.Request) {
+	picID := new(NewImageReq)
+	var imageRes NewImageRes
+	err := json.NewDecoder(r.Body).Decode(&picID)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	imageExtension := picID.Extension
+	imageGUID := uuid.NewV4().String()
+	key := fmt.Sprintf("%s.%s", imageGUID, imageExtension)
+	sess, err := session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	svc := s3.New(sess)
+	req, _ := svc.PutObjectRequest(&s3.PutObjectInput{
+		Bucket: aws.String(os.Getenv("CB_S3_BUCKET")),
+		Key:    aws.String(key),
+	})
+	checksum := picID.Checksum
+	req.HTTPRequest.Header.Set("Content-MD5", checksum)
+	url, err := req.Presign(15 * time.Minute)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	imageRes.ImageKey = key
+	imageRes.URL = url
+	//}
+	imageResJSON, err := json.Marshal(imageRes)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	_, err = w.Write(imageResJSON)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+}
+
+//NewImageURL is a handle to deal with New Image Requests
+func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	if cb.Environment == envDev {
+		mockURL(w, r)
+	} else {
+		imageURL(w, r)
+	}
+}
+
+//DeleteImage does a simple object removal from database
+func (cb *Corkboard) DeleteImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	key := ps.ByName("key")
-	if os.Getenv("CB_ENVIRONMENT") == "dev" {
+	if cb.Environment == envDev {
 		// delete an image: get current image
 		filepath := fmt.Sprintf("%s/%s", path, key)
 		if _, err := os.Stat(filepath); os.IsNotExist(err) {
@@ -140,12 +149,9 @@ func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps h
 //Still want to use the image GUID.tag as the key
 func (cb *Corkboard) MockS3(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-	log.Println("Entering MockS3...")
-
 	key := ps.ByName("key")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.Mkdir(path, 0777) //nolint: gas, errcheck
-		log.Println("Created directory 's3images' inside current directory")
 	}
 	defer r.Body.Close() //nolint: errcheck
 
@@ -189,6 +195,7 @@ func (cb *Corkboard) GetImageMock(w http.ResponseWriter, r *http.Request, ps htt
 	if err != nil {
 		log.Println(err)
 	}
+
 	w.Header().Set("Content-Type", fmt.Sprintf("image/%s", extension))
 
 	_, err = w.Write(pic)

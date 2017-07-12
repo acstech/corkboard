@@ -607,7 +607,7 @@ func TestNewImagePass(t *testing.T) {
 		}
 
 		reader := bytes.NewReader(pic)
-		req, err := http.NewRequest("POST", imageurl, reader)
+		req, err := http.NewRequest("PUT", imageurl, reader)
 
 		if err != nil {
 			log.Println(err)
