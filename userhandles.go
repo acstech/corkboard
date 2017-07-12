@@ -184,7 +184,7 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 	user.Lastname = userReq.Lastname
 	if len(userReq.Phone) != 0 {
 		phone, _ := regexp.MatchString("\\([0-9][0-9][0-9]\\) [0-9][0-9][0-9] - [0-9][0-9][0-9][0-9]", userReq.Phone)
-		if phone == false {
+		if !phone {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
