@@ -134,13 +134,6 @@ func (cb *Corkboard) DeleteImageURL(w http.ResponseWriter, r *http.Request, ps h
 
 }
 
-//
-// func (cb *Corkboard) UpdateImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-// cb.DeleteImageURL(w, r, ps)
-// cb.NewImageURL(w, r, _)
-// 	w.WriteHeader(http.StatusOK)
-// }
-
 //MockS3 checks for directory where files will be stored. If they don't, create it for them
 // the "presigned url's" that direct to this endpoint will have to be mocked by a fake "dev env"
 //endpoint. This endpoint should only be used for development purposes as well.
