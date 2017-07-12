@@ -23,7 +23,6 @@ import (
 const path = "./s3images"
 
 func mockURL(w http.ResponseWriter, r *http.Request) {
-	log.Println("MockURL is being called")
 	picID := new(NewImageReq)
 	var imageRes NewImageRes
 	err := json.NewDecoder(r.Body).Decode(&picID)
@@ -39,14 +38,12 @@ func mockURL(w http.ResponseWriter, r *http.Request) {
 	}
 	imageGUID := uuid.NewV4()
 	key := fmt.Sprintf("%s.%s", imageGUID, imageExtension)
-	log.Println(key)
 	imageRes.ImageKey = key
 	url := fmt.Sprintf("http://localhost:%s/api/image/post/%s", os.Getenv("CB_PORT"), key)
 
 	imageRes.URL = url
 	imageResJSON, err := json.Marshal(imageRes)
 	if err != nil {
-		log.Println("Could not marshal image response")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -90,7 +87,6 @@ func imageURL(w http.ResponseWriter, r *http.Request) {
 	//}
 	imageResJSON, err := json.Marshal(imageRes)
 	if err != nil {
-		log.Println("Could not marshal image response")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -117,7 +113,6 @@ func (cb *Corkboard) DeleteImage(w http.ResponseWriter, r *http.Request, ps http
 	if cb.Environment == envDev {
 		// delete an image: get current image
 		filepath := fmt.Sprintf("%s/%s", path, key)
-		log.Println(filepath)
 		if _, err := os.Stat(filepath); os.IsNotExist(err) {
 			w.WriteHeader(http.StatusNotFound)
 			return
@@ -154,12 +149,9 @@ func (cb *Corkboard) DeleteImage(w http.ResponseWriter, r *http.Request, ps http
 //Still want to use the image GUID.tag as the key
 func (cb *Corkboard) MockS3(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-	log.Println("Entering MockS3...")
-
 	key := ps.ByName("key")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.Mkdir(path, 0777) //nolint: gas, errcheck
-		log.Println("Created directory 's3images' inside current directory")
 	}
 	defer r.Body.Close() //nolint: errcheck
 
@@ -169,7 +161,7 @@ func (cb *Corkboard) MockS3(w http.ResponseWriter, r *http.Request, ps httproute
 		log.Println(err)
 		return
 	}
-	log.Println(file.Name())
+
 	//It works up to here, file is created in the correct dir with the correct name.
 	//Now we just need to be able to read the data from the form and copy it into the
 	//file we have just created somehow.
