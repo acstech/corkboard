@@ -125,7 +125,6 @@ func (corkboard *Corkboard) findItemByID(itemID string) (*Item, error) {
 		}
 	}
 	return item, nil
-
 }
 
 //createNewItem is called by NewItem, takes a new item request and inserts it into the database
