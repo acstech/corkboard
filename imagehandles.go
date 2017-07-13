@@ -75,8 +75,9 @@ func imageURL(w http.ResponseWriter, r *http.Request) {
 		Bucket: aws.String(os.Getenv("CB_S3_BUCKET")),
 		Key:    aws.String(key),
 	})
-	checksum := picID.Checksum
-	req.HTTPRequest.Header.Set("Content-MD5", checksum)
+	//checksum := picID.Checksum
+	// req.HTTPRequest.Header.Set("Content-MD5", checksum)
+	// req.HTTPRequest.Header.Set("Content-Type", fmt.Sprintf("image/%s", imageExtension))
 	url, err := req.Presign(15 * time.Minute)
 	if err != nil {
 		log.Println(err)
