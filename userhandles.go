@@ -242,12 +242,16 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 	//Check if user has any existing items, if so delete them
 	items, err := cb.findUserItems(id)
 	if len(items) != 0 && err == nil {
-
+		log.Println("Execution1")
 		for i := 0; i < len(items); i++ {
+			log.Println("Execution2")
 
+			theItems, _ := cb.findItemByID(items[i].ID)
 			//delete images for each picture
-			for j := 0; j < len(items[i].Pic); j++ {
-				cb.deleteImageID(items[j].Pic) //nolint: errcheck
+			for j := 0; j < len(theItems.PictureID); j++ {
+				log.Println("Execution3")
+
+				cb.deleteImageID(theItems.PictureID[j]) //nolint: errcheck
 			}
 
 			var docID = "item:" + items[i].ID
