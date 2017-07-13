@@ -238,10 +238,17 @@ func (corkboard *Corkboard) DeleteItem(w http.ResponseWriter, r *http.Request, p
 		return
 	}
 
-	var docID = "item:" + theid
-	_, err2 := corkboard.Bucket.Remove(docID, 0)
+	for i := 0; i < len(item.PictureID); i++ {
+		err2 := corkboard.deleteImageID(item.PictureID[i])
+		if err2 != nil {
+			log.Println(err2)
+		}
+	}
+
+	err2 := corkboard.removeItem(item)
 	if err2 != nil {
 		log.Println(err2)
+		w.WriteHeader(http.StatusBadRequest)
 	}
 	w.WriteHeader(http.StatusOK)
 }
