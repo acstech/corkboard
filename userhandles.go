@@ -231,10 +231,7 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	err2 := cb.deleteImageID(theuser.PicID)
-	if err2 != nil {
-		log.Println(err2)
-	}
+	cb.deleteImageID(theuser.PicID) //nolint: errcheck
 
 	_, err := cb.Bucket.Remove(key, 0)
 	if err != nil {
@@ -242,22 +239,22 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	items, _ := cb.findUserItems(id)
+	//Check if user has any existing items, if so delete them
+	items, err := cb.findUserItems(id)
+	if len(items) != 0 && err == nil {
 
-	for i := 0; i < len(items); i++ {
+		for i := 0; i < len(items); i++ {
 
-		item, err3 := cb.findItemByID(items[i].ID)
-		if err3 != nil {
-			log.Println(err3)
-		}
-		for j := 0; j < len(item.PictureID); j++ {
-			cb.deleteImageID(item.PictureID[j]) //nolint: errcheck
-		}
+			//delete images for each picture
+			for j := 0; j < len(items[i].Pic); j++ {
+				cb.deleteImageID(items[j].Pic) //nolint: errcheck
+			}
 
-		var docID = "item:" + items[i].ID
-		_, err := cb.Bucket.Remove(docID, 0)
-		if err != nil {
-			log.Println(err)
+			var docID = "item:" + items[i].ID
+			_, err := cb.Bucket.Remove(docID, 0)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	}
 

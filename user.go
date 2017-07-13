@@ -24,7 +24,8 @@ type User struct {
 
 //ItemID is used to unmarshal userItems queries
 type ItemID struct {
-	ID string `json:"itemid"`
+	ID  string `json:"itemid"`
+	Pic string `json:"picid"`
 }
 
 //FakeUser is a dummy struct used to add the "_type" field to users

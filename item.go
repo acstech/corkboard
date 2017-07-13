@@ -165,3 +165,15 @@ func (corkboard *Corkboard) updateItem(item *Item) error {
 	return err
 
 }
+
+func (corkboard *Corkboard) removeItem(item *Item) error {
+
+	id := item.ItemID
+	var theKey = "item:" + id
+	_, err := corkboard.Bucket.Remove(theKey, 0)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
