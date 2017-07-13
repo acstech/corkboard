@@ -227,7 +227,10 @@ func (corkboard *Corkboard) DeleteItem(w http.ResponseWriter, r *http.Request, p
 	}
 
 	for i := 0; i < len(item.PictureID); i++ {
-		corkboard.deleteImageID(item.PictureID[i])
+		err2 := corkboard.deleteImageID(item.PictureID[i])
+		if err2 != nil {
+			log.Println(err2)
+		}
 	}
 
 	var docID = "item:" + theid
