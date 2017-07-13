@@ -231,6 +231,8 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
+	cb.deleteImageID(theuser.PicID)
+
 	_, err := cb.Bucket.Remove(key, 0)
 	if err != nil {
 		log.Println(err)
@@ -240,6 +242,12 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 	items, _ := cb.findUserItems(id)
 
 	for i := 0; i < len(items); i++ {
+
+		item, _ := cb.findItemByID(items[i].ID)
+		for j := 0; j < len(item.PictureID); j++ {
+			cb.deleteImageID(item.PictureID[j])
+		}
+
 		var docID = "item:" + items[i].ID
 		_, err := cb.Bucket.Remove(docID, 0)
 		if err != nil {

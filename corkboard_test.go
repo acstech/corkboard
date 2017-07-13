@@ -687,7 +687,7 @@ func TestDeleteImageFail(t *testing.T) {
 			t.Error(err2)
 		}
 
-		if res.StatusCode != 404 {
+		if res.StatusCode != 400 {
 			t.Errorf("Success expected: %d", res.StatusCode)
 		}
 		res.Body.Close() //nolint: errcheck

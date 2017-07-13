@@ -1,6 +1,7 @@
 package corkboard
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -56,4 +57,36 @@ func (cb *Corkboard) getImageURL(key string) string {
 		return ""
 	}
 	return url
+}
+
+func (cb *Corkboard) deleteImageID(key string) error {
+	if cb.Environment == envDev {
+		// delete an image: get current image
+		filepath := fmt.Sprintf("%s/%s", path, key)
+		if _, err := os.Stat(filepath); os.IsNotExist(err) {
+			return err
+		}
+		err := os.Remove(filepath)
+		if err != nil {
+			log.Println(err)
+		}
+		return nil
+	} else {
+		sess, err := session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		svc := s3.New(sess)
+		_, err2 := svc.DeleteObject(&s3.DeleteObjectInput{
+			Bucket: aws.String(os.Getenv("CB_S3_BUCKET")),
+			Key:    aws.String(key),
+		})
+		if err2 != nil {
+			log.Println(err2)
+			return err2
+		}
+		return nil
+	}
+
 }
