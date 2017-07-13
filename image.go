@@ -71,22 +71,21 @@ func (cb *Corkboard) deleteImageID(key string) error {
 			log.Println(err)
 		}
 		return nil
-	} else {
-		sess, err := session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-		svc := s3.New(sess)
-		_, err2 := svc.DeleteObject(&s3.DeleteObjectInput{
-			Bucket: aws.String(os.Getenv("CB_S3_BUCKET")),
-			Key:    aws.String(key),
-		})
-		if err2 != nil {
-			log.Println(err2)
-			return err2
-		}
-		return nil
 	}
+	sess, err := session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	svc := s3.New(sess)
+	_, err2 := svc.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(os.Getenv("CB_S3_BUCKET")),
+		Key:    aws.String(key),
+	})
+	if err2 != nil {
+		log.Println(err2)
+		return err2
+	}
+	return nil
 
 }

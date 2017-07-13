@@ -251,7 +251,7 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 			log.Println(err3)
 		}
 		for j := 0; j < len(item.PictureID); j++ {
-			cb.deleteImageID(item.PictureID[j])
+			cb.deleteImageID(item.PictureID[j]) //nolint: errcheck
 		}
 
 		var docID = "item:" + items[i].ID
