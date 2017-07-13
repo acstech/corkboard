@@ -24,8 +24,7 @@ type User struct {
 
 //ItemID is used to unmarshal userItems queries
 type ItemID struct {
-	ID  string `json:"itemid"`
-	Pic string `json:"picid"`
+	ID string `json:"itemid"`
 }
 
 //FakeUser is a dummy struct used to add the "_type" field to users
@@ -117,6 +116,5 @@ func (cb *Corkboard) findUserItems(userID string) ([]ItemID, error) {
 		items = append(items, *itemID)
 		itemID = new(ItemID)
 	}
-
 	return items, nil
 }
