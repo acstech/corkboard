@@ -238,20 +238,16 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 	}
 	if len(items) != 0 && err == nil {
 		for i := 0; i < len(items); i++ {
-			log.Println("first execution")
 			theItems, _ := cb.findItemByID(items[i].ID)
 
 			//delete images for each picture
 			for j := 0; j < len(theItems.PictureID); j++ {
-				log.Println("Pic ", j)
 				cb.deleteImageID(theItems.PictureID[j]) //nolint: errcheck
 			}
 			//delete actual item
 			var docID = "item:" + items[i].ID
-			_, err := cb.Bucket.Remove(docID, 0)
-			if err != nil {
-				log.Println(err)
-			}
+			//is this bucket.remove errcheck important?
+			cb.Bucket.Remove(docID, 0) //nolint: errcheck
 		}
 	}
 	//delete user profile photo from S3 storage
