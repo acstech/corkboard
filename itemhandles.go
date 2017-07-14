@@ -135,6 +135,7 @@ func (corkboard *Corkboard) NewItem(w http.ResponseWriter, r *http.Request, _ ht
 	if err != nil {
 		log.Println(err)
 	}
+
 	claims, ok := r.Context().Value(ReqCtxClaims).(corkboardauth.CustomClaims)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
