@@ -231,31 +231,37 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	cb.deleteImageID(theuser.PicID) //nolint: errcheck
-
-	_, err := cb.Bucket.Remove(key, 0)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
 	//Check if user has any existing items, if so delete them
 	items, err := cb.findUserItems(id)
+	if err != nil {
+		log.Println("Issues", err)
+	}
 	if len(items) != 0 && err == nil {
-
 		for i := 0; i < len(items); i++ {
+			log.Println("first execution")
+			theItems, _ := cb.findItemByID(items[i].ID)
 
 			//delete images for each picture
-			for j := 0; j < len(items[i].Pic); j++ {
-				cb.deleteImageID(items[j].Pic) //nolint: errcheck
+			for j := 0; j < len(theItems.PictureID); j++ {
+				log.Println("Pic ", j)
+				cb.deleteImageID(theItems.PictureID[j]) //nolint: errcheck
 			}
-
+			//delete actual item
 			var docID = "item:" + items[i].ID
 			_, err := cb.Bucket.Remove(docID, 0)
 			if err != nil {
 				log.Println(err)
 			}
 		}
+	}
+	//delete user profile photo from S3 storage
+	cb.deleteImageID(theuser.PicID) //nolint: errcheck
+
+	//delete user from couchbase
+	_, err2 := cb.Bucket.Remove(key, 0)
+	if err2 != nil {
+		log.Println(err2)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)

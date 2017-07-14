@@ -247,7 +247,7 @@ func TestGetUserPass(t *testing.T) {
 func TestEditUserPass(t *testing.T) {
 
 	userJSON :=
-		fmt.Sprintf(`{ "email":"%s@ROCKWELL", "password":"cat", "siteId":"12341234-1234-1234-1234-123412341234", "firstname":"MARCO", "lastname":"BELLINELI", "phone":"(803) 431 - 6820"}`, emailaddress)
+		fmt.Sprintf(`{ "email":"%s@ROCKWELL", "password":"cat", "siteId":"12341234-1234-1234-1234-123412341234", "firstname":"MARCO", "lastname":"BELLINELI", "phone":"(803) 431 - 6820"5e1cfb74-5ea1-43ba-8f91-c4fe2adb9eb7}`, emailaddress)
 	reader := strings.NewReader(userJSON)
 
 	edituserURL = fmt.Sprintf("%s/api/users/edit/%s", serveURL, globaluserid)

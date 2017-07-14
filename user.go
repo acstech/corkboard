@@ -117,6 +117,6 @@ func (cb *Corkboard) findUserItems(userID string) ([]ItemID, error) {
 		items = append(items, *itemID)
 		itemID = new(ItemID)
 	}
-
+	log.Println("length", len(items))
 	return items, nil
 }
