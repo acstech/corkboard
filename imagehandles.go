@@ -75,8 +75,9 @@ func imageURL(w http.ResponseWriter, r *http.Request) {
 		Bucket: aws.String(os.Getenv("CB_S3_BUCKET")),
 		Key:    aws.String(key),
 	})
-	checksum := picID.Checksum
-	req.HTTPRequest.Header.Set("Content-MD5", checksum)
+	//checksum := picID.Checksum
+	// req.HTTPRequest.Header.Set("Content-MD5", checksum)
+	// req.HTTPRequest.Header.Set("Content-Type", fmt.Sprintf("image/%s", imageExtension))
 	url, err := req.Presign(15 * time.Minute)
 	if err != nil {
 		log.Println(err)
@@ -110,34 +111,10 @@ func (cb *Corkboard) NewImageURL(w http.ResponseWriter, r *http.Request, _ httpr
 func (cb *Corkboard) DeleteImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	key := ps.ByName("key")
-	if cb.Environment == envDev {
-		// delete an image: get current image
-		filepath := fmt.Sprintf("%s/%s", path, key)
-		if _, err := os.Stat(filepath); os.IsNotExist(err) {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-		err := os.Remove(filepath)
-		if err != nil {
-			log.Println(err)
-		}
-
-	} else {
-		sess, err := session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		svc := s3.New(sess)
-		_, err2 := svc.DeleteObject(&s3.DeleteObjectInput{
-			Bucket: aws.String(os.Getenv("CB_S3_BUCKET")),
-			Key:    aws.String(key),
-		})
-		if err2 != nil {
-			log.Println(err2)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
+	err := cb.deleteImageID(key)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 
