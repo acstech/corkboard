@@ -238,8 +238,8 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 	}
 	if len(items) != 0 && err == nil {
 		for i := 0; i < len(items); i++ {
-			theItems, _ := cb.findItemByID(items[i].ID)
 
+			theItems, _ := cb.findItemByID(items[i].ID)
 			//delete images for each picture
 			for j := 0; j < len(theItems.PictureID); j++ {
 				cb.deleteImageID(theItems.PictureID[j]) //nolint: errcheck
