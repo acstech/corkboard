@@ -437,7 +437,7 @@ func TestEditUserFail(t *testing.T) {
 }
 
 //-----------------------------------------
-//PASSING ITEM TESTS GO HERE
+//PASSING ITEM/IMAGE TESTS GO HERE
 //-----------------------------------------
 
 //TestCreateImageURLPass will create URL and we will store it for future use
@@ -510,134 +510,96 @@ func TestNewImagePass(t *testing.T) {
 //TestCreateItemPass creates an item with multiple fields, should always pass
 func TestCreateItemPass(t *testing.T) {
 
-	itemJSON := fmt.Sprintf(`{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 2", "salestatus": "4sale", "picid": [ "%s" ] }`, globalimage1)
-	reader := strings.NewReader(itemJSON)
-	req, err := http.NewRequest("POST", newitemsURL, reader)
-	if err != nil {
-		t.Error(err)
-	}
+	if dev {
+		itemJSON := fmt.Sprintf(`{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 2", "salestatus": "4sale", "picid": [ "%s" ] }`, globalimage1)
+		reader := strings.NewReader(itemJSON)
+		req, err := http.NewRequest("POST", newitemsURL, reader)
+		if err != nil {
+			t.Error(err)
+		}
 
-	bearer := "Bearer " + theToken
-	req.Header.Set("authorization", bearer)
+		bearer := "Bearer " + theToken
+		req.Header.Set("authorization", bearer)
 
-	res, err2 := http.DefaultClient.Do(req)
-	if err2 != nil {
-		t.Error(err2)
-	}
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
 
-	defer res.Body.Close() //nolint: errcheck
+		defer res.Body.Close() //nolint: errcheck
 
-	if res.StatusCode != 201 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		if res.StatusCode != 201 {
+			t.Errorf("Success expected: %d", res.StatusCode)
+		}
 	}
 }
 
 //TestGetItemsPass tests GetItems, should always pass
 func TestGetItemsPass(t *testing.T) {
-
-	req, err := http.NewRequest("GET", itemsURL, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	bearer := "Bearer " + theToken
-	req.Header.Set("authorization", bearer)
-	timer := time.NewTimer(time.Second * 1)
-	<-timer.C
-	res, err2 := http.DefaultClient.Do(req)
-	if err2 != nil {
-		t.Error(err2)
-	}
-
-	var Arr []Values
-	body, _ := ioutil.ReadAll(res.Body)
-	errre := json.Unmarshal(body, &Arr)
-	if errre != nil {
-		log.Println(errre)
-	}
-
-	//iterate through array and find items under user
-	for i := 0; i < len(Arr); i++ {
-		id := Arr[i].ItemUserID
-		if id == globaluserid {
-			globalitemid = Arr[i].TheItemID
-			globalprice = Arr[i].PriceType
+	if dev {
+		req, err := http.NewRequest("GET", itemsURL, nil)
+		if err != nil {
+			t.Error(err)
 		}
-	}
-	intprice := int(globalprice)
-	strprice := string(intprice)
+		bearer := "Bearer " + theToken
+		req.Header.Set("authorization", bearer)
+		timer := time.NewTimer(time.Second * 1)
+		<-timer.C
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
 
-	if len(strprice) == 0 {
-		t.Error("Unexpected empty field")
-	}
+		var Arr []Values
+		body, _ := ioutil.ReadAll(res.Body)
+		errre := json.Unmarshal(body, &Arr)
+		if errre != nil {
+			log.Println(errre)
+		}
 
-	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
-	}
-	res.Body.Close() //nolint: errcheck
-}
+		//iterate through array and find items under user
+		for i := 0; i < len(Arr); i++ {
+			id := Arr[i].ItemUserID
+			if id == globaluserid {
+				globalitemid = Arr[i].TheItemID
+				globalprice = Arr[i].PriceType
+			}
+		}
+		intprice := int(globalprice)
+		strprice := string(intprice)
 
-//TestGetUserPass2 will also check the User Items array
-func TestGetUserPass2(t *testing.T) {
-	useridURL = fmt.Sprintf("%s/api/users/%s", serveURL, globaluserid)
-	req, err := http.NewRequest("GET", useridURL, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	bearer := "Bearer " + theToken
-	req.Header.Set("authorization", bearer)
+		if len(strprice) == 0 {
+			t.Error("Unexpected empty field")
+		}
 
-	res, err2 := http.DefaultClient.Do(req)
-	if err2 != nil {
-		t.Error(err2)
+		if res.StatusCode != 200 {
+			t.Errorf("Success expected: %d", res.StatusCode)
+		}
+		res.Body.Close() //nolint: errcheck
 	}
-
-	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
-	}
-	res.Body.Close() //nolint: errcheck
-}
-
-//TestGetItemIDPass tests GetItemByID, should always pass
-func TestGetItemIDPass(t *testing.T) {
-
-	itemidURL = fmt.Sprintf("%s/api/items/%s", serveURL, globalitemid)
-	req, err := http.NewRequest("GET", itemidURL, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	bearer := "Bearer " + theToken
-	req.Header.Set("authorization", bearer)
-
-	res, err2 := http.DefaultClient.Do(req)
-	if err2 != nil {
-		t.Error(err2)
-	}
-
-	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
-	}
-	res.Body.Close() //nolint: errcheck
 }
 
 //TestDeleteItemPass cleans up database, deletes item.
 func TestDeleteItemPass(t *testing.T) {
-	deleteitemURL = fmt.Sprintf("%s/api/items/delete/%s", serveURL, globalitemid)
-	req, err := http.NewRequest("DELETE", deleteitemURL, nil)
-	if err != nil {
-		t.Error(err)
-	}
-	bearer := "Bearer " + theToken
-	req.Header.Set("authorization", bearer)
+	if dev {
+		deleteitemURL = fmt.Sprintf("%s/api/items/delete/%s", serveURL, globalitemid)
+		req, err := http.NewRequest("DELETE", deleteitemURL, nil)
+		if err != nil {
+			t.Error(err)
+		}
+		bearer := "Bearer " + theToken
+		req.Header.Set("authorization", bearer)
 
-	res, err2 := http.DefaultClient.Do(req)
-	if err2 != nil {
-		t.Error(err2)
-	}
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			t.Error(err2)
+		}
 
-	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		if res.StatusCode != 200 {
+			t.Errorf("Success expected: %d", res.StatusCode)
+		}
+		res.Body.Close() //nolint: errcheck
 	}
-	res.Body.Close() //nolint: errcheck
 }
 
 // //----------------------------------------------------------
@@ -843,6 +805,49 @@ func TestGetItemsPass2(t *testing.T) {
 
 	if len(strprice) == 0 {
 		t.Error("Unexpected empty field")
+	}
+
+	if res.StatusCode != 200 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck
+}
+
+//TestGetUserPass2 will also check the User Items array
+func TestGetUserPass2(t *testing.T) {
+	useridURL = fmt.Sprintf("%s/api/users/%s", serveURL, globaluserid)
+	req, err := http.NewRequest("GET", useridURL, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	bearer := "Bearer " + theToken
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	if res.StatusCode != 200 {
+		t.Errorf("Success expected: %d", res.StatusCode)
+	}
+	res.Body.Close() //nolint: errcheck
+}
+
+//TestGetItemIDPass tests GetItemByID, should always pass
+func TestGetItemIDPass(t *testing.T) {
+
+	itemidURL = fmt.Sprintf("%s/api/items/%s", serveURL, globalitemid)
+	req, err := http.NewRequest("GET", itemidURL, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	bearer := "Bearer " + theToken
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		t.Error(err2)
 	}
 
 	if res.StatusCode != 200 {
