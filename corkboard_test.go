@@ -247,7 +247,7 @@ func TestGetUserPass(t *testing.T) {
 func TestEditUserPass(t *testing.T) {
 
 	userJSON :=
-		fmt.Sprintf(`{ "email":"%s@ROCKWELL", "password":"cat", "siteId":"12341234-1234-1234-1234-123412341234", "firstname":"MARCO", "lastname":"BELLINELI", "phone":"(803) 431 - 6820"}`, emailaddress)
+		fmt.Sprintf(`{ "email":"%s@ROCKWELL.com", "password":"ca12341t", "siteId":"12341234-1234-1234-1234-123412341234", "firstname":"MARCO", "lastname":"BELLINELI", "phone":"(803) 431 - 6820"}`, emailaddress)
 	reader := strings.NewReader(userJSON)
 
 	edituserURL = fmt.Sprintf("%s/api/users/edit/%s", serveURL, globaluserid)
@@ -273,7 +273,7 @@ func TestEditUserPass(t *testing.T) {
 //TestSearchUserPass1 query by email
 func TestSearchUserPass1(t *testing.T) {
 
-	searchuserURL = fmt.Sprintf("%s/api/search/email=%s@ROCKWELL", serveURL, emailaddress)
+	searchuserURL = fmt.Sprintf("%s/api/search/email=%s@ROCKWELL.com", serveURL, emailaddress)
 
 	req, err := http.NewRequest("GET", searchuserURL, reader)
 	if err != nil {
