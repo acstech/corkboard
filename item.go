@@ -113,6 +113,7 @@ func (corkboard *Corkboard) findItemByID(itemID string) (*Item, error) {
 		fmt.Println(err)
 		return nil, err
 	}
+
 	if corkboard.Environment == envDev {
 		for _, id := range item.PictureID {
 			url := fmt.Sprintf("http://localhost:%s/api/images/%s", os.Getenv("CB_PORT"), id)
