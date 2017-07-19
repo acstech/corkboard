@@ -157,7 +157,7 @@ func (corkboard *Corkboard) NewItem(w http.ResponseWriter, r *http.Request, _ ht
 }
 
 //EditItem finds an item to be updated, creates a new item with new info, then appends new info to original item
-func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p httprouter.Params) { //nolint: gocyclo
 	var errs ErrorsRes
 	//reqitem stores information from update request
 	var reqitem NewItemReq

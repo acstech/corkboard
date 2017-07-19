@@ -54,9 +54,13 @@ type GetItemRes struct {
 	Status     string    `json:"salestatus,omitempty"`
 	UserID     string    `json:"userid,omitempty"`
 }
+
+//ErrorRes contains the error message thrown by a given error
 type ErrorRes struct {
 	Message string `json:"message"`
 }
+
+//ErrorsRes contains an array of all the error Responses from the errors in a data access method
 type ErrorsRes struct {
 	Errors []ErrorRes `json:"errors,omitempty"`
 }
