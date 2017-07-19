@@ -220,9 +220,14 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	item.PicURL = nil
 
 	//call to updateItem appends item to couchbase
-	err3 := corkboard.updateItem(item)
-	if err3 != nil {
-		log.Println(err3)
+	errs := corkboard.updateItem(item)
+	if len(errs.Errors) != 0 {
+		errsRes, _ := json.Marshal(errs)
+		_, err := w.Write(errsRes)
+		if err != nil {
+			log.Println(err)
+		}
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 }

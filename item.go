@@ -169,14 +169,17 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) ErrorsRes {
 
 //TODO: Clean this data up as well, item checks
 //updateItem upserts updated item object to couchbase document
-func (corkboard *Corkboard) updateItem(item *Item) error {
+func (corkboard *Corkboard) updateItem(item *Item) ErrorsRes {
 
 	var theID = "item:" + item.ItemID
 	thetime := time.Now()
 	item.DatePosted = thetime
+	errs := item.verify()
 	_, err := corkboard.Bucket.Upsert(theID, item, 0)
-	return err
-
+	if err != nil {
+		errs.Errors = append(errs.Errors, ErrorRes{Message: err.Error()})
+	}
+	return errs
 }
 
 func (corkboard *Corkboard) removeItem(item *Item) error {
@@ -214,6 +217,36 @@ func (newitem *NewItemReq) verify() ErrorsRes {
 		errs = append(errs, ErrorRes{Message: "Too many pictures uploaded. (Max 5)"})
 	}
 	if len(newitem.Status) > 20 {
+		errs = append(errs, ErrorRes{Message: "Invalid Status."})
+	}
+	var fmtErrs ErrorsRes
+	fmtErrs.Errors = errs
+	return fmtErrs
+}
+
+func (item *Item) verify() ErrorsRes {
+	var errs []ErrorRes
+	if len(item.ItemName) > 180 {
+		errs = append(errs, ErrorRes{Message: "Item name greater than 180 characters."})
+	} else if item.ItemName == "" {
+		errs = append(errs, ErrorRes{Message: "Must include an item name."})
+	}
+	if len(item.Category) > 25 {
+		errs = append(errs, ErrorRes{Message: "Category too long."})
+	} else if item.Category == "" {
+		errs = append(errs, ErrorRes{Message: "Must enter a category."})
+	}
+
+	if len(item.ItemDesc) > 500 {
+		errs = append(errs, ErrorRes{Message: "Item description greater than 500 characters."})
+	}
+	if item.Price > 10000000 {
+		errs = append(errs, ErrorRes{Message: "Price is greater too large."})
+	}
+	if len(item.PictureID) > 5 {
+		errs = append(errs, ErrorRes{Message: "Too many pictures uploaded. (Max 5)"})
+	}
+	if len(item.Status) > 20 {
 		errs = append(errs, ErrorRes{Message: "Invalid Status."})
 	}
 	var fmtErrs ErrorsRes
