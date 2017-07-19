@@ -3,7 +3,7 @@ package corkboard
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"regexp"
 	"strings"
 
 	"github.com/couchbase/gocb"
@@ -21,6 +21,16 @@ type User struct {
 	Phone     string   `json:"phone"`
 	Sites     []string `json:"sites"`
 }
+
+// // Errors struct for printing error message
+// type Errors struct {
+// 	Message string `json:"message"`
+// }
+//
+// // ErrorRes struct for collecting Errors
+// type ErrorRes struct {
+// 	Error []Errors `json:"errors,omitempty"`
+// }
 
 //ItemID is used to unmarshal userItems queries
 type ItemID struct {
@@ -82,7 +92,6 @@ func (cb *Corkboard) findUserByKey(key string) (*User, error) {
 	} else if parseKey[0] == "lastname" {
 		searchKey = "lastname"
 	} else {
-		log.Println("Request incorrectly formatted")
 		return nil, nil
 	}
 	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT email, firstname, id, lastname, phone, sites, zipcode FROM `%s` WHERE %s = '%s'", cb.Bucket.Name(), searchKey, value)) //nolint: gas
@@ -117,4 +126,36 @@ func (cb *Corkboard) findUserItems(userID string) ([]ItemID, error) {
 		itemID = new(ItemID)
 	}
 	return items, nil
+}
+
+func (cb *Corkboard) verify(user *UpdateUserReq) ErrorsRes {
+	var Err []ErrorRes
+	if len(user.Lastname) > 30 {
+		Err = append(Err, ErrorRes{Message: "Lastname cannot be more than 30 characters"})
+	}
+	if len(user.Firstname) > 30 {
+		Err = append(Err, ErrorRes{Message: "Firstname cannot be more than 30 characters"})
+	}
+	if len(user.Phone) != 0 {
+		phone, _ := regexp.MatchString(`\+?\d? ?\(?\d{3}\)? ?\d{3} ?\-? ?\d{4}`, user.Phone)
+		if !phone {
+			Err = append(Err, ErrorRes{Message: "Phone number must be in valid format"})
+		}
+	}
+	if len(user.Email) == 0 {
+		Err = append(Err, ErrorRes{Message: "Must include an email"})
+	} else if len(user.Email) > 150 {
+		Err = append(Err, ErrorRes{Message: "Email cannot be more than 150 characters"})
+	} else {
+		email, _ := regexp.MatchString(`(.+@.+\...+)`, user.Email)
+		if !email {
+			Err = append(Err, ErrorRes{Message: "Email must be in valid format"})
+		}
+	}
+	if len(user.Zipcode) != 0 && len(user.Zipcode) > 5 {
+		Err = append(Err, ErrorRes{Message: "Zipcode cannot be more than 5 characters"})
+	}
+	var res ErrorsRes
+	res.Errors = Err
+	return res
 }
