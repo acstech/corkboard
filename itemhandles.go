@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"reflect"
 	"strconv"
 	"strings"
 
@@ -195,27 +194,25 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	item.ItemDesc = reqitem.Itemdesc
 	item.Category = reqitem.Itemcat
 	var price float64
-	priceType := fmt.Sprint(reflect.TypeOf(reqitem.Price))
-	if priceType != "string" {
-		errs.Errors = append(errs.Errors, ErrorRes{Message: "Price should be sent as a string."})
-	} else {
-		var priceSplit = strings.TrimPrefix(reqitem.Price, "$ ")
+	var priceSplit string
+	if reqitem.Price != "" {
+		priceSplit = strings.TrimPrefix(reqitem.Price, "$ ")
 		priceSplit = strings.Replace(priceSplit, ",", "", -1)
 		price, err = strconv.ParseFloat(priceSplit, 64)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		if priceSplit == "0.00" {
-			price = 0.00
-		}
+	} else if priceSplit == "0.00" || reqitem.Price == "" {
+		price = 0.00
 	}
+
 	//This error check needs to be here because it is being performed on the Item not the NewItemReq
-	item.Price = price
-	if item.Price > 10000000 {
+	if price > 10000000 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	item.Price = price
 	item.Status = reqitem.Status
 
 	item.PictureID = reqitem.PictureID
