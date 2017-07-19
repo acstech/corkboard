@@ -144,18 +144,23 @@ func (corkboard *Corkboard) NewItem(w http.ResponseWriter, r *http.Request, _ ht
 	uid := claims.UID
 
 	item.UserID = uid
-	err2 := corkboard.createNewItem(item)
-	if err2 != nil {
-		log.Println(err2)
+	fmtErrs := corkboard.createNewItem(item)
+	if len(fmtErrs.Errors) != 0 {
+		errsRes, _ := json.Marshal(fmtErrs)
 		w.WriteHeader(http.StatusBadRequest)
+		_, err := w.Write(errsRes)
+		if err != nil {
+			log.Println(err)
+		}
+
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
 }
 
 //EditItem finds an item to be updated, creates a new item with new info, then appends new info to original item
-func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-
+func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p httprouter.Params) { //nolint: gocyclo
+	var errs ErrorsRes
 	//reqitem stores information from update request
 	var reqitem NewItemReq
 	decoder := json.NewDecoder(r.Body)
@@ -190,27 +195,41 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	item.ItemName = reqitem.Itemname
 	item.ItemDesc = reqitem.Itemdesc
 	item.Category = reqitem.Itemcat
-	var priceSplit = strings.TrimPrefix(reqitem.Price, "$ ")
-	priceSplit = strings.Replace(priceSplit, ",", "", -1)
-	var price, error = strconv.ParseFloat(priceSplit, 64)
-	if error != nil {
-		log.Println(error)
-		return
-	}
-	if priceSplit == "0.00" {
+	var price float64
+	var priceSplit string
+	if reqitem.Price != "" {
+		priceSplit = strings.TrimPrefix(reqitem.Price, "$ ")
+		priceSplit = strings.Replace(priceSplit, ",", "", -1)
+		price, err = strconv.ParseFloat(priceSplit, 64)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	} else if priceSplit == "0.00" || reqitem.Price == "" {
 		price = 0.00
+	}
+
+	//This error check needs to be here because it is being performed on the Item not the NewItemReq
+	if price > 10000000 {
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	item.Price = price
 	item.Status = reqitem.Status
+
 	item.PictureID = reqitem.PictureID
 	item.DatePosted = reqitem.Date
 	//The URL generated in "findItemByID" is not needed here
 	item.PicURL = nil
 
-	//call to updateItem appends item to couchbase
-	err3 := corkboard.updateItem(item)
-	if err3 != nil {
-		log.Println(err3)
+	errs = corkboard.updateItem(item)
+	if len(errs.Errors) != 0 {
+		errsRes, _ := json.Marshal(errs)
+		_, err := w.Write(errsRes)
+		if err != nil {
+			log.Println(err)
+		}
+		return
 	}
 	w.WriteHeader(http.StatusOK)
 }
