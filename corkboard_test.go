@@ -129,7 +129,7 @@ func TestCreateUserPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 201, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -147,7 +147,7 @@ func TestGetUsersFail(t *testing.T) {
 	}
 
 	if res.StatusCode != 401 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 401, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -178,7 +178,7 @@ func TestAuthPass(t *testing.T) {
 	theToken = theTok.Token
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -217,7 +217,7 @@ func TestGetUsersPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -239,7 +239,7 @@ func TestGetUserPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -266,7 +266,7 @@ func TestEditUserPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -290,7 +290,7 @@ func TestSearchUserPass1(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -313,7 +313,7 @@ func TestSearchUserPass2(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -337,7 +337,7 @@ func TestSearchUserPass3(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -361,7 +361,7 @@ func TestGetUsersFailAuth(t *testing.T) {
 	}
 
 	if res.StatusCode != 401 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 401, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -384,7 +384,7 @@ func TestSearchUserFail2(t *testing.T) {
 	}
 
 	if res.StatusCode != 500 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 500, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -405,7 +405,7 @@ func TestGetUsersFail2(t *testing.T) {
 	}
 
 	if res.StatusCode != 401 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 401, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -431,7 +431,7 @@ func TestEditUserFail(t *testing.T) {
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 400, recieved:  %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -473,7 +473,7 @@ func TestCreateImageURLPass(t *testing.T) {
 		globalimage1 = Arr.PicID
 
 		if res.StatusCode != 200 {
-			t.Errorf("Success expected: %d", res.StatusCode)
+			t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 		}
 	}
 }
@@ -502,7 +502,7 @@ func TestNewImagePass(t *testing.T) {
 			t.Error(err2)
 		}
 		if res.StatusCode != 201 {
-			t.Errorf("Success expected: %d", res.StatusCode)
+			t.Errorf("Success expected: 201, recieved: %d", res.StatusCode)
 		}
 	}
 }
@@ -529,7 +529,7 @@ func TestCreateItemPass(t *testing.T) {
 		defer res.Body.Close() //nolint: errcheck
 
 		if res.StatusCode != 201 {
-			t.Errorf("Success expected: %d", res.StatusCode)
+			t.Errorf("Success expected: 201, recieved: %d", res.StatusCode)
 		}
 	}
 }
@@ -573,7 +573,7 @@ func TestGetItemsPass(t *testing.T) {
 		}
 
 		if res.StatusCode != 200 {
-			t.Errorf("Success expected: %d", res.StatusCode)
+			t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 		}
 		res.Body.Close() //nolint: errcheck
 	}
@@ -596,7 +596,7 @@ func TestDeleteItemPass(t *testing.T) {
 		}
 
 		if res.StatusCode != 200 {
-			t.Errorf("Success expected: %d", res.StatusCode)
+			t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 		}
 		res.Body.Close() //nolint: errcheck
 	}
@@ -639,7 +639,7 @@ func TestCreateImageURLPass1(t *testing.T) {
 		globalimage = Arr.PicID
 
 		if res.StatusCode != 200 {
-			t.Errorf("Success expected: %d", res.StatusCode)
+			t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 		}
 	}
 }
@@ -668,7 +668,7 @@ func TestNewImagePass1(t *testing.T) {
 			t.Error(err2)
 		}
 		if res.StatusCode != 201 {
-			t.Errorf("Success expected: %d", res.StatusCode)
+			t.Errorf("Success expected: 201, recieved: %d", res.StatusCode)
 		}
 	}
 }
@@ -692,7 +692,7 @@ func TestGetImagePass(t *testing.T) {
 		}
 
 		if res.StatusCode != 200 {
-			t.Errorf("Success Expected:", res.StatusCode)
+			t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 		}
 		res.Body.Close() //nolint: errcheck
 	}
@@ -715,7 +715,7 @@ func TestDeleteImagePass(t *testing.T) {
 		}
 
 		if res.StatusCode != 200 {
-			t.Errorf("Success expected: %d", res.StatusCode)
+			t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 		}
 		res.Body.Close() //nolint: errcheck
 	}
@@ -738,7 +738,7 @@ func TestDeleteImageFail(t *testing.T) {
 		}
 
 		if res.StatusCode != 400 {
-			t.Errorf("Success expected: %d", res.StatusCode)
+			t.Errorf("Success expected: 400, recieved:  %d", res.StatusCode)
 		}
 		res.Body.Close() //nolint: errcheck
 	}
@@ -765,7 +765,7 @@ func TestCreateItemPass1(t *testing.T) {
 	defer res.Body.Close() //nolint: errcheck
 
 	if res.StatusCode != 201 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 201, recieved: %d", res.StatusCode)
 	}
 }
 
@@ -808,7 +808,7 @@ func TestGetItemsPass2(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -829,7 +829,7 @@ func TestGetUserPass2(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -851,7 +851,7 @@ func TestGetItemIDPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -872,7 +872,7 @@ func TestGetItemsByCatPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -897,7 +897,7 @@ func TestUpdateItemPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -918,7 +918,7 @@ func TestDeleteItemPass2(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -947,7 +947,7 @@ func TestCreateItemFail(t *testing.T) {
 	defer res.Body.Close() //nolint: errcheck
 
 	if res.StatusCode != 400 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 400, recieved: %d", res.StatusCode)
 	}
 }
 
@@ -967,7 +967,7 @@ func TestGetItemsByCatFail(t *testing.T) {
 	}
 
 	if res.StatusCode != 204 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 204, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -990,7 +990,7 @@ func TestDeleteItemFail(t *testing.T) {
 	}
 
 	if res.StatusCode != 404 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 404, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -1010,7 +1010,7 @@ func TestGetItemFail(t *testing.T) {
 	}
 
 	if res.StatusCode != 204 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 204, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -1030,7 +1030,7 @@ func TestUpdateItemFail(t *testing.T) {
 	}
 	//204???
 	if res.StatusCode != 404 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 404, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -1052,7 +1052,7 @@ func TestDeleteUserPass(t *testing.T) {
 		t.Error(err2)
 	}
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint :errcheck
 }
@@ -1079,7 +1079,7 @@ func TestSearchUserFail(t *testing.T) {
 	}
 
 	if res.StatusCode != 500 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 500, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -1105,7 +1105,7 @@ func TestEditUserFail3(t *testing.T) {
 	}
 
 	if res.StatusCode != 404 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 404, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -1126,7 +1126,7 @@ func TestGetUserFail(t *testing.T) {
 		t.Error(err2)
 	}
 	if res.StatusCode != 404 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 404, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -1147,7 +1147,7 @@ func TestDeleteUserFail(t *testing.T) {
 		t.Error(err2)
 	}
 	if res.StatusCode != 204 {
-		t.Errorf("Success expected: %d", res.StatusCode)
+		t.Errorf("Success expected: 204, recieved: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
