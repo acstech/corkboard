@@ -951,31 +951,6 @@ func TestCreateItemFail(t *testing.T) {
 	}
 }
 
-// func TestCreateItemFail2(t *testing.T) {
-//
-// 	itemJSON := `{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ ", "salestatus": "4sale" }`
-// 	reader := strings.NewReader(itemJSON)
-//
-// 	req, err := http.NewRequest("POST", newitemsURL, reader)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-//
-// 	bearer := "Bearer " + theToken
-// 	req.Header.Set("authorization", bearer)
-//
-// 	res, err2 := http.DefaultClient.Do(req)
-// 	if err2 != nil {
-// 		t.Error(err2)
-// 	}
-//
-// 	defer res.Body.Close() //nolint: errcheck
-//
-// 	if res.StatusCode != 400 {
-// 		t.Errorf("Success expected: %d", res.StatusCode)
-// 	}
-// }
-
 //TestGetItemsByCatFail searches for nonexistent category
 func TestGetItemsByCatFail(t *testing.T) {
 	caturl := fmt.Sprintf("%s/api/category/%s", serveURL, "i dont live")

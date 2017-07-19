@@ -22,10 +22,12 @@ type User struct {
 	Sites     []string `json:"sites"`
 }
 
+// Errors struct for printing error message
 type Errors struct {
 	Message string `json:"message"`
 }
 
+// ErrorRes struct for collecting Errors
 type ErrorRes struct {
 	Error []Errors `json:"errors,omitempty"`
 }
@@ -150,7 +152,7 @@ func (cb *Corkboard) verify(user *UpdateUserReq) []Errors {
 			Err = append(Err, Errors{Message: "Email must be in valid format"})
 		}
 	}
-	if len(user.Zipcode) > 5 {
+	if len(user.Zipcode) != 0 && len(user.Zipcode) > 5 {
 		Err = append(Err, Errors{Message: "Zipcode cannot be more than 5 characters"})
 	}
 	return Err
