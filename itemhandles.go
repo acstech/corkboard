@@ -147,10 +147,12 @@ func (corkboard *Corkboard) NewItem(w http.ResponseWriter, r *http.Request, _ ht
 	fmtErrs := corkboard.createNewItem(item)
 	if len(fmtErrs.Errors) != 0 {
 		errsRes, _ := json.Marshal(fmtErrs)
+		w.WriteHeader(http.StatusBadRequest)
 		_, err := w.Write(errsRes)
 		if err != nil {
 			log.Println(err)
 		}
+
 		return
 	}
 	w.WriteHeader(http.StatusCreated)

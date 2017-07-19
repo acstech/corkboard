@@ -143,9 +143,9 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) ErrorsRes {
 	//Might be best to return a list of all the errors that occur at the end of the method
 
 	errs := newitem.verify()
-	if len(errs.Errors) != 0 {
-		return errs
-	}
+	// if len(errs.Errors) != 0 {
+	// 	return errs
+	// }
 	var name = newitem.Itemname
 	var desc = newitem.Itemdesc
 	var cat = newitem.Itemcat
@@ -153,18 +153,20 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) ErrorsRes {
 
 	var priceSplit = strings.TrimPrefix(newitem.Price, "$ ")
 	priceSplit = strings.Replace(priceSplit, ",", "", -1)
-	price, error := strconv.ParseFloat(priceSplit, 64)
-	if error != nil {
-		log.Println(error)
+	price, err := strconv.ParseFloat(priceSplit, 64)
+	if err != nil {
+		errs.Errors = append(errs.Errors, ErrorRes{Message: "Parsing price failed. Allowed characters: $ , . 0-9"})
 	}
-	if priceSplit == "0.00" {
+	if priceSplit == "0.00" || priceSplit == "" {
 		price = 0.00
 	}
 	var status = newitem.Status
 	newID := uuid.NewV4()
 	uID := newID.String()
-
-	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, PictureID: picid, Price: price, Status: status, UserID: newitem.UserID, DatePosted: time.Now()}, 0)
+	if len(errs.Errors) != 0 {
+		return errs
+	}
+	_, err = corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, PictureID: picid, Price: price, Status: status, UserID: newitem.UserID, DatePosted: time.Now()}, 0)
 	if err != nil {
 		errs.Errors = append(errs.Errors, ErrorRes{Message: err.Error()})
 	}
@@ -215,7 +217,7 @@ func (newitem *NewItemReq) verify() ErrorsRes {
 		errs = append(errs, ErrorRes{Message: "Item description greater than 500 characters."})
 	}
 	if len(newitem.Price) > 12 {
-		errs = append(errs, ErrorRes{Message: "Price is greater too large."})
+		errs = append(errs, ErrorRes{Message: "Price is too large."})
 	}
 	if len(newitem.PictureID) > 5 {
 		errs = append(errs, ErrorRes{Message: "Too many pictures uploaded. (Max 5)"})
@@ -245,7 +247,7 @@ func (item *Item) verify() ErrorsRes {
 		errs = append(errs, ErrorRes{Message: "Item description greater than 500 characters."})
 	}
 	if item.Price > 10000000 {
-		errs = append(errs, ErrorRes{Message: "Price is greater too large."})
+		errs = append(errs, ErrorRes{Message: "Price is too large."})
 	}
 	if len(item.PictureID) > 5 {
 		errs = append(errs, ErrorRes{Message: "Too many pictures uploaded. (Max 5)"})
