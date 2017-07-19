@@ -191,12 +191,6 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 	}
 	user.Phone = userReq.Phone
 	user.Email = userReq.Email
-
-	zip, _ := regexp.MatchString("[0-9][0-9][0-9][0-9][0-9]", userReq.Zipcode)
-	if !zip {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
 	user.Zipcode = userReq.Zipcode
 	user.PicID = userReq.PicID
 
