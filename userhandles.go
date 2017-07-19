@@ -94,6 +94,7 @@ func (cb *Corkboard) GetUser(w http.ResponseWriter, r *http.Request, ps httprout
 		log.Println(err)
 		return
 	}
+
 	var itemList []Item
 	for _, element := range itemIDList {
 		item, err2 := cb.findItemByID(element.ID)

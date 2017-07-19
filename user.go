@@ -22,19 +22,9 @@ type User struct {
 	Sites     []string `json:"sites"`
 }
 
-// // Errors struct for printing error message
-// type Errors struct {
-// 	Message string `json:"message"`
-// }
-//
-// // ErrorRes struct for collecting Errors
-// type ErrorRes struct {
-// 	Error []Errors `json:"errors,omitempty"`
-// }
-
 //ItemID is used to unmarshal userItems queries
 type ItemID struct {
-	ID string `json:"itemid"`
+	ID string `json:"id"`
 }
 
 //FakeUser is a dummy struct used to add the "_type" field to users
@@ -111,7 +101,7 @@ func (cb *Corkboard) findUserByKey(key string) (*User, error) {
 }
 
 func (cb *Corkboard) findUserItems(userID string) ([]ItemID, error) {
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid FROM `%s` WHERE type = 'item' AND userid = '%s'", cb.Bucket.Name(), userID)) //nolint: gas
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT id FROM `%s` WHERE type = 'item' AND userid = '%s'", cb.Bucket.Name(), userID)) //nolint: gas
 	res, err := cb.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
 		return nil, err
