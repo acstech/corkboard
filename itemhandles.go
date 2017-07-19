@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -158,7 +159,7 @@ func (corkboard *Corkboard) NewItem(w http.ResponseWriter, r *http.Request, _ ht
 
 //EditItem finds an item to be updated, creates a new item with new info, then appends new info to original item
 func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-
+	var errs ErrorsRes
 	//reqitem stores information from update request
 	var reqitem NewItemReq
 	decoder := json.NewDecoder(r.Body)
@@ -193,34 +194,36 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	item.ItemName = reqitem.Itemname
 	item.ItemDesc = reqitem.Itemdesc
 	item.Category = reqitem.Itemcat
-
-	var priceSplit = strings.TrimPrefix(reqitem.Price, "$ ")
-	priceSplit = strings.Replace(priceSplit, ",", "", -1)
-	var price, error = strconv.ParseFloat(priceSplit, 64)
-	if error != nil {
-		log.Println(error)
-		return
+	var price float64
+	priceType := fmt.Sprint(reflect.TypeOf(reqitem.Price))
+	if priceType != "string" {
+		errs.Errors = append(errs.Errors, ErrorRes{Message: "Price should be sent as a string."})
+	} else {
+		var priceSplit = strings.TrimPrefix(reqitem.Price, "$ ")
+		priceSplit = strings.Replace(priceSplit, ",", "", -1)
+		price, err = strconv.ParseFloat(priceSplit, 64)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		if priceSplit == "0.00" {
+			price = 0.00
+		}
 	}
-	if priceSplit == "0.00" {
-		price = 0.00
-	}
+	//This error check needs to be here because it is being performed on the Item not the NewItemReq
+	item.Price = price
 	if item.Price > 10000000 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	item.Price = price
 	item.Status = reqitem.Status
-	if len(reqitem.PictureID) > 5 {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
+
 	item.PictureID = reqitem.PictureID
 	item.DatePosted = reqitem.Date
 	//The URL generated in "findItemByID" is not needed here
 	item.PicURL = nil
 
-	//call to updateItem appends item to couchbase
-	errs := corkboard.updateItem(item)
+	errs = corkboard.updateItem(item)
 	if len(errs.Errors) != 0 {
 		errsRes, _ := json.Marshal(errs)
 		_, err := w.Write(errsRes)
