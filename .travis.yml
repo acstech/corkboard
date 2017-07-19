@@ -8,7 +8,7 @@ env:
 before_install:
 - go get -u github.com/alecthomas/gometalinter
 - gometalinter --install
-- gometalinter --vendor --tests --disable=gotype .
+- gometalinter --vendor --tests --disable=gotype --deadline=1m .
 - gometalinter --vendor --tests --disable=gotype ./cmd/corkboard/.
 - if [ "$TRAVIS_EVENT_TYPE" = "pull_request" ] || ! [ -z "$TRAVIS_TAG" ]; then chmod +x ./standup_couchbase.sh ./stop_couchbase.sh; fi
 install:
