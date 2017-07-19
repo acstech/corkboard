@@ -144,10 +144,13 @@ func (corkboard *Corkboard) NewItem(w http.ResponseWriter, r *http.Request, _ ht
 	uid := claims.UID
 
 	item.UserID = uid
-	err2 := corkboard.createNewItem(item)
-	if err2 != nil {
-		log.Println(err2)
-		w.WriteHeader(http.StatusBadRequest)
+	fmtErrs := corkboard.createNewItem(item)
+	if len(fmtErrs.Errors) != 0 {
+		errsRes, _ := json.Marshal(fmtErrs)
+		_, err := w.Write(errsRes)
+		if err != nil {
+			log.Println(err)
+		}
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -190,6 +193,7 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	item.ItemName = reqitem.Itemname
 	item.ItemDesc = reqitem.Itemdesc
 	item.Category = reqitem.Itemcat
+
 	var priceSplit = strings.TrimPrefix(reqitem.Price, "$ ")
 	priceSplit = strings.Replace(priceSplit, ",", "", -1)
 	var price, error = strconv.ParseFloat(priceSplit, 64)
@@ -200,8 +204,16 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	if priceSplit == "0.00" {
 		price = 0.00
 	}
+	if item.Price > 10000000 {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	item.Price = price
 	item.Status = reqitem.Status
+	if len(reqitem.PictureID) > 5 {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	item.PictureID = reqitem.PictureID
 	item.DatePosted = reqitem.Date
 	//The URL generated in "findItemByID" is not needed here
