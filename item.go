@@ -55,6 +55,16 @@ type GetItemRes struct {
 	UserID     string    `json:"userid,omitempty"`
 }
 
+//ErrorRes contains the error message thrown by a given error
+type ErrorRes struct {
+	Message string `json:"message"`
+}
+
+//ErrorsRes contains an array of all the error Responses from the errors in a data access method
+type ErrorsRes struct {
+	Errors []ErrorRes `json:"errors,omitempty"`
+}
+
 //getUserKey concatenates the uuid with the "item" prefix
 func getItemKey(id uuid.UUID) string {
 	return fmt.Sprintf("item:%s", id.String())
@@ -129,8 +139,13 @@ func (corkboard *Corkboard) findItemByID(itemID string) (*Item, error) {
 }
 
 //createNewItem is called by NewItem, takes a new item request and inserts it into the database
-func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
-	//Add more fields later???
+func (corkboard *Corkboard) createNewItem(newitem NewItemReq) ErrorsRes {
+	//Might be best to return a list of all the errors that occur at the end of the method
+
+	errs := newitem.verify()
+	// if len(errs.Errors) != 0 {
+	// 	return errs
+	// }
 	var name = newitem.Itemname
 	var desc = newitem.Itemdesc
 	var cat = newitem.Itemcat
@@ -138,32 +153,39 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) error {
 
 	var priceSplit = strings.TrimPrefix(newitem.Price, "$ ")
 	priceSplit = strings.Replace(priceSplit, ",", "", -1)
-
-	price, error := strconv.ParseFloat(priceSplit, 64)
-	if error != nil {
-		log.Println(error)
-		return error
+	price, err := strconv.ParseFloat(priceSplit, 64)
+	if err != nil {
+		errs.Errors = append(errs.Errors, ErrorRes{Message: "Parsing price failed. Allowed characters: $ , . 0-9"})
 	}
-	if priceSplit == "0.00" {
+	if priceSplit == "0.00" || priceSplit == "" {
 		price = 0.00
 	}
 	var status = newitem.Status
 	newID := uuid.NewV4()
 	uID := newID.String()
-	_, err := corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, PictureID: picid, Price: price, Status: status, UserID: newitem.UserID, DatePosted: time.Now()}, 0)
-	return err
-
+	if len(errs.Errors) != 0 {
+		return errs
+	}
+	_, err = corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, PictureID: picid, Price: price, Status: status, UserID: newitem.UserID, DatePosted: time.Now()}, 0)
+	if err != nil {
+		errs.Errors = append(errs.Errors, ErrorRes{Message: err.Error()})
+	}
+	return errs
 }
 
+//TODO: Clean this data up as well, item checks
 //updateItem upserts updated item object to couchbase document
-func (corkboard *Corkboard) updateItem(item *Item) error {
+func (corkboard *Corkboard) updateItem(item *Item) ErrorsRes {
 
 	var theID = "item:" + item.ItemID
 	thetime := time.Now()
 	item.DatePosted = thetime
+	errs := item.verify()
 	_, err := corkboard.Bucket.Upsert(theID, item, 0)
-	return err
-
+	if err != nil {
+		errs.Errors = append(errs.Errors, ErrorRes{Message: err.Error()})
+	}
+	return errs
 }
 
 func (corkboard *Corkboard) removeItem(item *Item) error {
@@ -176,4 +198,64 @@ func (corkboard *Corkboard) removeItem(item *Item) error {
 		return err
 	}
 	return nil
+}
+
+func (newitem *NewItemReq) verify() ErrorsRes {
+	var errs []ErrorRes
+	if len(newitem.Itemname) > 180 {
+		errs = append(errs, ErrorRes{Message: "Item name greater than 180 characters."})
+	} else if newitem.Itemname == "" {
+		errs = append(errs, ErrorRes{Message: "Must include an item name."})
+	}
+	if len(newitem.Itemcat) > 25 {
+		errs = append(errs, ErrorRes{Message: "Category too long."})
+	} else if newitem.Itemcat == "" {
+		errs = append(errs, ErrorRes{Message: "Must enter a category."})
+	}
+
+	if len(newitem.Itemdesc) > 500 {
+		errs = append(errs, ErrorRes{Message: "Item description greater than 500 characters."})
+	}
+	if len(newitem.Price) > 12 {
+		errs = append(errs, ErrorRes{Message: "Price is too large."})
+	}
+	if len(newitem.PictureID) > 5 {
+		errs = append(errs, ErrorRes{Message: "Too many pictures uploaded. (Max 5)"})
+	}
+	if len(newitem.Status) > 20 {
+		errs = append(errs, ErrorRes{Message: "Invalid Status."})
+	}
+	var fmtErrs ErrorsRes
+	fmtErrs.Errors = errs
+	return fmtErrs
+}
+
+func (item *Item) verify() ErrorsRes {
+	var errs []ErrorRes
+	if len(item.ItemName) > 180 {
+		errs = append(errs, ErrorRes{Message: "Item name greater than 180 characters."})
+	} else if item.ItemName == "" {
+		errs = append(errs, ErrorRes{Message: "Must include an item name."})
+	}
+	if len(item.Category) > 25 {
+		errs = append(errs, ErrorRes{Message: "Category too long."})
+	} else if item.Category == "" {
+		errs = append(errs, ErrorRes{Message: "Must enter a category."})
+	}
+
+	if len(item.ItemDesc) > 500 {
+		errs = append(errs, ErrorRes{Message: "Item description greater than 500 characters."})
+	}
+	if item.Price > 10000000 {
+		errs = append(errs, ErrorRes{Message: "Price is too large."})
+	}
+	if len(item.PictureID) > 5 {
+		errs = append(errs, ErrorRes{Message: "Too many pictures uploaded. (Max 5)"})
+	}
+	if len(item.Status) > 20 {
+		errs = append(errs, ErrorRes{Message: "Invalid Status."})
+	}
+	var fmtErrs ErrorsRes
+	fmtErrs.Errors = errs
+	return fmtErrs
 }
