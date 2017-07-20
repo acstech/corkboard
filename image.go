@@ -22,7 +22,7 @@ import (
 //posting/getting item photos
 type ItemImage struct {
 	ImageID string `json:"picid"`
-	ItemID  string `json:"itemid"`
+	ItemID  string `json:"id"`
 }
 
 //NewImageReq is used to decode NewImage body into usable data.
