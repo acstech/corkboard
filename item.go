@@ -15,13 +15,13 @@ import (
 //Item struct contains properties for a standard item, not all properties are required
 type Item struct {
 	Type       string    `json:"type,omitempty"`
-	ItemID     string    `json:"itemid,omitempty"`
-	ItemName   string    `json:"itemname,omitempty"`
-	ItemDesc   string    `json:"itemdesc,omitempty"`
-	Category   string    `json:"itemcat,omitempty" `
+	ItemID     string    `json:"id,omitempty"`
+	ItemName   string    `json:"name,omitempty"`
+	ItemDesc   string    `json:"description,omitempty"`
+	Category   string    `json:"category,omitempty" `
 	PictureID  []string  `json:"picid,omitempty"`
 	PicURL     []string  `json:"url,omitempty"`
-	Price      float64   `json:"itemprice"`
+	Price      float64   `json:"price"`
 	DatePosted time.Time `json:"date,omitempty"`
 	Status     string    `json:"salestatus,omitempty"`
 	UserID     string    `json:"userid,omitempty"`
@@ -30,10 +30,10 @@ type Item struct {
 //NewItemReq struct for creating new items
 type NewItemReq struct {
 	Type      string    `json:"type,omitempty"`
-	Itemname  string    `json:"itemname,omitempty"`
-	Itemcat   string    `json:"itemcat,omitempty"`
-	Itemdesc  string    `json:"itemdesc,omitempty"`
-	Price     string    `json:"itemprice,omitempty"`
+	Itemname  string    `json:"name,omitempty"`
+	Itemcat   string    `json:"category,omitempty"`
+	Itemdesc  string    `json:"description,omitempty"`
+	Price     string    `json:"price,omitempty"`
 	PictureID []string  `json:"picid,omitempty"`
 	Status    string    `json:"salestatus,omitempty"`
 	Date      time.Time `json:"date,omitempty"`
@@ -43,13 +43,13 @@ type NewItemReq struct {
 
 //GetItemRes is used to return all image data and include the Id and url of the primary pic
 type GetItemRes struct {
-	ItemID     string    `json:"itemid,omitempty"`
-	ItemName   string    `json:"itemname,omitempty"`
-	ItemDesc   string    `json:"itemdesc,omitempty"`
-	Category   string    `json:"itemcat,omitempty"`
+	ItemID     string    `json:"id,omitempty"`
+	ItemName   string    `json:"name,omitempty"`
+	ItemDesc   string    `json:"description,omitempty"`
+	Category   string    `json:"category,omitempty"`
 	PictureID  string    `json:"picid,omitempty"`
 	PicURL     string    `json:"url, omitempty"`
-	Price      float64   `json:"itemprice"`
+	Price      float64   `json:"price"`
 	DatePosted time.Time `json:"date,omitempty"`
 	Status     string    `json:"salestatus,omitempty"`
 	UserID     string    `json:"userid,omitempty"`
@@ -73,7 +73,7 @@ func getItemKey(id uuid.UUID) string {
 //findItems takes a corkboard object and queries couchbase
 func (corkboard *Corkboard) findItems() ([]Item, error) {
 
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemprice, itemcat, picid, date, userid FROM `%s` WHERE type = 'item'", corkboard.Bucket.Name())) //nolint: gas
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT id, name, description, price, category, picid, date, userid FROM `%s` WHERE type = 'item'", corkboard.Bucket.Name())) //nolint: gas
 	//log.Println(corkboard.Bucket.Name())
 
 	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{})
@@ -96,7 +96,7 @@ func (corkboard *Corkboard) findItems() ([]Item, error) {
 
 //findItemsByCat queries couchbase for items by category matching the parameter
 func (corkboard *Corkboard) findItemsByCat(itemCat string) ([]Item, error) {
-	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT itemid, itemname, itemdesc, itemprice, itemcat, date, userid FROM `%s` WHERE itemcat = '%s'", corkboard.Bucket.Name(), itemCat)) //nolint: gas
+	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT id, name, description, price, category, date, userid FROM `%s` WHERE category = '%s'", corkboard.Bucket.Name(), itemCat)) //nolint: gas
 
 	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {

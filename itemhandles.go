@@ -13,15 +13,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-/*type GetItemReq struct {
-	Itemname string    `json:"itemname,omitempty"`
-	Itemcat  string    `json:"itemcat,omitempty"`
-	Itemdesc string    `json:"itemdesc,omitempty"`
-	Price    string    `json:"itemprice,omitempty"`
-	Status   string    `json:"salestatus,omitempty"`
-	Date     time.Time `json:"date,omitempty"`
-}*/
-
 //GetItems is an http handler for finding an array of items and storing them in the items array
 //Currently, GetItems finds items with a N1QLQuery that searches for a "type" variable
 func (corkboard *Corkboard) GetItems(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {

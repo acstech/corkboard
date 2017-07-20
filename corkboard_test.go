@@ -21,6 +21,7 @@ import (
 var (
 	server        *httptest.Server //nolint: megacheck
 	reader        io.Reader
+	bucket        string
 	newuserURL    string
 	usersURL      string
 	useridURL     string
@@ -55,14 +56,16 @@ var (
 type Token struct {
 	Token string `json:"token"`
 }
+type UserValues struct {
+	TheUserID    string `json:"id"`
+	TheUserEmail string `json:"email"`
+}
 
-type Values struct {
-	TheUserID    string  `json:"id"`
-	TheUserEmail string  `json:"email"`
-	TheItemID    string  `json:"itemid"`
-	ItemUserID   string  `json:"userid"`
-	PriceType    float64 `json:"itemprice"`
-	PicID        string  `json:"picid"`
+type ItemValues struct {
+	TheItemID  string  `json:"id"`
+	ItemUserID string  `json:"userid"`
+	PriceType  float64 `json:"price"`
+	PicID      string  `json:"picid"`
 }
 
 func init() {
@@ -86,6 +89,7 @@ func init() {
 	}
 
 	server := httptest.NewServer(cork.Router())
+	bucket = cork.Bucket.Name()
 
 	//Connection strings (user)
 	serveURL = server.URL
@@ -102,6 +106,71 @@ func init() {
 
 	//Connection strings (image)
 	newimageurl = fmt.Sprintf("%s/api/image/new", server.URL)
+}
+
+func itemcleanup(id string, token string) {
+	if dev {
+		deleteitemURL = fmt.Sprintf("%s/api/items/delete/%s", serveURL, id)
+		req, err := http.NewRequest("DELETE", deleteitemURL, nil)
+		if err != nil {
+			log.Println(err)
+		}
+		bearer := "Bearer " + token
+		req.Header.Set("authorization", bearer)
+
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			log.Println(err2)
+		}
+
+		if res.StatusCode != 200 {
+			log.Println("Warning: Potential untracked object: Item, ", id)
+		}
+		res.Body.Close() //nolint: errcheck
+	}
+}
+
+func usercleanup(id string, token string) {
+
+	deleteuserURL = fmt.Sprintf("%s/api/users/delete/%s", serveURL, id)
+	req, err := http.NewRequest("DELETE", deleteuserURL, nil)
+	if err != nil {
+		log.Println(err)
+	}
+
+	bearer := "Bearer " + token
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		log.Println(err2)
+	}
+	if res.StatusCode != 200 {
+		log.Println("Warning: Potential untracked object: User, ", id)
+	}
+	res.Body.Close() //nolint :errcheck
+	log.Println("in usercleanup,", id, token)
+}
+
+func imagecleanup(id string) {
+	if dev {
+		url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, id)
+		req, err := http.NewRequest("DELETE", url, nil)
+		if err != nil {
+			log.Println(err)
+		}
+
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			log.Println(err2)
+		}
+
+		if res.StatusCode != 200 {
+			log.Println("Success expected: 200, received: %d", res.StatusCode)
+			log.Println("Warning: Potential untracked Object: Image, ", id)
+		}
+		res.Body.Close() //nolint: errcheck
+	}
 }
 
 //-----------------------------------------
@@ -129,7 +198,7 @@ func TestCreateUserPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 201 {
-		t.Errorf("Success expected: 201, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 201, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -147,7 +216,7 @@ func TestGetUsersFail(t *testing.T) {
 	}
 
 	if res.StatusCode != 401 {
-		t.Errorf("Success expected: 401, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 401, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -178,7 +247,7 @@ func TestAuthPass(t *testing.T) {
 	theToken = theTok.Token
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -201,7 +270,7 @@ func TestGetUsersPass(t *testing.T) {
 	}
 
 	//store fields from returned users into array
-	var Arr []Values
+	var Arr []UserValues
 	body, _ := ioutil.ReadAll(res.Body)
 	errre := json.Unmarshal(body, &Arr)
 	if errre != nil {
@@ -217,7 +286,7 @@ func TestGetUsersPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -239,7 +308,8 @@ func TestGetUserPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
+		usercleanup(globaluserid, theToken)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -266,7 +336,8 @@ func TestEditUserPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
+		usercleanup(globaluserid, theToken)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -290,7 +361,9 @@ func TestSearchUserPass1(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
+		usercleanup(globaluserid, theToken)
+
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -313,7 +386,8 @@ func TestSearchUserPass2(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
+		usercleanup(globaluserid, theToken)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -337,7 +411,7 @@ func TestSearchUserPass3(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -361,7 +435,7 @@ func TestGetUsersFailAuth(t *testing.T) {
 	}
 
 	if res.StatusCode != 401 {
-		t.Errorf("Success expected: 401, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 401, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -384,7 +458,7 @@ func TestSearchUserFail2(t *testing.T) {
 	}
 
 	if res.StatusCode != 500 {
-		t.Errorf("Success expected: 500, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 500, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -405,7 +479,7 @@ func TestGetUsersFail2(t *testing.T) {
 	}
 
 	if res.StatusCode != 401 {
-		t.Errorf("Success expected: 401, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 401, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -431,7 +505,8 @@ func TestEditUserFail(t *testing.T) {
 	}
 
 	if res.StatusCode != 400 {
-		t.Errorf("Success expected: 400, recieved:  %d", res.StatusCode)
+		t.Errorf("Success expected: 400, received:  %d", res.StatusCode)
+		usercleanup(globaluserid, theToken)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -462,7 +537,7 @@ func TestCreateImageURLPass(t *testing.T) {
 
 		defer res.Body.Close() //nolint: errcheck
 
-		var Arr Values
+		var Arr ItemValues
 		body, _ := ioutil.ReadAll(res.Body)
 		errre := json.Unmarshal(body, &Arr)
 		if errre != nil {
@@ -473,7 +548,7 @@ func TestCreateImageURLPass(t *testing.T) {
 		globalimage1 = Arr.PicID
 
 		if res.StatusCode != 200 {
-			t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+			t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 		}
 	}
 }
@@ -502,7 +577,8 @@ func TestNewImagePass(t *testing.T) {
 			t.Error(err2)
 		}
 		if res.StatusCode != 201 {
-			t.Errorf("Success expected: 201, recieved: %d", res.StatusCode)
+			t.Errorf("Success expected: 201, received: %d", res.StatusCode)
+			imagecleanup(globalimage1)
 		}
 	}
 }
@@ -511,7 +587,7 @@ func TestNewImagePass(t *testing.T) {
 func TestCreateItemPass(t *testing.T) {
 
 	if dev {
-		itemJSON := fmt.Sprintf(`{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 2", "salestatus": "4sale", "picid": [ "%s" ] }`, globalimage1)
+		itemJSON := fmt.Sprintf(`{ "name": "helmet", "description": "hard hat", "category": "sports", "price": "$ 2", "salestatus": "4sale", "picid": [ "%s" ] }`, globalimage1)
 		reader := strings.NewReader(itemJSON)
 		req, err := http.NewRequest("POST", newitemsURL, reader)
 		if err != nil {
@@ -529,7 +605,8 @@ func TestCreateItemPass(t *testing.T) {
 		defer res.Body.Close() //nolint: errcheck
 
 		if res.StatusCode != 201 {
-			t.Errorf("Success expected: 201, recieved: %d", res.StatusCode)
+			t.Errorf("Success expected: 201, received: %d", res.StatusCode)
+			itemcleanup(globalimage1, theToken)
 		}
 	}
 }
@@ -550,7 +627,7 @@ func TestGetItemsPass(t *testing.T) {
 			t.Error(err2)
 		}
 
-		var Arr []Values
+		var Arr []ItemValues
 		body, _ := ioutil.ReadAll(res.Body)
 		errre := json.Unmarshal(body, &Arr)
 		if errre != nil {
@@ -573,7 +650,7 @@ func TestGetItemsPass(t *testing.T) {
 		}
 
 		if res.StatusCode != 200 {
-			t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+			t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 		}
 		res.Body.Close() //nolint: errcheck
 	}
@@ -596,7 +673,7 @@ func TestDeleteItemPass(t *testing.T) {
 		}
 
 		if res.StatusCode != 200 {
-			t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+			t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 		}
 		res.Body.Close() //nolint: errcheck
 	}
@@ -628,7 +705,7 @@ func TestCreateImageURLPass1(t *testing.T) {
 
 		defer res.Body.Close() //nolint: errcheck
 
-		var Arr Values
+		var Arr ItemValues
 		body, _ := ioutil.ReadAll(res.Body)
 		errre := json.Unmarshal(body, &Arr)
 		if errre != nil {
@@ -639,7 +716,7 @@ func TestCreateImageURLPass1(t *testing.T) {
 		globalimage = Arr.PicID
 
 		if res.StatusCode != 200 {
-			t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+			t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 		}
 	}
 }
@@ -668,7 +745,8 @@ func TestNewImagePass1(t *testing.T) {
 			t.Error(err2)
 		}
 		if res.StatusCode != 201 {
-			t.Errorf("Success expected: 201, recieved: %d", res.StatusCode)
+			t.Errorf("Success expected: 201, received: %d", res.StatusCode)
+			imagecleanup(globalimage)
 		}
 	}
 }
@@ -692,7 +770,7 @@ func TestGetImagePass(t *testing.T) {
 		}
 
 		if res.StatusCode != 200 {
-			t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+			t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 		}
 		res.Body.Close() //nolint: errcheck
 	}
@@ -715,7 +793,7 @@ func TestDeleteImagePass(t *testing.T) {
 		}
 
 		if res.StatusCode != 200 {
-			t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+			t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 		}
 		res.Body.Close() //nolint: errcheck
 	}
@@ -738,7 +816,7 @@ func TestDeleteImageFail(t *testing.T) {
 		}
 
 		if res.StatusCode != 400 {
-			t.Errorf("Success expected: 400, recieved:  %d", res.StatusCode)
+			t.Errorf("Success expected: 400, received:  %d", res.StatusCode)
 		}
 		res.Body.Close() //nolint: errcheck
 	}
@@ -747,7 +825,7 @@ func TestDeleteImageFail(t *testing.T) {
 //TestCreateItemPass1 creates an item with multiple fields, should always pass
 func TestCreateItemPass1(t *testing.T) {
 
-	itemJSON := `{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "$ 2", "salestatus": "4sale" }`
+	itemJSON := `{ "name": "helmet", "description": "hard hat", "category": "sports", "price": "$ 2", "salestatus": "4sale" }`
 	reader := strings.NewReader(itemJSON)
 	req, err := http.NewRequest("POST", newitemsURL, reader)
 	if err != nil {
@@ -765,7 +843,7 @@ func TestCreateItemPass1(t *testing.T) {
 	defer res.Body.Close() //nolint: errcheck
 
 	if res.StatusCode != 201 {
-		t.Errorf("Success expected: 201, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 201, received: %d", res.StatusCode)
 	}
 }
 
@@ -785,7 +863,7 @@ func TestGetItemsPass2(t *testing.T) {
 		t.Error(err2)
 	}
 
-	var Arr []Values
+	var Arr []ItemValues
 	body, _ := ioutil.ReadAll(res.Body)
 	errre := json.Unmarshal(body, &Arr)
 	if errre != nil {
@@ -808,7 +886,7 @@ func TestGetItemsPass2(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -829,7 +907,7 @@ func TestGetUserPass2(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -851,7 +929,7 @@ func TestGetItemIDPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -872,7 +950,7 @@ func TestGetItemsByCatPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -880,7 +958,7 @@ func TestGetItemsByCatPass(t *testing.T) {
 //TestUpdateItemPass tests EditItem, should always pass
 func TestUpdateItemPass(t *testing.T) {
 
-	itemJSON := `{ "itemname": "WASHINGTON DC", "itemdesc": "finesse", "itemprice": "$ 345" }`
+	itemJSON := `{ "name": "WASHINGTON DC", "description": "finesse", "price": "$ 345" }`
 	reader := strings.NewReader(itemJSON)
 
 	edititemURL = fmt.Sprintf("%s/api/items/edit/%s", serveURL, globalitemid)
@@ -897,7 +975,8 @@ func TestUpdateItemPass(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
+		itemcleanup(globalitemid, theToken)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -918,7 +997,7 @@ func TestDeleteItemPass2(t *testing.T) {
 	}
 
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -929,7 +1008,7 @@ func TestDeleteItemPass2(t *testing.T) {
 
 //TestCreateItemFail malforms the price field
 func TestCreateItemFail(t *testing.T) {
-	itemJSON := `{ "itemname": "helmet", "itemdesc": "hard hat", "itemcat": "sports", "itemprice": "dollars", "salestatus": "4sale" }`
+	itemJSON := `{ "name": "helmet", "description": "hard hat", "category": "sports", "price": "dollars", "salestatus": "4sale" }`
 	reader := strings.NewReader(itemJSON)
 
 	req, err := http.NewRequest("POST", newitemsURL, reader)
@@ -947,7 +1026,7 @@ func TestCreateItemFail(t *testing.T) {
 	defer res.Body.Close() //nolint: errcheck
 
 	if res.StatusCode != 400 {
-		t.Errorf("Success expected: 400, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 400, received: %d", res.StatusCode)
 	}
 }
 
@@ -967,7 +1046,7 @@ func TestGetItemsByCatFail(t *testing.T) {
 	}
 
 	if res.StatusCode != 204 {
-		t.Errorf("Success expected: 204, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 204, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -990,7 +1069,7 @@ func TestDeleteItemFail(t *testing.T) {
 	}
 
 	if res.StatusCode != 404 {
-		t.Errorf("Success expected: 404, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 404, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -1010,7 +1089,7 @@ func TestGetItemFail(t *testing.T) {
 	}
 
 	if res.StatusCode != 204 {
-		t.Errorf("Success expected: 204, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 204, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -1030,7 +1109,7 @@ func TestUpdateItemFail(t *testing.T) {
 	}
 	//204???
 	if res.StatusCode != 404 {
-		t.Errorf("Success expected: 404, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 404, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -1052,7 +1131,7 @@ func TestDeleteUserPass(t *testing.T) {
 		t.Error(err2)
 	}
 	if res.StatusCode != 200 {
-		t.Errorf("Success expected: 200, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint :errcheck
 }
@@ -1079,7 +1158,7 @@ func TestSearchUserFail(t *testing.T) {
 	}
 
 	if res.StatusCode != 500 {
-		t.Errorf("Success expected: 500, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 500, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -1105,7 +1184,7 @@ func TestEditUserFail3(t *testing.T) {
 	}
 
 	if res.StatusCode != 404 {
-		t.Errorf("Success expected: 404, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 404, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -1126,7 +1205,7 @@ func TestGetUserFail(t *testing.T) {
 		t.Error(err2)
 	}
 	if res.StatusCode != 404 {
-		t.Errorf("Success expected: 404, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 404, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -1147,7 +1226,7 @@ func TestDeleteUserFail(t *testing.T) {
 		t.Error(err2)
 	}
 	if res.StatusCode != 204 {
-		t.Errorf("Success expected: 204, recieved: %d", res.StatusCode)
+		t.Errorf("Success expected: 204, received: %d", res.StatusCode)
 	}
 	res.Body.Close() //nolint: errcheck
 }
