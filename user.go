@@ -97,6 +97,7 @@ func (cb *Corkboard) findUserByKey(key string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return user, nil
 }
 
@@ -141,7 +142,14 @@ func (cb *Corkboard) verify(user *UpdateUserReq) ErrorsRes {
 		if !email {
 			Err = append(Err, ErrorRes{Message: "Email must be in valid format"})
 		}
+		//verify originality of attempted email update
+		key := fmt.Sprintf("email=%s", user.Email)
+		_, err := cb.findUserByKey(key)
+		if err != nil {
+			Err = append(Err, ErrorRes{Message: "email already registered!"})
+		}
 	}
+
 	if len(user.Zipcode) != 0 && len(user.Zipcode) != 5 {
 		Err = append(Err, ErrorRes{Message: "Zipcode must be 5 characters"})
 	}

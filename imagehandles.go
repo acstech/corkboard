@@ -139,15 +139,6 @@ func (cb *Corkboard) MockS3(w http.ResponseWriter, r *http.Request, ps httproute
 		return
 	}
 
-	//It works up to here, file is created in the correct dir with the correct name.
-	//Now we just need to be able to read the data from the form and copy it into the
-	//file we have just created somehow.
-	// image, _, err1 := r.FormFile("Image")
-	// if err1 != nil {
-	// 	log.Println(err1)
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// }
-	//log.Println(image)
 	_, err = io.Copy(file, r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

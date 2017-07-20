@@ -215,7 +215,10 @@ func (newitem *NewItemReq) verify() ErrorsRes {
 
 	if len(newitem.Itemdesc) > 500 {
 		errs = append(errs, ErrorRes{Message: "Item description greater than 500 characters."})
+	} else if newitem.Itemdesc == "" {
+		errs = append(errs, ErrorRes{Message: "Must enter a description."})
 	}
+
 	if len(newitem.Price) > 12 {
 		errs = append(errs, ErrorRes{Message: "Price is too large."})
 	}
@@ -238,14 +241,17 @@ func (item *Item) verify() ErrorsRes {
 		errs = append(errs, ErrorRes{Message: "Must include an item name."})
 	}
 	if len(item.Category) > 25 {
-		errs = append(errs, ErrorRes{Message: "Category too long."})
+		errs = append(errs, ErrorRes{Message: "Category cannot be more than 25 characters."})
 	} else if item.Category == "" {
 		errs = append(errs, ErrorRes{Message: "Must enter a category."})
 	}
 
 	if len(item.ItemDesc) > 500 {
 		errs = append(errs, ErrorRes{Message: "Item description greater than 500 characters."})
+	} else if item.ItemDesc == "" {
+		errs = append(errs, ErrorRes{Message: "Must enter a description."})
 	}
+
 	if item.Price > 10000000 {
 		errs = append(errs, ErrorRes{Message: "Price is too large."})
 	}

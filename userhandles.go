@@ -128,6 +128,10 @@ func (cb *Corkboard) SearchUser(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	if user == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	var userRes GetUserRes
 	userRes.Email = user.Email
 	userRes.Firstname = user.Firstname

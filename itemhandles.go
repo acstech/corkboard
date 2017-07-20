@@ -97,16 +97,6 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	// var newitem Item
-	// //NewReqTransfer(item, &itemreq)
-	// newitem.ItemName = item.ItemName
-	// newitem.Category = item.Category
-	// newitem.ItemDesc = item.ItemDesc
-	// newitem.Price = item.Price
-	// newitem.Status = item.Status
-	// newitem.PictureID = item.PictureID
-	// newitem.DatePosted = item.DatePosted
-
 	JSONitem, err := json.Marshal(item)
 	if err != nil {
 		log.Println(err)
