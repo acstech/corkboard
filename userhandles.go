@@ -184,7 +184,7 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	theErr := cb.verify(userReq)
+	theErr := cb.verify(userReq, id)
 	if len(theErr.Errors) != 0 {
 		errsRes, _ := json.Marshal(theErr)
 		w.WriteHeader(http.StatusBadRequest)
