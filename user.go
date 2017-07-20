@@ -120,7 +120,7 @@ func (cb *Corkboard) findUserItems(userID string) ([]ItemID, error) {
 }
 
 //verify checks all data fields before allowing User to accept UpdateUserReq changes
-func (cb *Corkboard) verify(user *UpdateUserReq, userID string) ErrorsRes {
+func (cb *Corkboard) verify(user *UpdateUserReq, userID string) ErrorsRes { // nolint: gocyclo
 	var Err []ErrorRes
 	if len(user.Lastname) > 30 {
 		Err = append(Err, ErrorRes{Message: "Lastname cannot be more than 30 characters"})
