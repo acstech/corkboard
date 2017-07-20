@@ -97,6 +97,7 @@ func (cb *Corkboard) findUserByKey(key string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return user, nil
 }
 
@@ -118,7 +119,8 @@ func (cb *Corkboard) findUserItems(userID string) ([]ItemID, error) {
 	return items, nil
 }
 
-func (cb *Corkboard) verify(user *UpdateUserReq) ErrorsRes {
+//verify checks all data fields before allowing User to accept UpdateUserReq changes
+func (cb *Corkboard) verify(user *UpdateUserReq, userID string) ErrorsRes { // nolint: gocyclo
 	var Err []ErrorRes
 	if len(user.Lastname) > 30 {
 		Err = append(Err, ErrorRes{Message: "Lastname cannot be more than 30 characters"})
@@ -141,7 +143,17 @@ func (cb *Corkboard) verify(user *UpdateUserReq) ErrorsRes {
 		if !email {
 			Err = append(Err, ErrorRes{Message: "Email must be in valid format"})
 		}
+		//verify new email is not registered already
+		key := fmt.Sprintf("email=%s", user.Email)
+		newuser, err := cb.findUserByKey(key)
+		//if findUserByKey returns no error, that means it found a matching user, which means the UpdateUserReq should not be allowed to set their email to a pre-existing email
+		if err != nil {
+			//we good
+		} else if newuser.ID != userID {
+			Err = append(Err, ErrorRes{Message: "Email is already registered"})
+		}
 	}
+
 	if len(user.Zipcode) != 0 && len(user.Zipcode) != 5 {
 		Err = append(Err, ErrorRes{Message: "Zipcode must be 5 characters"})
 	}
