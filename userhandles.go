@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"regexp"
 
 	corkboardauth "github.com/acstech/corkboard-auth"
 	"github.com/julienschmidt/httprouter"
@@ -180,15 +179,16 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
+	theErr := cb.verify(userReq)
+	if len(theErr.Errors) != 0 {
+		errsRes, _ := json.Marshal(theErr)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(errsRes) //nolint: errcheck
+		return
+	}
+
 	user.Firstname = userReq.Firstname
 	user.Lastname = userReq.Lastname
-	if len(userReq.Phone) != 0 {
-		phone, _ := regexp.MatchString("\\([0-9][0-9][0-9]\\) [0-9][0-9][0-9] - [0-9][0-9][0-9][0-9]", userReq.Phone)
-		if !phone {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-	}
 	user.Phone = userReq.Phone
 	user.Email = userReq.Email
 	user.Zipcode = userReq.Zipcode
@@ -234,7 +234,7 @@ func (cb *Corkboard) DeleteUser(w http.ResponseWriter, r *http.Request, ps httpr
 	//Check if user has any existing items, if so delete them
 	items, err := cb.findUserItems(id)
 	if err != nil {
-		log.Println("Issues", err)
+		log.Println(err)
 	}
 	if len(items) != 0 && err == nil {
 		for i := 0; i < len(items); i++ {

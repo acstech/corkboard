@@ -68,9 +68,17 @@ func (cba *CorkboardAuth) RegisterUser() httprouter.Handle {
 			errs = append(errs, ErrorRes{Message: "Must include an email address"})
 		}
 
-		password, _ := regexp.MatchString("(........+)", req.Password)
+		if len(req.Email) > 150 {
+			errs = append(errs, ErrorRes{Message: "Email cannot be more than 150 characters"})
+		}
+
+		password, _ := regexp.MatchString("(.{8})", req.Password)
 		if password == false {
 			errs = append(errs, ErrorRes{Message: "Password must be at least 8 characters"})
+		}
+
+		if len(req.Password) > 20 {
+			errs = append(errs, ErrorRes{Message: "Password cannot be longer than 20 characters"})
 		}
 
 		if req.SiteID == "" {
