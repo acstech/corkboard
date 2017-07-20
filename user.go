@@ -145,7 +145,8 @@ func (cb *Corkboard) verify(user *UpdateUserReq) ErrorsRes {
 		//verify originality of attempted email update
 		key := fmt.Sprintf("email=%s", user.Email)
 		_, err := cb.findUserByKey(key)
-		if err != nil {
+		//if findUserByKey returns no error, that means it found a matching user, which means the UpdateUserReq should not be allowed to set their email to a pre-existing email
+		if err == nil {
 			Err = append(Err, ErrorRes{Message: "email already registered!"})
 		}
 	}
