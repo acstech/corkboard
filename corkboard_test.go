@@ -21,6 +21,7 @@ import (
 var (
 	server        *httptest.Server //nolint: megacheck
 	reader        io.Reader
+	bucket        string
 	newuserURL    string
 	usersURL      string
 	useridURL     string
@@ -88,6 +89,7 @@ func init() {
 	}
 
 	server := httptest.NewServer(cork.Router())
+	bucket = cork.Bucket.Name()
 
 	//Connection strings (user)
 	serveURL = server.URL
@@ -104,6 +106,71 @@ func init() {
 
 	//Connection strings (image)
 	newimageurl = fmt.Sprintf("%s/api/image/new", server.URL)
+}
+
+func itemcleanup(id string, token string) {
+	if dev {
+		deleteitemURL = fmt.Sprintf("%s/api/items/delete/%s", serveURL, id)
+		req, err := http.NewRequest("DELETE", deleteitemURL, nil)
+		if err != nil {
+			log.Println(err)
+		}
+		bearer := "Bearer " + token
+		req.Header.Set("authorization", bearer)
+
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			log.Println(err2)
+		}
+
+		if res.StatusCode != 200 {
+			log.Println("Warning: Potential untracked object: Item, ", id)
+		}
+		res.Body.Close() //nolint: errcheck
+	}
+}
+
+func usercleanup(id string, token string) {
+
+	deleteuserURL = fmt.Sprintf("%s/api/users/delete/%s", serveURL, id)
+	req, err := http.NewRequest("DELETE", deleteuserURL, nil)
+	if err != nil {
+		log.Println(err)
+	}
+
+	bearer := "Bearer " + token
+	req.Header.Set("authorization", bearer)
+
+	res, err2 := http.DefaultClient.Do(req)
+	if err2 != nil {
+		log.Println(err2)
+	}
+	if res.StatusCode != 200 {
+		log.Println("Warning: Potential untracked object: User, ", id)
+	}
+	res.Body.Close() //nolint :errcheck
+	log.Println("in usercleanup,", id, token)
+}
+
+func imagecleanup(id string) {
+	if dev {
+		url := fmt.Sprintf("%s/api/images/delete/%s", serveURL, id)
+		req, err := http.NewRequest("DELETE", url, nil)
+		if err != nil {
+			log.Println(err)
+		}
+
+		res, err2 := http.DefaultClient.Do(req)
+		if err2 != nil {
+			log.Println(err2)
+		}
+
+		if res.StatusCode != 200 {
+			log.Println("Success expected: 200, received: %d", res.StatusCode)
+			log.Println("Warning: Potential untracked Object: Image, ", id)
+		}
+		res.Body.Close() //nolint: errcheck
+	}
 }
 
 //-----------------------------------------
@@ -242,6 +309,7 @@ func TestGetUserPass(t *testing.T) {
 
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
+		usercleanup(globaluserid, theToken)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -269,6 +337,7 @@ func TestEditUserPass(t *testing.T) {
 
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
+		usercleanup(globaluserid, theToken)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -293,6 +362,8 @@ func TestSearchUserPass1(t *testing.T) {
 
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
+		usercleanup(globaluserid, theToken)
+
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -316,6 +387,7 @@ func TestSearchUserPass2(t *testing.T) {
 
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
+		usercleanup(globaluserid, theToken)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -434,6 +506,7 @@ func TestEditUserFail(t *testing.T) {
 
 	if res.StatusCode != 400 {
 		t.Errorf("Success expected: 400, received:  %d", res.StatusCode)
+		usercleanup(globaluserid, theToken)
 	}
 	res.Body.Close() //nolint: errcheck
 }
@@ -505,6 +578,7 @@ func TestNewImagePass(t *testing.T) {
 		}
 		if res.StatusCode != 201 {
 			t.Errorf("Success expected: 201, received: %d", res.StatusCode)
+			imagecleanup(globalimage1)
 		}
 	}
 }
@@ -532,6 +606,7 @@ func TestCreateItemPass(t *testing.T) {
 
 		if res.StatusCode != 201 {
 			t.Errorf("Success expected: 201, received: %d", res.StatusCode)
+			itemcleanup(globalimage1, theToken)
 		}
 	}
 }
@@ -671,6 +746,7 @@ func TestNewImagePass1(t *testing.T) {
 		}
 		if res.StatusCode != 201 {
 			t.Errorf("Success expected: 201, received: %d", res.StatusCode)
+			imagecleanup(globalimage)
 		}
 	}
 }
@@ -900,6 +976,7 @@ func TestUpdateItemPass(t *testing.T) {
 
 	if res.StatusCode != 200 {
 		t.Errorf("Success expected: 200, received: %d", res.StatusCode)
+		itemcleanup(globalitemid, theToken)
 	}
 	res.Body.Close() //nolint: errcheck
 }

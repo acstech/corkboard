@@ -142,8 +142,8 @@ func (cb *Corkboard) verify(user *UpdateUserReq) ErrorsRes {
 			Err = append(Err, ErrorRes{Message: "Email must be in valid format"})
 		}
 	}
-	if len(user.Zipcode) != 0 && len(user.Zipcode) > 5 {
-		Err = append(Err, ErrorRes{Message: "Zipcode cannot be more than 5 characters"})
+	if len(user.Zipcode) != 0 && len(user.Zipcode) != 5 {
+		Err = append(Err, ErrorRes{Message: "Zipcode must be 5 characters"})
 	}
 	var res ErrorsRes
 	res.Errors = Err
