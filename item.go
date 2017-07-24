@@ -219,7 +219,7 @@ func (newitem *NewItemReq) verify() ErrorsRes {
 		errs = append(errs, ErrorRes{Message: "Must enter a description."})
 	}
 
-	if len(newitem.Price) > 12 {
+	if len(newitem.Price) > 15 {
 		errs = append(errs, ErrorRes{Message: "Price is too large."})
 	}
 	if len(newitem.PictureID) > 5 {
