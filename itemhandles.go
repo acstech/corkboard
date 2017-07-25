@@ -184,6 +184,12 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 		price, err = strconv.ParseFloat(priceSplit, 64)
 		if err != nil {
 			errs.Errors = append(errs.Errors, ErrorRes{Message: "Parsing price failed. Allowed characters: $ , . 0-9"})
+			errsRes, _ := json.Marshal(errs)
+			w.WriteHeader(http.StatusBadRequest)
+			_, err := w.Write(errsRes)
+			if err != nil {
+				log.Println(err)
+			}
 			return
 		}
 	} else if priceSplit == "0.00" || reqitem.Price == "" {
