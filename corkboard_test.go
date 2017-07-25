@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -20,7 +19,6 @@ import (
 
 var (
 	server        *httptest.Server //nolint: megacheck
-	reader        io.Reader
 	bucket        string
 	newuserURL    string
 	usersURL      string
@@ -516,7 +514,7 @@ func TestGetItemsPass(t *testing.T) {
 func TestDeleteItemPass(t *testing.T) {
 	if dev {
 		deleteitemURL = fmt.Sprintf("%s/api/items/delete/%s", serveURL, globalitemid)
-		if doTest("DELETE", deleteitemURL, "", theToken, 200) == true {
+		if doTest("DELETE", deleteitemURL, "", theToken, 200) {
 			log.Println("Warning: Potential untracked item object in CouchBase resulting from modified code:", globalitemid)
 		}
 	}
