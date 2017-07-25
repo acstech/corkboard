@@ -212,6 +212,7 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	errs = corkboard.updateItem(item)
 	if len(errs.Errors) != 0 {
 		errsRes, _ := json.Marshal(errs)
+		w.WriteHeader(http.StatusBadRequest)
 		_, err := w.Write(errsRes)
 		if err != nil {
 			log.Println(err)
