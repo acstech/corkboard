@@ -144,13 +144,12 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) ErrorsRes {
 
 	errs := newitem.verify()
 	// if len(errs.Errors) != 0 {
-	// 	return errs
+	// return errs
 	// }
 	var name = newitem.Itemname
 	var desc = newitem.Itemdesc
 	var cat = newitem.Itemcat
 	var picid = newitem.PictureID
-
 	var priceSplit = strings.TrimPrefix(newitem.Price, "$ ")
 	priceSplit = strings.Replace(priceSplit, ",", "", -1)
 	price, err := strconv.ParseFloat(priceSplit, 64)
@@ -166,6 +165,7 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) ErrorsRes {
 	if len(errs.Errors) != 0 {
 		return errs
 	}
+
 	_, err = corkboard.Bucket.Insert(getItemKey(newID), Item{ItemID: uID, Type: "item", ItemName: name, ItemDesc: desc, Category: cat, PictureID: picid, Price: price, Status: status, UserID: newitem.UserID, DatePosted: time.Now()}, 0)
 	if err != nil {
 		errs.Errors = append(errs.Errors, ErrorRes{Message: err.Error()})
@@ -208,17 +208,21 @@ func (newitem *NewItemReq) verify() ErrorsRes {
 		errs = append(errs, ErrorRes{Message: "Must include an item name."})
 	}
 	if len(newitem.Itemcat) > 25 {
-		errs = append(errs, ErrorRes{Message: "Category too long."})
+		errs = append(errs, ErrorRes{Message: "Category cannot be longer than 25 characters."})
 	} else if newitem.Itemcat == "" {
 		errs = append(errs, ErrorRes{Message: "Must enter a category."})
 	}
 
 	if len(newitem.Itemdesc) > 500 {
 		errs = append(errs, ErrorRes{Message: "Item description greater than 500 characters."})
+	} else if newitem.Itemdesc == "" {
+		errs = append(errs, ErrorRes{Message: "Must enter a description."})
 	}
+
 	if len(newitem.Price) > 12 {
 		errs = append(errs, ErrorRes{Message: "Price is too large."})
 	}
+
 	if len(newitem.PictureID) > 5 {
 		errs = append(errs, ErrorRes{Message: "Too many pictures uploaded. (Max 5)"})
 	}
@@ -238,17 +242,21 @@ func (item *Item) verify() ErrorsRes {
 		errs = append(errs, ErrorRes{Message: "Must include an item name."})
 	}
 	if len(item.Category) > 25 {
-		errs = append(errs, ErrorRes{Message: "Category too long."})
+		errs = append(errs, ErrorRes{Message: "Category cannot be more than 25 characters."})
 	} else if item.Category == "" {
 		errs = append(errs, ErrorRes{Message: "Must enter a category."})
 	}
 
 	if len(item.ItemDesc) > 500 {
 		errs = append(errs, ErrorRes{Message: "Item description greater than 500 characters."})
+	} else if item.ItemDesc == "" {
+		errs = append(errs, ErrorRes{Message: "Must enter a description."})
 	}
+
 	if item.Price > 10000000 {
 		errs = append(errs, ErrorRes{Message: "Price is too large."})
 	}
+
 	if len(item.PictureID) > 5 {
 		errs = append(errs, ErrorRes{Message: "Too many pictures uploaded. (Max 5)"})
 	}

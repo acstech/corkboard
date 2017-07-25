@@ -97,16 +97,6 @@ func (corkboard *Corkboard) GetItemByID(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	// var newitem Item
-	// //NewReqTransfer(item, &itemreq)
-	// newitem.ItemName = item.ItemName
-	// newitem.Category = item.Category
-	// newitem.ItemDesc = item.ItemDesc
-	// newitem.Price = item.Price
-	// newitem.Status = item.Status
-	// newitem.PictureID = item.PictureID
-	// newitem.DatePosted = item.DatePosted
-
 	JSONitem, err := json.Marshal(item)
 	if err != nil {
 		log.Println(err)
@@ -193,7 +183,7 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 		priceSplit = strings.Replace(priceSplit, ",", "", -1)
 		price, err = strconv.ParseFloat(priceSplit, 64)
 		if err != nil {
-			log.Println(err)
+			errs.Errors = append(errs.Errors, ErrorRes{Message: "Parsing price failed. Allowed characters: $ , . 0-9"})
 			return
 		}
 	} else if priceSplit == "0.00" || reqitem.Price == "" {
@@ -216,6 +206,7 @@ func (corkboard *Corkboard) EditItem(w http.ResponseWriter, r *http.Request, p h
 	errs = corkboard.updateItem(item)
 	if len(errs.Errors) != 0 {
 		errsRes, _ := json.Marshal(errs)
+		w.WriteHeader(http.StatusBadRequest)
 		_, err := w.Write(errsRes)
 		if err != nil {
 			log.Println(err)

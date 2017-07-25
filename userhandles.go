@@ -128,6 +128,10 @@ func (cb *Corkboard) SearchUser(w http.ResponseWriter, r *http.Request, ps httpr
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	if user == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	var userRes GetUserRes
 	userRes.Email = user.Email
 	userRes.Firstname = user.Firstname
@@ -180,7 +184,7 @@ func (cb *Corkboard) UpdateUser(w http.ResponseWriter, r *http.Request, ps httpr
 		return
 	}
 
-	theErr := cb.verify(userReq)
+	theErr := cb.verify(userReq, id)
 	if len(theErr.Errors) != 0 {
 		errsRes, _ := json.Marshal(theErr)
 		w.WriteHeader(http.StatusBadRequest)
