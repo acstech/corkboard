@@ -30,12 +30,18 @@ func mockURL(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
+	// valid image extensions
 	var imageExtension string
 	if picID.Extension == "jpg" {
 		imageExtension = "jpeg"
-	} else {
+	} else if picID.Extension == "png" || picID.Extension == "jpeg" {
 		imageExtension = picID.Extension
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("invalid extension")
+		return
 	}
+
 	imageGUID := uuid.NewV4()
 	key := fmt.Sprintf("%s.%s", imageGUID, imageExtension)
 	imageRes.ImageKey = key
