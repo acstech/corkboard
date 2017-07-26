@@ -21,6 +21,7 @@ import (
 )
 
 const path = "./s3images"
+const jpeg = "jpeg"
 
 func mockURL(w http.ResponseWriter, r *http.Request) {
 	picID := new(NewImageReq)
@@ -33,8 +34,8 @@ func mockURL(w http.ResponseWriter, r *http.Request) {
 	// valid image extensions
 	var imageExtension string
 	if picID.Extension == "jpg" {
-		imageExtension = "jpeg"
-	} else if picID.Extension == "png" || picID.Extension == "jpeg" {
+		imageExtension = jpeg
+	} else if picID.Extension == "png" || picID.Extension == jpeg {
 		imageExtension = picID.Extension
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
@@ -68,7 +69,16 @@ func imageURL(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	imageExtension := picID.Extension
+	var imageExtension string
+	if picID.Extension == "jpg" {
+		imageExtension = jpeg
+	} else if picID.Extension == "png" || picID.Extension == jpeg {
+		imageExtension = picID.Extension
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("invalid extension")
+		return
+	}
 	imageGUID := uuid.NewV4().String()
 	key := fmt.Sprintf("%s.%s", imageGUID, imageExtension)
 	sess, err := session.NewSession(&aws.Config{Region: aws.String("us-east-1")})
