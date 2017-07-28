@@ -13,11 +13,6 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 )
 
-//
-// import (
-//
-// )
-
 //ItemImage bundles the ImageID, ItemID, and the image into one object to simplify
 //posting/getting item photos
 type ItemImage struct {

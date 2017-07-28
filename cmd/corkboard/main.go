@@ -11,8 +11,6 @@ import (
 	"github.com/rs/cors"
 )
 
-/* Need to eventually set os env varibales forthe CB Connection.
-For now, the connection varibales are hard coded*/
 //main ...
 func main() {
 
