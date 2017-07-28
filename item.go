@@ -74,7 +74,6 @@ func getItemKey(id uuid.UUID) string {
 func (corkboard *Corkboard) findItems() ([]Item, error) {
 
 	query := gocb.NewN1qlQuery(fmt.Sprintf("SELECT id, name, description, price, category, salestatus, picid, date, userid FROM `%s` WHERE type = 'item'", corkboard.Bucket.Name())) //nolint: gas
-	//log.Println(corkboard.Bucket.Name())
 
 	rows, err := corkboard.Bucket.ExecuteN1qlQuery(query, []interface{}{})
 	if err != nil {
@@ -143,9 +142,6 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) ErrorsRes {
 	//Might be best to return a list of all the errors that occur at the end of the method
 
 	errs := newitem.verify()
-	// if len(errs.Errors) != 0 {
-	// return errs
-	// }
 	var name = newitem.Itemname
 	var desc = newitem.Itemdesc
 	var cat = newitem.Itemcat
@@ -173,7 +169,6 @@ func (corkboard *Corkboard) createNewItem(newitem NewItemReq) ErrorsRes {
 	return errs
 }
 
-//TODO: Clean this data up as well, item checks
 //updateItem upserts updated item object to couchbase document
 func (corkboard *Corkboard) updateItem(item *Item) ErrorsRes {
 
@@ -218,7 +213,6 @@ func (newitem *NewItemReq) verify() ErrorsRes {
 	} else if newitem.Itemdesc == "" {
 		errs = append(errs, ErrorRes{Message: "Must enter a description."})
 	}
-
 
 	if len(newitem.Price) > 15 {
 		errs = append(errs, ErrorRes{Message: "Price is too large."})

@@ -33,7 +33,6 @@ func (cb *Corkboard) GetUsers(w http.ResponseWriter, r *http.Request, _ httprout
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
-	//TODO: GetUsers should return the picID/GetURL of the user
 	usersRes := make([]GetUserRes, len(users))
 
 	for i, user := range users {

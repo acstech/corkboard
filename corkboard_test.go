@@ -113,7 +113,7 @@ func doTest(method string, url string, json string, token string, code int) bool
 
 	req, err := http.NewRequest(method, url, reader)
 	if err != nil {
-		log.Println(err) //t.Error(err)
+		log.Println(err)
 	}
 	if token != "" {
 		bearer := "Bearer " + token
@@ -122,7 +122,7 @@ func doTest(method string, url string, json string, token string, code int) bool
 
 	res, err2 := http.DefaultClient.Do(req)
 	if err2 != nil {
-		log.Println(err2) //t.Error(err2)
+		log.Println(err2)
 	}
 	if res.StatusCode != code {
 		log.Println("Success expected: %d, received: %d", code, res.StatusCode)
@@ -537,8 +537,6 @@ func TestCreateImageURLPass1(t *testing.T) {
 
 		bearer := "Bearer " + theToken
 		req.Header.Set("authorization", bearer)
-		// timer := time.NewTimer(time.Second * 1)
-		// <-timer.C
 		res, err2 := http.DefaultClient.Do(req)
 		if err2 != nil {
 			t.Error(err2)
